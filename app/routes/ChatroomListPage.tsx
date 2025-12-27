@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { useChatroomList } from "../../hooks/useChatroomList";
 import ChatroomCard from "../../components/ChatroomCard";
 import ProtectedRoute from "../../components/ProtectedRoute";
 import { useNavigate } from "react-router";
 import ChatListSkeleton from '../../components/ChatListSkeleton';
+import CreateChatroomModal from "../../components/CreateChatroomModal";
+import { Plus } from "lucide-react";
 
 interface ChatroomListPageProps {
   onChatroomSelect?: (chatroomId: string) => void;
@@ -12,6 +14,11 @@ interface ChatroomListPageProps {
 const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect }) => {
   const { chatrooms, loading, error } = useChatroomList();
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleCreateSuccess = () => {
+    setIsModalOpen(false);
+  };
 
   const handleChatroomClick = (chatroomId: string) => {
     onChatroomSelect?.(chatroomId);
@@ -21,9 +28,16 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect })
   return (
     <ProtectedRoute>
       <div className="p-4 h-full overflow-y-auto flex flex-col">
-        <h1 className="text-2xl font-bold mb-4 text-left border-b-gray-300 border-b-2 pb-3 sticky top-0 bg-white z-10">
-          Chats
-        </h1>
+        <div className="flex justify-between items-center mb-4 sticky top-0 bg-white z-10 border-b border-gray-300 pb-3">
+          <h1 className="text-2xl font-bold text-left">Chats</h1>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition-colors"
+            aria-label="Create new chatroom"
+          >
+            <Plus size={28} />
+          </button>
+        </div>
         <div className="space-y-2 flex-1">
           {loading ? (
             <ChatListSkeleton />
@@ -54,6 +68,11 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect })
           )}
         </div>
       </div>
+      <CreateChatroomModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleCreateSuccess}
+      />
     </ProtectedRoute>
   );
 };

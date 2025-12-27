@@ -8,6 +8,15 @@ interface Message {
   senderUsername: string;
   content: string;
   timestamp: string;
+  type?: 'message' | 'system'; // Add message type
+}
+
+interface SystemMessage {
+  type: 'system';
+  id: string;
+  systemType: 'userJoined';
+  username: string;
+  timestamp: string;
 }
 
 interface UseChatroomReturn {
@@ -79,6 +88,18 @@ export const useChatroom = (): UseChatroomReturn => {
             senderUsername: message.senderUsername,
             content: message.content,
             timestamp: message.timestamp,
+            type: 'message',
+          }]);
+          break;
+        case 'userJoined':
+          // Add a system message when a user joins
+          setMessages((prevMessages) => [...prevMessages, {
+            id: `system-${Date.now()}`,
+            senderId: 'system',
+            senderUsername: 'System',
+            content: `${message.username} just joined`,
+            timestamp: new Date().toISOString(),
+            type: 'system',
           }]);
           break;
         case 'leaveSuccess':

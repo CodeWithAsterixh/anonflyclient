@@ -1,5 +1,5 @@
 import { getAPIBaseURL } from 'lib/constants/api';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import ChatroomMenu from '../../components/ChatroomMenu';
 import JoinRoomOverlay from '../../components/JoinRoomOverlay';
@@ -9,6 +9,7 @@ import ProtectedRoute from "../../components/ProtectedRoute";
 import ChatroomSkeleton from '../../components/ChatroomSkeleton';
 import { useAuth } from '../../hooks/useAuth';
 import { useChatroom, type ChatroomDetail } from '../../hooks/useChatroom';
+import { ChevronDown } from 'lucide-react';
 
 interface OutletContext {
   onBack: () => void;
@@ -27,6 +28,9 @@ const ChatroomPage: React.FC = () => {
   const { onBack, isMobile } = useOutletContext<OutletContext>();
   const [isHost, setIsHost] = useState(false);
   const [chatroomDetail, setChatroomDetails] = useState<ChatroomDetail | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   useEffect(() => {
     const fetchChatroomDetails = async () => {
@@ -76,6 +80,24 @@ const ChatroomPage: React.FC = () => {
       }
     };
   }, [currentChatroomId, leaveChatroom]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Track scroll position to show/hide scroll button
+  const handleScroll = () => {
+    if (messagesContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100; // 100px threshold
+      setShowScrollButton(!isAtBottom);
+    }
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const handleSendMessage = (content: string) => {
     sendMessage(content);
@@ -259,10 +281,26 @@ const ChatroomPage: React.FC = () => {
         </header>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div 
+          ref={messagesContainerRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto p-4 space-y-4 relative"
+        >
           {messages.map((msg, index) => (
             <MessageDisplay key={index} message={msg} />
           ))}
+          <div ref={messagesEndRef} />
+
+          {/* Scroll to bottom button */}
+          {showScrollButton && (
+            <button
+              onClick={scrollToBottom}
+              className="fixed bottom-24 right-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-3 shadow-lg transition-all duration-200 z-40"
+              aria-label="Scroll to bottom"
+            >
+              <ChevronDown size={24} />
+            </button>
+          )}
         </div>
 
         {/* Message Input */}

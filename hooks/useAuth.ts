@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { login, createUser, getUser } from '../lib/controllers/authController';
 import type { User } from '../types/User';
 import Cookies from 'js-cookie';
+import { getSessionUser, setSessionUser, clearSessionUser } from '../lib/helpers/authStorage';
 
 
 
@@ -58,6 +59,19 @@ export const useAuth = () => {
      * Initializes authentication state from localStorage on component mount.
      */
     const initializeAuth = async () => {
+      // Prefer sessionStorage cached user to avoid repeated API calls
+      const session = getSessionUser();
+      if (session && session.token && session.user) {
+        setAuthState({
+          user: session.user,
+          token: session.token,
+          isAuthenticated: true,
+          loading: false,
+          error: null,
+        });
+        return;
+      }
+
       const storedToken = Cookies.get('token');
 
       if (storedToken) {
@@ -70,14 +84,15 @@ export const useAuth = () => {
             loading: false,
             error: null,
           });
+          // cache in sessionStorage for the session
+          setSessionUser(userData.data, storedToken);
         } catch (error: any) {
           console.error("Failed to fetch user data on initialization:", error);
-          // Only clear token if it's an unauthorized error (e.g., 401 invalid token)
           if (error.response && error.response.status === 401) {
-            Cookies.remove('token'); // Clear invalid token
+            Cookies.remove('token');
+            clearSessionUser();
             setAuthState(prev => ({ ...prev, loading: false, isAuthenticated: false, token: null, user: null, error: 'Session expired. Please log in again.' }));
           } else {
-            // For other errors, just set loading to false and keep existing token (if any)
             setAuthState(prev => ({ ...prev, loading: false, error: error.message || 'An unexpected error occurred.' }));
           }
         }
@@ -103,6 +118,8 @@ export const useAuth = () => {
       });
       if (response.data.token && response.data.user) {
         Cookies.set('token', response.data.token, { expires: 7 }); // Token expires in 7 days
+        // store session in sessionStorage to avoid repeated user fetches
+        setSessionUser(response.data.user, response.data.token);
         setAuthState({
           user: response.data.user,
           token: response.data.token,
@@ -137,6 +154,7 @@ export const useAuth = () => {
       const response = await createUser({username, password});
       if (response.token && response.user) {
         Cookies.set('token', response.token, { expires: 7 }); // Token expires in 7 days
+        setSessionUser(response.user, response.token);
         setAuthState({
           user: response.user,
           token: response.token,
@@ -164,6 +182,7 @@ export const useAuth = () => {
    */
   const logout = useCallback(() => {
     Cookies.remove('token');
+    clearSessionUser();
     setAuthState({
       user: null,
       token: null,

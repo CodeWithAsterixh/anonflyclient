@@ -6,6 +6,7 @@ import JoinRoomOverlay from '../../components/JoinRoomOverlay';
 import MessageDisplay from '../../components/MessageDisplay';
 import MessageInput from '../../components/MessageInput';
 import ProtectedRoute from "../../components/ProtectedRoute";
+import ChatroomSkeleton from '../../components/ChatroomSkeleton';
 import { useAuth } from '../../hooks/useAuth';
 import { useChatroom, type ChatroomDetail } from '../../hooks/useChatroom';
 
@@ -25,7 +26,7 @@ const ChatroomPage: React.FC = () => {
   const { user, loading, token } = useAuth();
   const { onBack, isMobile } = useOutletContext<OutletContext>();
   const [isHost, setIsHost] = useState(false);
-  const [chatroomDetail, setChatroomDetails]  = useState<ChatroomDetail|null>(null)
+  const [chatroomDetail, setChatroomDetails] = useState<ChatroomDetail | null>(null)
 
   useEffect(() => {
     const fetchChatroomDetails = async () => {
@@ -63,10 +64,10 @@ const ChatroomPage: React.FC = () => {
   } = useChatroom();
 
   useEffect(() => {
-    if (chatroomId && isConnected && user && currentChatroomId !== chatroomId) {
-      joinChatroom(chatroomId);
-    }
-  }, [chatroomId, isConnected, user, currentChatroomId, joinChatroom]);
+    // Do not auto-join on page load. Joining will be triggered by user action.
+  }, [/* intentionally empty to avoid auto-joining */]);
+
+
 
   useEffect(() => {
     return () => {
@@ -116,9 +117,7 @@ const ChatroomPage: React.FC = () => {
     return <JoinRoomOverlay message="Connecting to chat service..." />;
   }
 
-  if (!currentChatroomId || currentChatroomId !== chatroomId) {
-    return <JoinRoomOverlay message="Joining chatroom..." />;
-  }
+  const isJoined = currentChatroomId === chatroomId;
 
   const handleLeaveRoom = () => {
     leaveChatroom();
@@ -160,6 +159,72 @@ const ChatroomPage: React.FC = () => {
       alert('An error occurred while deleting the chatroom.');
     }
   };
+  if (!isJoined) {
+    // show skeleton with overlay prompting the user to join
+    return (
+      <ProtectedRoute>
+        <div className="flex flex-col h-screen bg-gray-50 relative">
+          {/* Header */}
+          <header className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm flex justify-between items-center">
+            <div className="flex items-center gap-3 flex-1">
+              {isMobile && (
+                <button
+                  onClick={onBack}
+                  className="text-blue-500 hover:text-blue-700 font-semibold text-lg"
+                  aria-label="Back"
+                >
+                  ← Back
+                </button>
+              )}
+              <h1 className="text-xl font-bold text-gray-900">
+                {chatroomDetail?.roomname || 'Chatroom'}
+              </h1>
+            </div>
+            <ChatroomMenu
+              onLeaveRoom={handleLeaveRoom}
+              onRemoveParticipant={() => console.log('Remove participant clicked')}
+              onDeleteRoom={handleDeleteRoom}
+              isHost={isHost}
+            />
+          </header>
+
+          {/* Skeleton content */}
+          <div className="flex-1 relative">
+            <ChatroomSkeleton />
+
+            {/* Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
+              <div className="bg-white rounded-lg p-6 max-w-md mx-4 text-center shadow-lg">
+                <h2 className="text-lg font-semibold mb-2">{chatroomDetail?.roomname || 'Chatroom'}</h2>
+                <p className="text-sm text-gray-600 mb-4">{chatroomDetail?.description || 'Join the room to see messages and participate.'}</p>
+                <div className="flex items-center justify-center space-x-3">
+                  <button
+                    onClick={() => joinChatroom(chatroomId as string)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  >
+                    Join Room
+                  </button>
+                  <button
+                    onClick={() => { if (isMobile) onBack(); else navigate('/'); }}
+                    className="bg-gray-100 px-4 py-2 rounded hover:bg-gray-200"
+                  >
+                    Back
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Message Input placeholder (disabled) */}
+          <div className="p-4 border-t border-gray-200">
+            <div className="h-10 bg-gray-100 rounded" />
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+
 
   return (
     <ProtectedRoute>
@@ -197,8 +262,8 @@ const ChatroomPage: React.FC = () => {
         </div>
 
         {/* Message Input */}
-        <MessageInput 
-          onSendMessage={handleSendMessage} 
+        <MessageInput
+          onSendMessage={handleSendMessage}
           isDisabled={!isConnected || !currentChatroomId}
         />
       </div>

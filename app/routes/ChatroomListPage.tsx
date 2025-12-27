@@ -3,6 +3,7 @@ import { useChatroomList } from "../../hooks/useChatroomList";
 import ChatroomCard from "../../components/ChatroomCard";
 import ProtectedRoute from "../../components/ProtectedRoute";
 import { useNavigate } from "react-router";
+import ChatListSkeleton from '../../components/ChatListSkeleton';
 
 interface ChatroomListPageProps {
   onChatroomSelect?: (chatroomId: string) => void;
@@ -25,9 +26,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect })
         </h1>
         <div className="space-y-2 flex-1">
           {loading ? (
-            <div className="flex items-center justify-center h-full bg-gray-50">
-              <p className="text-lg text-gray-700">Loading chatrooms...</p>
-            </div>
+            <ChatListSkeleton />
           ) : error ? (
             <div className="flex items-center justify-center h-full bg-gray-50">
               <p className="text-lg text-red-600">Error: {error}</p>

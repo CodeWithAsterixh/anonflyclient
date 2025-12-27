@@ -1,7 +1,9 @@
 import { getAPIBaseURL } from "lib/constants/api";
 
+import { getTokenFromSession } from '../helpers/authStorage';
+
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
+  const token = getTokenFromSession();
   return {
     'Content-Type': 'application/json',
     'Authorization': token ? `Bearer ${token}` : '',

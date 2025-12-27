@@ -47,7 +47,7 @@ const ChatLayout: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-white overflow-hidden">
+    <div className="flex h-[100dvh] bg-white overflow-hidden">
       {/* Left Column: Chatroom List 
           - Desktop: Always visible (md:block)
           - Mobile: Shows based on JavaScript state or Tailwind hidden state

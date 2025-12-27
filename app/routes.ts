@@ -16,7 +16,7 @@ export default [
     },
     {
       path: "/:chatroomId",
-      file: "routes/ChatRoomPage.tsx",
+      file: "routes/ChatroomPage.tsx",
     },
   ]),
 ] satisfies RouteConfig;

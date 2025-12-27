@@ -102,6 +102,17 @@ export const useChatroom = (): UseChatroomReturn => {
             type: 'system',
           }]);
           break;
+        case 'userLeft':
+          // Add a system message when a user leaves
+          setMessages((prevMessages) => [...prevMessages, {
+            id: `system-${Date.now()}`,
+            senderId: 'system',
+            senderUsername: 'System',
+            content: `${message.username} left the chat`,
+            timestamp: new Date().toISOString(),
+            type: 'system',
+          }]);
+          break;
         case 'leaveSuccess':
           console.log(`Successfully left chatroom: ${message.chatroomId}`);
           setCurrentChatroomId(null);

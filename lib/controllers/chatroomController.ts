@@ -1,8 +1,17 @@
 import { getAPIBaseURL } from "lib/constants/api";
-import { getTokenFromSession } from '../helpers/authStorage';
+import { getSessionUser } from '../helpers/authStorage';
+import Cookies from 'js-cookie';
 
 const getAuthHeaders = () => {
-  const token = getTokenFromSession();
+  // Try to get token from sessionStorage first, then fall back to cookies
+  let token = null;
+  const session = getSessionUser();
+  if (session && session.token) {
+    token = session.token;
+  } else {
+    token = Cookies.get('token');
+  }
+  
   return {
     'Content-Type': 'application/json',
     'Authorization': token ? `Bearer ${token}` : '',

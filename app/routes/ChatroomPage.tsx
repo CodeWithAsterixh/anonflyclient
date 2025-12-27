@@ -143,11 +143,7 @@ const ChatroomPage: React.FC = () => {
 
   const handleLeaveRoom = () => {
     leaveChatroom();
-    if (isMobile) {
-      onBack();
-    } else {
-      navigate('/');
-    }
+    navigate('/');
   };
 
   const handleDeleteRoom = async () => {
@@ -191,7 +187,7 @@ const ChatroomPage: React.FC = () => {
             <div className="flex items-center gap-3 flex-1">
               {isMobile && (
                 <button
-                  onClick={() => { if (typeof onBack === 'function') onBack(); else navigate('/'); }}
+                  onClick={() => navigate('/')}
                   className="text-blue-500 hover:text-blue-700 font-semibold text-lg"
                   aria-label="Back"
                 >
@@ -261,7 +257,7 @@ const ChatroomPage: React.FC = () => {
             {/* Back button for mobile */}
             {isMobile && (
               <button
-                onClick={() => { if (typeof onBack === 'function') onBack(); else navigate('/'); }}
+                onClick={() => navigate('/')}
                 className="text-blue-500 hover:text-blue-700 font-semibold text-lg"
                 aria-label="Back"
               >

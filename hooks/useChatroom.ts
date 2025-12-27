@@ -93,25 +93,35 @@ export const useChatroom = (): UseChatroomReturn => {
           break;
         case 'userJoined':
           // Add a system message when a user joins
-          setMessages((prevMessages) => [...prevMessages, {
-            id: `system-${Date.now()}`,
-            senderId: 'system',
-            senderUsername: 'System',
-            content: `${message.username} just joined`,
-            timestamp: new Date().toISOString(),
-            type: 'system',
-          }]);
+          console.log('Received userJoined message:', message);
+          setMessages((prevMessages) => {
+            const newMessage = {
+              id: `system-${Date.now()}`,
+              senderId: 'system',
+              senderUsername: 'System',
+              content: `${message.username} just joined`,
+              timestamp: new Date().toISOString(),
+              type: 'system' as const,
+            };
+            console.log('Adding system message:', newMessage);
+            return [...prevMessages, newMessage];
+          });
           break;
         case 'userLeft':
           // Add a system message when a user leaves
-          setMessages((prevMessages) => [...prevMessages, {
-            id: `system-${Date.now()}`,
-            senderId: 'system',
-            senderUsername: 'System',
-            content: `${message.username} left the chat`,
-            timestamp: new Date().toISOString(),
-            type: 'system',
-          }]);
+          console.log('Received userLeft message:', message);
+          setMessages((prevMessages) => {
+            const newMessage = {
+              id: `system-${Date.now()}`,
+              senderId: 'system',
+              senderUsername: 'System',
+              content: `${message.username} left the chat`,
+              timestamp: new Date().toISOString(),
+              type: 'system' as const,
+            };
+            console.log('Adding system message:', newMessage);
+            return [...prevMessages, newMessage];
+          });
           break;
         case 'leaveSuccess':
           console.log(`Successfully left chatroom: ${message.chatroomId}`);

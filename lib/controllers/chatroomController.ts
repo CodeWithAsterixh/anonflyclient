@@ -119,6 +119,27 @@ export const deleteChatroom = async (chatroomId: string) => {
   }
 };
 
+export const editChatroom = async (chatroomId: string, roomname: string, description?: string) => {
+  try {
+    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${chatroomId}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ roomname, description }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to edit chatroom');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Edit chatroom error:', error);
+    throw error;
+  }
+};
+
 export const deleteMessage = async (chatroomId: string, messageId: string) => {
   try {
     const response = await fetch(`${getAPIBaseURL()}/chatrooms/${chatroomId}/messages/${messageId}`, {

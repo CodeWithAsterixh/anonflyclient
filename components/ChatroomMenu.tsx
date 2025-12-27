@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { EllipsisVerticalIcon } from 'lucide-react';
+import { EllipsisVerticalIcon, Edit } from 'lucide-react';
 
 interface ChatroomMenuProps {
   onLeaveRoom: () => void;
   onRemoveParticipant: () => void; // This will need to be more complex later
   onDeleteRoom: () => void;
+  onEditRoom: () => void;
   isHost: boolean;
 }
 
@@ -14,6 +15,7 @@ const ChatroomMenu: React.FC<ChatroomMenuProps> = ({
   onLeaveRoom,
   onRemoveParticipant,
   onDeleteRoom,
+  onEditRoom,
   isHost,
 }) => {
   return (
@@ -45,6 +47,19 @@ const ChatroomMenu: React.FC<ChatroomMenuProps> = ({
                 </button>
               )}
             </Menu.Item>
+            {isHost && (
+              <Menu.Item>
+                {({ active }) => (
+                  <button
+                    onClick={onEditRoom}
+                    className={`block px-4 py-2 text-sm ${active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'} flex items-center gap-2`}
+                  >
+                    <Edit size={16} />
+                    Edit Room
+                  </button>
+                )}
+              </Menu.Item>
+            )}
             {isHost && (
               <Menu.Item>
                 {({ active }) => (

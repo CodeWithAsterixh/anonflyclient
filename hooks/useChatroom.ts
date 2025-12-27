@@ -103,13 +103,11 @@ export const useChatroom = (): UseChatroomReturn => {
               timestamp: new Date().toISOString(),
               type: 'system' as const,
             };
-            console.log('Adding system message:', newMessage);
             return [...prevMessages, newMessage];
           });
           break;
         case 'userLeft':
           // Add a system message when a user leaves
-          console.log('Received userLeft message:', message);
           setMessages((prevMessages) => {
             const newMessage = {
               id: `system-${Date.now()}`,
@@ -119,7 +117,6 @@ export const useChatroom = (): UseChatroomReturn => {
               timestamp: new Date().toISOString(),
               type: 'system' as const,
             };
-            console.log('Adding system message:', newMessage);
             return [...prevMessages, newMessage];
           });
           break;

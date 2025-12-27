@@ -10,6 +10,7 @@ import ChatroomSkeleton from '../../components/ChatroomSkeleton';
 import { useAuth } from '../../hooks/useAuth';
 import { useChatroom, type ChatroomDetail } from '../../hooks/useChatroom';
 import { ChevronDown } from 'lucide-react';
+import EditChatroomModal from '../../components/EditChatroomModal';
 
 interface OutletContext {
   onBack: () => void;
@@ -31,6 +32,7 @@ const ChatroomPage: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchChatroomDetails = async () => {
@@ -163,11 +165,7 @@ const ChatroomPage: React.FC = () => {
 
       if (response.ok) {
         alert('Chatroom deleted successfully!');
-        if (isMobile) {
-          onBack();
-        } else {
-          navigate('/');
-        }
+        navigate('/');
       } else {
         const errorData = await response.json();
         alert(`Failed to delete chatroom: ${errorData.message}`);
@@ -175,6 +173,24 @@ const ChatroomPage: React.FC = () => {
     } catch (error) {
       console.error("Error deleting chatroom:", error);
       alert('An error occurred while deleting the chatroom.');
+    }
+  };
+
+  const handleEditSuccess = () => {
+    // Refetch chatroom details to get updated values
+    if (chatroomId && token && user) {
+      fetch(`${getAPIBaseURL()}/chatroom/${chatroomId}/details`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.data) {
+            setChatroomDetails(data.data);
+          }
+        })
+        .catch(err => console.error('Error refetching chatroom details:', err));
     }
   };
   if (!isJoined) {
@@ -202,6 +218,7 @@ const ChatroomPage: React.FC = () => {
               onLeaveRoom={handleLeaveRoom}
               onRemoveParticipant={() => console.log('Remove participant clicked')}
               onDeleteRoom={handleDeleteRoom}
+              onEditRoom={() => setIsEditModalOpen(true)}
               isHost={isHost}
             />
           </header>
@@ -216,18 +233,14 @@ const ChatroomPage: React.FC = () => {
                 <h2 className="text-lg font-semibold mb-2">{chatroomDetail?.roomname || 'Chatroom'}</h2>
                 <p className="text-sm text-gray-600 mb-4">{chatroomDetail?.description || 'Join the room to see messages and participate.'}</p>
                 <div className="flex items-center justify-center space-x-3">
-                  {chatroomDetail?.participants?.some(p => p.userId === user.userId) ? (
-                    <div className="text-sm text-gray-700">You're listed as a participant</div>
-                  ) : (
-                    <button
-                      onClick={() => joinChatroom(chatroomId as string)}
-                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                    >
-                      Join Room
-                    </button>
-                  )}
                   <button
-                    onClick={() => { if (isMobile) onBack(); else navigate('/'); }}
+                    onClick={() => joinChatroom(chatroomId as string)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  >
+                    Enter Room
+                  </button>
+                  <button
+                    onClick={() => navigate('/')}
                     className="bg-gray-100 px-4 py-2 rounded hover:bg-gray-200"
                   >
                     Back
@@ -272,6 +285,7 @@ const ChatroomPage: React.FC = () => {
             onLeaveRoom={handleLeaveRoom}
             onRemoveParticipant={() => console.log('Remove participant clicked')}
             onDeleteRoom={handleDeleteRoom}
+            onEditRoom={() => setIsEditModalOpen(true)}
             isHost={isHost}
           />
         </header>
@@ -305,6 +319,14 @@ const ChatroomPage: React.FC = () => {
           isDisabled={!isConnected || !currentChatroomId}
         />
       </div>
+      <EditChatroomModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSuccess={handleEditSuccess}
+        chatroomId={chatroomId || ''}
+        initialRoomname={chatroomDetail?.roomname || ''}
+        initialDescription={chatroomDetail?.description || ''}
+      />
     </ProtectedRoute>
   );
 };

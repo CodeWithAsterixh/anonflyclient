@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from './useAuth';
-import { CHAT_WS_URL } from '../lib/constants/api';
+import { getChatWSURL } from '../lib/constants/api';
 
 interface Message {
   id?: string;
@@ -53,7 +53,8 @@ export const useChatroom = (): UseChatroomReturn => {
       ws.current.close();
     }
 
-    const websocketUrl = `${CHAT_WS_URL}?token=${token}`;
+    const baseWs = getChatWSURL();
+    const websocketUrl = `${baseWs}?token=${encodeURIComponent(token)}`;
     ws.current = new WebSocket(websocketUrl);
 
     ws.current.onopen = () => {

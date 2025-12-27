@@ -22,7 +22,8 @@ interface EncryptedCache {
 
 // Cache configuration
 const CACHE_KEY = 'anonfly_server_selector';
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+// Reduce default cache to 10 minutes to avoid long-lived wrong selections
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
 const ENCRYPTION_KEY_SEED = 'anonfly-secure-server-selector-2025';
 const ENCRYPTION_SALT = 'anonfly-encryption-salt';
 
@@ -167,10 +168,29 @@ async function getCachedServerSelector(): Promise<string | null> {
 
     // Decrypt the server ID
     const serverId = await decryptServerId(cacheData);
-    
+
     if (serverId) {
       const server = SERVERS.find(s => s.id === serverId);
       if (server) {
+        // Attempt to verify cached server is suitable for the current user location
+        try {
+          const location = await getUserLocation();
+          if (location) {
+            // If the cached server does not serve the user's continent, ignore the cache
+            if (!server.continents.includes(location.continent)) {
+              console.log(
+                `Cached server ${serverId} (${server.region}) is not suitable for continent ${location.continent}; ignoring cache`
+              );
+              // Clear the bad cache to avoid repeated mismatches
+              localStorage.removeItem(CACHE_KEY);
+              return null;
+            }
+          }
+        } catch (err) {
+          // If checking location fails, fall back to using the cached server
+          console.warn('Could not verify cached server against user location, using cache as fallback');
+        }
+
         console.log(
           `Using cached server selector: ${serverId} (${server.region}) - Cache age: ${(age / 1000 / 60).toFixed(1)} minutes`
         );

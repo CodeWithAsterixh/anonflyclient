@@ -1,6 +1,6 @@
 import { getAPIBaseURL } from 'lib/constants/api';
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams, useOutletContext } from 'react-router';
+import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import ChatroomMenu from '../../components/ChatroomMenu';
 import JoinRoomOverlay from '../../components/JoinRoomOverlay';
 import MessageDisplay from '../../components/MessageDisplay';
@@ -169,7 +169,7 @@ const ChatroomPage: React.FC = () => {
             <div className="flex items-center gap-3 flex-1">
               {isMobile && (
                 <button
-                  onClick={onBack}
+                  onClick={() => { if (typeof onBack === 'function') onBack(); else navigate('/'); }}
                   className="text-blue-500 hover:text-blue-700 font-semibold text-lg"
                   aria-label="Back"
                 >
@@ -235,7 +235,7 @@ const ChatroomPage: React.FC = () => {
             {/* Back button for mobile */}
             {isMobile && (
               <button
-                onClick={onBack}
+                onClick={() => { if (typeof onBack === 'function') onBack(); else navigate('/'); }}
                 className="text-blue-500 hover:text-blue-700 font-semibold text-lg"
                 aria-label="Back"
               >

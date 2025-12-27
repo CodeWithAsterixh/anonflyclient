@@ -1,4 +1,4 @@
-import { CHAT_WS_URL } from "lib/constants/api";
+import { getChatWSURL } from "lib/constants/api";
 
 interface WebSocketMessage {
   type: string;
@@ -15,7 +15,8 @@ class WebSocketController {
       return;
     }
 
-    this.ws = new WebSocket(CHAT_WS_URL);
+    const wsUrl = typeof window !== 'undefined' ? getChatWSURL() : getChatWSURL();
+    this.ws = new WebSocket(wsUrl);
 
     this.ws.onopen = () => {
       console.log('WebSocket connected.');

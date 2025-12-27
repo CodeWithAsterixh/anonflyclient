@@ -1,7 +1,30 @@
 import { selectBestServer } from '../helpers/serverSelector';
 
 let API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-export const CHAT_WS_URL = import.meta.env.VITE_CHAT_WS_URL || 'ws://localhost:3000';
+
+/**
+ * Resolve the chat WebSocket URL at runtime.
+ * - If `VITE_CHAT_WS_URL` is provided, use it but upgrade to `wss://` when the page is served over HTTPS.
+ * - Otherwise derive from `API_BASE_URL` (http -> ws, https -> wss).
+ */
+export function getChatWSURL(): string {
+  const envWs = import.meta.env.VITE_CHAT_WS_URL as string | undefined;
+
+  // Prefer explicit env value when present
+  if (envWs) {
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+      return envWs.startsWith('ws://') ? envWs.replace(/^ws:\/\//i, 'wss://') : envWs;
+    }
+    return envWs;
+  }
+
+  // Derive from API_BASE_URL
+  if (API_BASE_URL.startsWith('https://')) return API_BASE_URL.replace(/^https?:\/\//i, 'wss://');
+  if (API_BASE_URL.startsWith('http://')) return API_BASE_URL.replace(/^https?:\/\//i, 'ws://');
+
+  // Fallback
+  return 'ws://localhost:3000';
+}
 
 /**
  * Initialize API configuration with geolocation-based server selection

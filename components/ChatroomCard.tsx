@@ -31,16 +31,21 @@ const ChatroomCard: React.FC<ChatroomCardProps> = ({
 
   return (
     <div
-      className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow duration-200"
+      className="flex items-center space-x-3 animate-pulse cursor-pointer"
       onClick={() => navigate(`/${id}`)}
     >
-      <h2 className="text-xl font-semibold mb-2">{roomname}</h2>
-      <p className="text-gray-600 mb-4">{description || 'No description provided.'}</p>
-      <div className="flex justify-between items-center text-sm text-gray-500">
-        <span>Participants: {participantCount}</span>
-        {lastMessage && (
-          <span className="italic">Last message: "{lastMessage}"</span>
-        )}
+      <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 font-semibold">
+        {roomname ? roomname.charAt(0).toUpperCase() : 'R'}
+      </div>
+      <div className="flex-1">
+        <h2 className="text-xl font-semibold mb-1">{roomname}</h2>
+        <p className="text-gray-600 mb-2 text-sm truncate">{description || 'No description provided.'}</p>
+        <div className="flex justify-between items-center text-sm text-gray-500">
+          <span>Participants: {participantCount}</span>
+          {lastMessage && (
+            <span className="italic truncate">Last message: "{lastMessage}"</span>
+          )}
+        </div>
       </div>
     </div>
   );

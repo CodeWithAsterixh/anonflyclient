@@ -198,12 +198,16 @@ const ChatroomPage: React.FC = () => {
                 <h2 className="text-lg font-semibold mb-2">{chatroomDetail?.roomname || 'Chatroom'}</h2>
                 <p className="text-sm text-gray-600 mb-4">{chatroomDetail?.description || 'Join the room to see messages and participate.'}</p>
                 <div className="flex items-center justify-center space-x-3">
-                  <button
-                    onClick={() => joinChatroom(chatroomId as string)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  >
-                    Join Room
-                  </button>
+                  {chatroomDetail?.participants?.some(p => p.userId === user.userId) ? (
+                    <div className="text-sm text-gray-700">You're listed as a participant</div>
+                  ) : (
+                    <button
+                      onClick={() => joinChatroom(chatroomId as string)}
+                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    >
+                      Join Room
+                    </button>
+                  )}
                   <button
                     onClick={() => { if (isMobile) onBack(); else navigate('/'); }}
                     className="bg-gray-100 px-4 py-2 rounded hover:bg-gray-200"

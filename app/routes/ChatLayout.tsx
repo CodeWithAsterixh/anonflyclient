@@ -71,7 +71,7 @@ const ChatLayout: React.FC = () => {
       <div
         className={`${
           isHydrated
-            ? !showChatList && isMobile
+            ? showChatList && isMobile
               ? 'hidden'
               : 'flex'
             : 'hidden md:flex'

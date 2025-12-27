@@ -1,6 +1,6 @@
-import { API_BASE_URL } from 'lib/constants/api';
+import { getAPIBaseURL } from 'lib/constants/api';
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams, useOutletContext } from 'react-router';
 import ChatroomMenu from '../../components/ChatroomMenu';
 import JoinRoomOverlay from '../../components/JoinRoomOverlay';
 import MessageDisplay from '../../components/MessageDisplay';
@@ -8,6 +8,11 @@ import MessageInput from '../../components/MessageInput';
 import ProtectedRoute from "../../components/ProtectedRoute";
 import { useAuth } from '../../hooks/useAuth';
 import { useChatroom, type ChatroomDetail } from '../../hooks/useChatroom';
+
+interface OutletContext {
+  onBack: () => void;
+  isMobile: boolean;
+}
 
 /**
  * ChatroomPage component displays the messages within a specific chatroom,
@@ -18,6 +23,7 @@ const ChatroomPage: React.FC = () => {
   const { chatroomId } = useParams<{ chatroomId: string }>();
   const navigate = useNavigate();
   const { user, loading, token } = useAuth();
+  const { onBack, isMobile } = useOutletContext<OutletContext>();
   const [isHost, setIsHost] = useState(false);
   const [chatroomDetail, setChatroomDetails]  = useState<ChatroomDetail|null>(null)
 
@@ -26,7 +32,7 @@ const ChatroomPage: React.FC = () => {
       if (!chatroomId || !token || !user) return;
 
       try {
-        const response = await fetch(`${API_BASE_URL}/chatroom/${chatroomId}/details`, {
+        const response = await fetch(`${getAPIBaseURL()}/chatroom/${chatroomId}/details`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -116,7 +122,11 @@ const ChatroomPage: React.FC = () => {
 
   const handleLeaveRoom = () => {
     leaveChatroom();
-    navigate('/'); // Navigate to home or chatroom list after leaving
+    if (isMobile) {
+      onBack();
+    } else {
+      navigate('/');
+    }
   };
 
   const handleDeleteRoom = async () => {
@@ -127,7 +137,7 @@ const ChatroomPage: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/chatrooms/${chatroomId}`, {
+      const response = await fetch(`${getAPIBaseURL()}/chatrooms/${chatroomId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -136,7 +146,11 @@ const ChatroomPage: React.FC = () => {
 
       if (response.ok) {
         alert('Chatroom deleted successfully!');
-        navigate('/'); // Navigate to home or chatroom list after deletion
+        if (isMobile) {
+          onBack();
+        } else {
+          navigate('/');
+        }
       } else {
         const errorData = await response.json();
         alert(`Failed to delete chatroom: ${errorData.message}`);
@@ -149,9 +163,24 @@ const ChatroomPage: React.FC = () => {
 
   return (
     <ProtectedRoute>
-      <div className="flex flex-col h-screen bg-gray-100">
-        <header className="bg-blue-600 text-white p-4 shadow-md flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Chatroom: {chatroomDetail&&chatroomDetail.roomname}</h1>
+      <div className="flex flex-col h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm flex justify-between items-center">
+          <div className="flex items-center gap-3 flex-1">
+            {/* Back button for mobile */}
+            {isMobile && (
+              <button
+                onClick={onBack}
+                className="text-blue-500 hover:text-blue-700 font-semibold text-lg"
+                aria-label="Back"
+              >
+                ← Back
+              </button>
+            )}
+            <h1 className="text-xl font-bold text-gray-900">
+              {chatroomDetail?.roomname || 'Chatroom'}
+            </h1>
+          </div>
           <ChatroomMenu
             onLeaveRoom={handleLeaveRoom}
             onRemoveParticipant={() => console.log('Remove participant clicked')}
@@ -159,12 +188,19 @@ const ChatroomPage: React.FC = () => {
             isHost={isHost}
           />
         </header>
+
+        {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((msg, index) => (
             <MessageDisplay key={index} message={msg} />
           ))}
         </div>
-        <MessageInput onSendMessage={handleSendMessage} isDisabled={!isConnected || !currentChatroomId} />
+
+        {/* Message Input */}
+        <MessageInput 
+          onSendMessage={handleSendMessage} 
+          isDisabled={!isConnected || !currentChatroomId}
+        />
       </div>
     </ProtectedRoute>
   );

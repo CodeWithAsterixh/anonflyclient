@@ -1,11 +1,11 @@
-import { API_BASE_URL } from "lib/constants/api";
+import { getAPIBaseURL } from "lib/constants/api";
 
 export const login = async (credentials: {
     username: string;
     password: string;
 }) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/login`, {
+    const response = await fetch(`${getAPIBaseURL()}/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -28,7 +28,7 @@ export const login = async (credentials: {
 
 export const getUser = async (token: string) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/user`, {
+    const response = await fetch(`${getAPIBaseURL()}/auth/user`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ export const createUser = async (userData: {
     password:string;
 }) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/users`, {
+    const response = await fetch(`${getAPIBaseURL()}/users`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

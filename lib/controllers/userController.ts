@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "lib/constants/api";
+import { getAPIBaseURL } from "lib/constants/api";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
@@ -10,7 +10,7 @@ const getAuthHeaders = () => {
 
 export const deleteUser = async (userId: string) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+    const response = await fetch(`${getAPIBaseURL()}/users/${userId}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });

@@ -6,9 +6,10 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-
+import { useEffect } from "react";
 
 import type { Route } from "./+types/root";
+import { initializeAPI } from "../lib/constants/api";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -43,6 +44,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    initializeAPI();
+  }, []);
+
   return (
     <Outlet />
   );

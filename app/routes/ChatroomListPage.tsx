@@ -2,38 +2,38 @@ import React from "react";
 import { useChatroomList } from "../../hooks/useChatroomList";
 import ChatroomCard from "../../components/ChatroomCard";
 import ProtectedRoute from "../../components/ProtectedRoute";
-import { useNavigate } from "react-router"; // Import useNavigate
+import { useNavigate } from "react-router";
 
-const ChatroomListPage: React.FC = () => {
+interface ChatroomListPageProps {
+  onChatroomSelect?: (chatroomId: string) => void;
+}
+
+const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect }) => {
   const { chatrooms, loading, error } = useChatroomList();
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   const handleChatroomClick = (chatroomId: string) => {
-    navigate(`/${chatroomId}`); // Navigate to the specific chatroom
+    onChatroomSelect?.(chatroomId);
+    navigate(`/${chatroomId}`);
   };
 
   return (
     <ProtectedRoute>
-      <div className="p-4 size-full">
-        {" "}
-        {/* Removed container mx-auto and min-h-screen */}
-        <h1 className="text-2xl font-bold mb-4 text-left border-b-gray-400 border-b-2">
+      <div className="p-4 h-full overflow-y-auto flex flex-col">
+        <h1 className="text-2xl font-bold mb-4 text-left border-b-gray-300 border-b-2 pb-3 sticky top-0 bg-white z-10">
           Chats
-        </h1>{" "}
-        {/* Adjusted heading size */}
-        <div className="space-y-2">
-          {" "}
-          {/* Changed grid to space-y for a list-like appearance */}
+        </h1>
+        <div className="space-y-2 flex-1">
           {loading ? (
-            <div className="flex items-center justify-center h-full bg-gray-100">
+            <div className="flex items-center justify-center h-full bg-gray-50">
               <p className="text-lg text-gray-700">Loading chatrooms...</p>
             </div>
           ) : error ? (
-            <div className="flex items-center justify-center h-full bg-gray-100">
+            <div className="flex items-center justify-center h-full bg-gray-50">
               <p className="text-lg text-red-600">Error: {error}</p>
             </div>
           ) : chatrooms.length === 0 ? (
-            <p className="text-center text-gray-600">
+            <p className="text-center text-gray-600 py-8">
               No chatrooms available. Create one!
             </p>
           ) : (
@@ -41,7 +41,7 @@ const ChatroomListPage: React.FC = () => {
               <div
                 key={room.id}
                 onClick={() => handleChatroomClick(room.id)}
-                className="cursor-pointer"
+                className="cursor-pointer hover:bg-gray-100 rounded-lg transition-colors duration-150"
               >
                 <ChatroomCard
                   id={room.id}

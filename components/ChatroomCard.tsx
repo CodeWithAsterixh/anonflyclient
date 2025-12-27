@@ -30,7 +30,7 @@ const ChatroomCard: React.FC<ChatroomCardProps> = ({
       </div>
 
       {/* Name and description */}
-      <div className="flex-1 mx-3">
+      <div className="flex-1 mx-3 max-w-[calc(100%-80px)] overflow-hidden">
         <h2 className="text-lg font-semibold truncate">{roomname}</h2>
         <p className="text-gray-600 text-sm truncate">{description || 'No description'}</p>
         {lastMessage && (

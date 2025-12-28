@@ -94,7 +94,6 @@ async function deriveEncryptionKey(): Promise<CryptoKey> {
 
     return key;
   } catch (error) {
-    console.error('Error deriving encryption key:', error);
     throw error;
   }
 }
@@ -120,7 +119,6 @@ async function encryptServerId(serverId: string): Promise<EncryptedCache> {
       ts: Date.now(),
     };
   } catch (error) {
-    console.error('Error encrypting server ID:', error);
     throw error;
   }
 }
@@ -142,7 +140,6 @@ async function decryptServerId(cache: EncryptedCache): Promise<string | null> {
 
     return new TextDecoder().decode(decrypted);
   } catch (error) {
-    console.error('Error decrypting server ID:', error);
     return null;
   }
 }
@@ -185,7 +182,6 @@ async function getCachedServerSelector(): Promise<string | null> {
           }
         } catch (err) {
           // If checking location fails, fall back to using the cached server
-          console.warn('Could not verify cached server against user location, using cache as fallback');
         }
 
         return serverId;
@@ -194,7 +190,6 @@ async function getCachedServerSelector(): Promise<string | null> {
 
     return null;
   } catch (error) {
-    console.error('Error reading cache:', error);
     return null;
   }
 }
@@ -208,7 +203,7 @@ async function cacheServerSelector(serverId: string): Promise<void> {
     localStorage.setItem(CACHE_KEY, JSON.stringify(encrypted));
     const server = SERVERS.find(s => s.id === serverId);
   } catch (error) {
-    console.error('Error caching server selector:', error);
+    // Silently fail
   }
 }
 
@@ -219,7 +214,7 @@ export function clearServerCache(): void {
   try {
     localStorage.removeItem(CACHE_KEY);
   } catch (error) {
-    console.error('Error clearing cache:', error);
+    // Silently fail
   }
 }
 
@@ -262,7 +257,6 @@ async function getUserLocation(): Promise<LocationData | null> {
     const data = await response.json();
 
     if (data.status === 'fail') {
-      console.warn('Geolocation failed:', data.message);
       return null;
     }
 
@@ -273,7 +267,6 @@ async function getUserLocation(): Promise<LocationData | null> {
       longitude: data.lon,
     };
   } catch (error) {
-    console.error('Error fetching user location:', error);
     return null;
   }
 }
@@ -296,7 +289,6 @@ export async function selectBestServer(): Promise<string> {
   const location = await getUserLocation();
 
   if (!location) {
-    console.warn('Could not determine user location, using default server (server-1)');
     await cacheServerSelector(SERVERS[0].id);
     return SERVERS[0].url;
   }

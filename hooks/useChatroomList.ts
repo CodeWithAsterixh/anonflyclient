@@ -60,7 +60,6 @@ export const useChatroomList = (): UseChatroomListReturn => {
     };
 
     eventSource.onerror = (err) => {
-      console.error("EventSource failed:", err);
       setError("Failed to load chatrooms.");
       setLoading(false);
       eventSource.close();

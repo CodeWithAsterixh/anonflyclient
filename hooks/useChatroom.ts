@@ -288,7 +288,6 @@ export const useChatroom = (): UseChatroomReturn => {
           userAid: identity.aid,
         }));
       } catch (err: any) {
-        console.error('Failed to secure message:', err);
         setError('Failed to secure message');
       }
     } else {

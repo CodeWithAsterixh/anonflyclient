@@ -11,7 +11,6 @@ class WebSocketController {
 
   public connect(onOpen?: () => void, onClose?: () => void, onError?: (event: Event) => void) {
     if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
-      console.warn('WebSocket is already connected or connecting.');
       return;
     }
 
@@ -28,11 +27,9 @@ class WebSocketController {
         const handlers = this.messageHandlers.get(parsedMessage.type);
         if (handlers) {
           handlers.forEach(handler => handler(parsedMessage));
-        } else {
-          console.warn(`No handler for message type: ${parsedMessage.type}`);
         }
       } catch (error) {
-        console.error('Failed to parse WebSocket message:', error);
+        // Silently fail parsing
       }
     };
 
@@ -41,7 +38,6 @@ class WebSocketController {
     };
 
     this.ws.onerror = (event) => {
-      console.error('WebSocket error:', event);
       if (onError) onError(event);
     };
   }
@@ -56,8 +52,6 @@ class WebSocketController {
   public sendMessage(message: WebSocketMessage) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
-    } else {
-      console.error('WebSocket is not connected. Cannot send message.');
     }
   }
 

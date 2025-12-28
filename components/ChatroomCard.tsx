@@ -1,6 +1,6 @@
-import React from 'react';
-import { useNavigate } from 'react-router';
 import { User } from 'lucide-react';
+import React from 'react';
+import { Link } from 'react-router';
 
 interface ChatroomCardProps {
   id: string;
@@ -17,12 +17,11 @@ const ChatroomCard: React.FC<ChatroomCardProps> = ({
   participantCount,
   lastMessage,
 }) => {
-  const navigate = useNavigate();
 
   return (
-    <div
+    <Link
       className="flex items-center p-3 cursor-pointer hover:bg-gray-100"
-      onClick={() => navigate(`/${id}`)}
+      to={`/${id}`}
     >
       {/* Avatar */}
       <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 font-semibold flex-shrink-0">
@@ -43,7 +42,7 @@ const ChatroomCard: React.FC<ChatroomCardProps> = ({
         <User className="h-5 w-5" />
         <span>{participantCount}</span>
       </div>
-    </div>
+    </Link>
   );
 };
 

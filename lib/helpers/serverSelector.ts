@@ -26,33 +26,34 @@ const CACHE_KEY = 'anonfly_server_selector';
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
 const ENCRYPTION_KEY_SEED = 'anonfly-secure-server-selector-2025';
 const ENCRYPTION_SALT = 'anonfly-encryption-salt';
-
+const env_servers = import.meta.env
+const {VITE_SERVER_1_URL,VITE_SERVER_2_URL,VITE_SERVER_3_URL,VITE_SERVER_4_URL} = env_servers
 const SERVERS: ServerConfig[] = [
   {
     name: 'server-1',
     id: 'srv1',
-    url: 'https://anonfly-server-1.onrender.com',
+    url: VITE_SERVER_1_URL,
     region: 'Oregon, USA',
     continents: ['North America'],
   },
   {
     name: 'server-2',
     id: 'srv2',
-    url: 'https://anonfly-server-2.onrender.com',
+    url: VITE_SERVER_2_URL,
     region: 'Singapore',
     continents: ['Asia'],
   },
   {
     name: 'server-3',
     id: 'srv3',
-    url: 'https://anonfly-server-3.onrender.com',
+    url: VITE_SERVER_3_URL,
     region: 'Frankfurt, Germany',
     continents: ['Europe'],
   },
   {
     name: 'server-4',
     id: 'srv4',
-    url: 'https://anonfly-server-4.onrender.com',
+    url: VITE_SERVER_4_URL,
     region: 'Virginia, USA',
     continents: ['North America'],
   },

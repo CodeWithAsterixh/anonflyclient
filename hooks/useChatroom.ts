@@ -64,7 +64,7 @@ interface UseChatroomReturn {
  *
  * @returns {UseChatroomReturn} An object containing chatroom state and functions.
  */
-export const useChatroom = (initialChatroomId?: string | null): UseChatroomReturn => {
+export const useChatroom = (initialChatroomId?: string | null, deferConnection: boolean = false): UseChatroomReturn => {
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesRef = useRef<Message[]>([]);
   const [participants, setParticipants] = useState<Map<string, Participant>>(
@@ -573,14 +573,18 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
 
 
   useEffect(() => {
-    connect();
+    // We only auto-connect if we have a room ID and it's not a password-protected flow
+    // The ChatroomPage will call reconnect() if a manual connection is needed
+    if (!deferConnection) {
+      connect();
+    }
     return () => {
       if (ws.current) {
         ws.current.close();
         ws.current = null;
       }
     };
-  }, [connect]);
+  }, [connect, deferConnection]);
 
   const sendMessage = useCallback(
     async (content: string) => {

@@ -99,7 +99,7 @@ const ChatroomPage: React.FC = () => {
     reconnect,
     clearError,
     currentChatroomId,
-  } = useChatroom(chatroomId);
+  } = useChatroom(chatroomId, !chatroomDetail || chatroomDetail.isLocked);
 
   // Sync isHost with SSE updates
   useEffect(() => {
@@ -111,11 +111,17 @@ const ChatroomPage: React.FC = () => {
   const displayDetail = sseChatroomDetail || chatroomDetail;
 
   // Auto-join if room is not locked and we are connected
+  // Or if room IS locked, we are connected, and we have a password ready (from a previous attempt)
   useEffect(() => {
-    if (isConnected && chatroomId && displayDetail && !displayDetail.isLocked && !isJoined) {
-      joinChatroom(chatroomId);
+    if (isConnected && chatroomId && displayDetail && !isJoined) {
+      if (!displayDetail.isLocked) {
+        joinChatroom(chatroomId);
+      } else if (joinPassword) {
+        // If it's locked and we just connected after clicking "Enter Room", try to join now
+        joinChatroom(chatroomId, joinPassword);
+      }
     }
-  }, [isConnected, chatroomId, displayDetail, isJoined, joinChatroom]);
+  }, [isConnected, chatroomId, displayDetail, isJoined, joinChatroom, joinPassword]);
 
   useEffect(() => {
     if (
@@ -222,6 +228,13 @@ const ChatroomPage: React.FC = () => {
     if (!chatroomId) return;
     setPasswordError(null);
     try {
+      // For locked rooms, we might need to connect first if we deferred it
+      if (displayDetail?.isLocked && !isConnected) {
+        reconnect();
+        // We need to wait a bit for connection or handle it in an effect
+        // But joinChatroom will fail if not connected, so we'll rely on the effect
+        // to call joinChatroom once connected, OR we just call it here and let it fail/retry
+      }
       await joinChatroom(chatroomId, joinPassword);
       setJoinPassword("");
     } catch (err: any) {
@@ -244,7 +257,7 @@ const ChatroomPage: React.FC = () => {
             }}
           />
           <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
-            {isMobile&&<Logo showText size={32} className="py-2"/>}
+            {isMobile && <Logo showText size={32} className="py-2" />}
             <div className="w-full flex justify-between items-center bg-neutral-200/50 px-4 py-3">
               <div className="flex items-center gap-3">
                 <button
@@ -363,6 +376,9 @@ const ChatroomPage: React.FC = () => {
   }
 
   if (!isJoined) {
+    const isLocked = displayDetail?.isLocked;
+    const isConnecting = isLocked && !isConnected && joinPassword !== "";
+
     // show skeleton with overlay prompting the user to join
     return (
       <ProtectedRoute>
@@ -379,8 +395,8 @@ const ChatroomPage: React.FC = () => {
           />
           {/* Header */}
 
-          <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm flex flex-col gap-2 justify-between items-center z-10">
-            {isMobile&&<Logo showText size={32} className="py-2" />}
+          <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
+            {isMobile && <Logo showText size={32} className="py-2" />}
             <div className="w-full flex justify-between items-center bg-neutral-200/50 px-4 py-3">
               <div className="flex items-center gap-3">
                 <button
@@ -398,8 +414,12 @@ const ChatroomPage: React.FC = () => {
                   </h1>
                   <p className="text-xs text-gray-500">
                     {displayDetail?.participantCount !== undefined
-                      ? `${displayDetail.participantCount} participants • ${isConnected ? 'connected' : 'connecting...'}`
-                      : isConnected ? 'connected' : 'connecting...'}
+                      ? `${displayDetail.participantCount} participants • ${
+                          isConnected ? "connected" : "ready"
+                        }`
+                      : isConnected
+                      ? "connected"
+                      : "ready"}
                   </p>
                 </div>
               </div>
@@ -414,9 +434,18 @@ const ChatroomPage: React.FC = () => {
             </div>
           </header>
 
-          {/* Messages Area Skeleton */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 relative z-10">
-            <ChatroomSkeleton />
+          {/* Messages Area - No skeleton for locked rooms until connecting */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 relative z-10 flex flex-col">
+            {!isLocked || isConnecting ? (
+              <ChatroomSkeleton />
+            ) : (
+              <div className="flex-1 flex items-center justify-center">
+                {/* Empty space or decorative element for locked state */}
+                <div className="opacity-10">
+                   <Logo size={120} />
+                </div>
+              </div>
+            )}
 
             {/* Join Overlay */}
             <div className="absolute inset-0 flex items-center justify-center bg-white/20 backdrop-blur-[2px] z-20">
@@ -429,10 +458,10 @@ const ChatroomPage: React.FC = () => {
                     "Join the room to see messages and participate."}
                 </p>
 
-                {(displayDetail?.isLocked ||
-                  (passwordError &&
-                    (passwordError.toLowerCase().includes("password") ||
-                      passwordError.toLowerCase().includes("locked")))) ? (
+                {isLocked ||
+                (passwordError &&
+                  (passwordError.toLowerCase().includes("password") ||
+                    passwordError.toLowerCase().includes("locked"))) ? (
                   <div className="mb-4">
                     <div className="flex items-center justify-center gap-2 text-amber-600 mb-2">
                       <Lock size={16} />
@@ -446,7 +475,8 @@ const ChatroomPage: React.FC = () => {
                         value={joinPassword}
                         onChange={(e) => setJoinPassword(e.target.value)}
                         placeholder="Enter room password"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 pr-10"
+                        disabled={isConnecting}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 pr-10 disabled:bg-gray-50 disabled:text-gray-400"
                         onKeyDown={(e) =>
                           e.key === "Enter" && handleJoinChatroom()
                         }
@@ -474,14 +504,21 @@ const ChatroomPage: React.FC = () => {
                     <div className="flex items-center justify-center space-x-3 mt-4">
                       <button
                         onClick={handleJoinChatroom}
-                        disabled={!isConnected}
+                        disabled={isConnecting}
                         className={`px-4 py-2 rounded font-medium text-white transition-colors ${
-                          isConnected 
-                            ? "bg-blue-600 hover:bg-blue-700" 
+                          !isConnecting
+                            ? "bg-blue-600 hover:bg-blue-700"
                             : "bg-blue-400 cursor-not-allowed"
                         }`}
                       >
-                        {isConnected ? "Enter Room" : "Connecting..."}
+                        {isConnecting ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            Connecting...
+                          </div>
+                        ) : (
+                          "Enter Room"
+                        )}
                       </button>
                       <button
                         onClick={() => {
@@ -498,7 +535,9 @@ const ChatroomPage: React.FC = () => {
                   <div className="flex flex-col items-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
                     <p className="text-sm text-gray-500">
-                      {isConnected ? "Joining room..." : "Connecting to service..."}
+                      {isConnected
+                        ? "Joining room..."
+                        : "Connecting to service..."}
                     </p>
                   </div>
                 )}
@@ -530,7 +569,7 @@ const ChatroomPage: React.FC = () => {
         />
         {/* Header */}
         <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
-          {isMobile&&<Logo showText size={32} className="py-2"/>}
+          {isMobile && <Logo showText size={32} className="py-2" />}
           <div className="w-full flex justify-between items-center bg-neutral-200/50 px-4 py-3">
             <div className="flex items-center gap-3">
               <button

@@ -15,12 +15,12 @@ const getAuthHeaders = () => {
   };
 };
 
-export const createChatroom = async (roomname: string, description?: string) => {
+export const createChatroom = async (roomname: string, description?: string, password?: string) => {
   try {
     const response = await fetch(`${getAPIBaseURL()}/chatrooms`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ roomname, description }),
+      body: JSON.stringify({ roomname, description, password }),
     });
 
     const data = await response.json();
@@ -54,11 +54,12 @@ export const getChatroomMessages = async (chatroomId: string) => {
   }
 };
 
-export const joinChatroom = async (chatroomId: string) => {
+export const joinChatroom = async (chatroomId: string, password?: string) => {
   try {
     const response = await fetch(`${getAPIBaseURL()}/chatrooms/${chatroomId}/join`, {
       method: 'POST',
       headers: getAuthHeaders(),
+      body: JSON.stringify({ password }),
     });
 
     const data = await response.json();

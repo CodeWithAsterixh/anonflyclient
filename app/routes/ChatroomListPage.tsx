@@ -22,7 +22,6 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect })
 
   const handleChatroomClick = (chatroomId: string) => {
     onChatroomSelect?.(chatroomId);
-    navigate(`/${chatroomId}`);
   };
 
   return (
@@ -51,19 +50,16 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect })
             </p>
           ) : (
             chatrooms.map((room) => (
-              <div
+              <ChatroomCard
                 key={room.id}
+                id={room.id}
+                roomname={room.roomname}
+                description={room.description || ""}
+                participantCount={room.participantCount}
+                lastMessage={room.lastMessage}
+                isLocked={room.isLocked}
                 onClick={() => handleChatroomClick(room.id)}
-                className="cursor-pointer hover:bg-gray-100 rounded-lg transition-colors duration-150"
-              >
-                <ChatroomCard
-                  id={room.id}
-                  roomname={room.roomname}
-                  description={room.description || ""}
-                  participantCount={room.participantCount}
-                  lastMessage={room.lastMessage}
-                />
-              </div>
+              />
             ))
           )}
         </div>

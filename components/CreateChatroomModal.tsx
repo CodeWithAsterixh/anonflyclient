@@ -15,6 +15,7 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
 }) => {
   const [roomname, setRoomname] = useState('');
   const [description, setDescription] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,9 +31,10 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
         return;
       }
 
-      await createChatroom(roomname, description);
+      await createChatroom(roomname, description, password);
       setRoomname('');
       setDescription('');
+      setPassword('');
       onSuccess();
       onClose();
     } catch (err) {
@@ -94,6 +96,22 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
               rows={3}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors resize-none"
               disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" { ...({ className: "block text-sm font-medium text-gray-700 mb-1" }) }>
+              Password (optional - locks the room)
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password to lock room"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              disabled={loading}
+              autoComplete="new-password"
             />
           </div>
 

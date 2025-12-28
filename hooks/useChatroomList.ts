@@ -10,6 +10,7 @@ interface Chatroom {
   hostAid: string;
   participantCount: number;
   lastMessage: string | null;
+  isLocked: boolean;
 }
 
 interface UseChatroomListReturn {

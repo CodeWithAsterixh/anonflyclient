@@ -9,7 +9,7 @@ import ProtectedRoute from "../../components/ProtectedRoute";
 import ChatroomSkeleton from '../../components/ChatroomSkeleton';
 import { useAuth } from '../../hooks/useAuth';
 import { useChatroom, type ChatroomDetail } from '../../hooks/useChatroom';
-import { ChevronDown, ChevronLeftIcon, Lock } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Lock } from 'lucide-react';
 import EditChatroomModal from '../../components/EditChatroomModal';
 import NoChatSelectedFallback from 'components/NoChatSelectedFallback';
 
@@ -29,11 +29,13 @@ const ChatroomPage: React.FC = () => {
   const { user, loading, token, logout } = useAuth();
   const { onBack, isMobile } = useOutletContext<OutletContext>();
   const [isHost, setIsHost] = useState(false);
-  const [chatroomDetail, setChatroomDetails] = useState<ChatroomDetail | null>(null)
+  const [chatroomDetail, setChatroomDetails] = useState<ChatroomDetail | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [joinPassword, setJoinPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchChatroomDetails = async () => {
@@ -74,8 +76,16 @@ const ChatroomPage: React.FC = () => {
     hasRoomKey,
     error,
     reconnect,
+    clearError,
     currentChatroomId,
   } = useChatroom(chatroomId);
+
+  useEffect(() => {
+    if (error && (error.toLowerCase().includes('password') || error.toLowerCase().includes('locked'))) {
+      setPasswordError(error);
+      clearError();
+    }
+  }, [error, clearError]);
 
   const isJoined = currentChatroomId === chatroomId;
 
@@ -161,6 +171,17 @@ const ChatroomPage: React.FC = () => {
     }
   };
 
+  const handleJoinChatroom = async () => {
+    if (!chatroomId) return;
+    setPasswordError(null);
+    try {
+      await joinChatroom(chatroomId, joinPassword);
+      setJoinPassword('');
+    } catch (err: any) {
+      setPasswordError(err.message || 'Failed to join chatroom');
+    }
+  };
+
   if (isJoined && !hasRoomKey) {
     return (
       <ProtectedRoute>
@@ -212,7 +233,7 @@ const ChatroomPage: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (error && !error.toLowerCase().includes('password') && !error.toLowerCase().includes('locked')) {
     return (
       <div className="flex flex-col items-center justify-center min-h-full bg-gray-50 p-6 text-center">
         <div className="bg-white p-8 rounded-2xl shadow-sm max-w-md w-full border border-gray-100">
@@ -268,7 +289,7 @@ const ChatroomPage: React.FC = () => {
                   className="text-blue-500 hover:text-blue-700 font-semibold text-lg"
                   aria-label="Back"
                 >
-                  <ChevronLeftIcon className='w-6 h-6' />Back
+                  <ChevronLeft className='w-6 h-6' />Back
                 </button>
               )}
               <h1 className="text-xl font-bold text-gray-900">
@@ -293,9 +314,30 @@ const ChatroomPage: React.FC = () => {
               <div className="bg-white rounded-lg p-6 max-w-md mx-4 text-center shadow-lg">
                 <h2 className="text-lg font-semibold mb-2">{chatroomDetail?.roomname || 'Chatroom'}</h2>
                 <p className="text-sm text-gray-600 mb-4">{chatroomDetail?.description || 'Join the room to see messages and participate.'}</p>
+                
+                {(chatroomDetail?.isLocked || (passwordError && (passwordError.toLowerCase().includes('password') || passwordError.toLowerCase().includes('locked')))) && (
+                  <div className="mb-4">
+                    <div className="flex items-center justify-center gap-2 text-amber-600 mb-2">
+                      <Lock size={16} />
+                      <span className="text-sm font-medium">This room is password protected</span>
+                    </div>
+                    <input
+                      type="password"
+                      value={joinPassword}
+                      onChange={(e) => setJoinPassword(e.target.value)}
+                      placeholder="Enter room password"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+                      onKeyDown={(e) => e.key === 'Enter' && handleJoinChatroom()}
+                    />
+                    {passwordError && (
+                      <p className="text-xs text-red-500 mb-2">{passwordError}</p>
+                    )}
+                  </div>
+                )}
+
                 <div className="flex items-center justify-center space-x-3">
                   <button
-                    onClick={() => joinChatroom(chatroomId as string)}
+                    onClick={handleJoinChatroom}
                     className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                   >
                     Enter Room
@@ -335,7 +377,7 @@ const ChatroomPage: React.FC = () => {
                 className="text-blue-500 hover:text-blue-700 font-semibold text-lg flex items-center justify-start gap-1"
                 aria-label="Back"
               >
-                <ChevronLeftIcon/> Back
+                <ChevronLeft/> Back
               </button>
             )}
             <h1 className="text-xl font-bold text-gray-900">

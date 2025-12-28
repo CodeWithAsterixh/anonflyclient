@@ -31,13 +31,23 @@ interface Message {
   isEncrypted?: boolean;
 }
 
+export interface ChatroomDetail {
+  roomId: string;
+  roomname: string;
+  description: string;
+  hostAid: string;
+  isLocked: boolean;
+  participants: Participant[];
+}
+
 interface UseChatroomReturn {
   messages: Message[];
   participants: Map<string, Participant>;
   sendMessage: (content: string) => void;
-  joinChatroom: (chatroomId: string) => void;
+  joinChatroom: (chatroomId: string, password?: string) => void;
   leaveChatroom: () => void;
   reconnect: () => void;
+  clearError: () => void;
   isConnected: boolean;
   hasRoomKey: boolean;
   error: string | null;
@@ -110,7 +120,7 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
   }, [hasRoomKey, decryptStoredMessages]);
 
   const joinChatroom = useCallback(
-    async (chatroomId: string) => {
+    async (chatroomId: string, password?: string) => {
       if (!user && !loading) {
         setError("Cannot join chatroom: User not authenticated.");
         return;
@@ -132,6 +142,7 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
                 token, // Send token for authentication
                 userAid: identity.aid,
                 username: identity.username,
+                password,
               })
             );
           } else {
@@ -593,6 +604,10 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
     connect();
   }, [connect]);
 
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
   return {
     messages,
     participants,
@@ -600,22 +615,10 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
     joinChatroom,
     leaveChatroom,
     reconnect,
+    clearError,
     isConnected,
     hasRoomKey,
     error,
     currentChatroomId,
   };
 };
-
-interface ChatroomParticipant {
-  userId: string;
-  username: string;
-}
-
-export interface ChatroomDetail {
-  roomId: string;
-  roomname: string;
-  description: string;
-  hostAid: string;
-  participants: ChatroomParticipant[];
-}

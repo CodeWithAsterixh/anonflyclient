@@ -78,21 +78,22 @@ class WebSocketController {
   }
 
   // Specific message sending functions
-  public sendChatMessage(chatroomId: string, content: string, userId: string, username: string) {
+  public sendChatMessage(chatroomId: string, content: string, userAid: string, username: string, signature?: string) {
     this.sendMessage({
       type: 'message',
       chatroomId,
-      content,
-      userId,
+      content, // This is now the encrypted blob
+      userAid,
       username,
+      signature,
     });
   }
 
-  public joinChatroom(chatroomId: string, userId: string, username: string) {
+  public joinChatroom(chatroomId: string, userAid: string, username: string) {
     this.sendMessage({
       type: 'joinChatroom',
       chatroomId,
-      userId,
+      userAid,
       username,
     });
   }

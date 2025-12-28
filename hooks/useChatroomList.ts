@@ -7,7 +7,7 @@ interface Chatroom {
   id: string;
   roomname: string;
   description: string;
-  hostUserId: string;
+  hostAid: string;
   participantCount: number;
   lastMessage: string | null;
 }

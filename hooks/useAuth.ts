@@ -4,9 +4,9 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { login, createUser, getUser } from '../lib/controllers/authController';
+import { performHandshake } from '../lib/controllers/authController';
+import { getIdentity, generateIdentity } from '../lib/helpers/identityManager';
 import type { User } from '../types/User';
-import Cookies from 'js-cookie';
 import { getSessionUser, setSessionUser, clearSessionUser } from '../lib/helpers/authStorage';
 
 
@@ -22,8 +22,7 @@ interface AuthState {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  loginUser: (username: string, password: string) => Promise<void>;
-  registerUser: (username: string, email: string, password: string) => Promise<void>;
+  joinAnonymously: (username: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
   error: string | null;
@@ -31,19 +30,7 @@ interface AuthContextType {
 
 /**
  * Custom hook for managing authentication state and actions.
- * Provides functions for logging in, registering, and logging out users.
- * Manages authentication token storage in localStorage.
- * 
- * @returns {
- *   user: User | null,
- *   token: string | null,
- *   isAuthenticated: boolean,
- *   loading: boolean,
- *   error: string | null,
- *   loginUser: (username: string, password: string) => Promise<void>,
- *   registerUser: (username: string, password: string) => Promise<void>,
- *   logout: () => void
- * }
+ * Provides functions for joining anonymously and logging out.
  */
 export const useAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
@@ -54,134 +41,84 @@ export const useAuth = () => {
     error: null,
   });
 
-  useEffect(() => {
-    /**
-     * Initializes authentication state from localStorage on component mount.
-     */
-    const initializeAuth = async () => {
-      // Prefer sessionStorage cached user to avoid repeated API calls
-      const session = getSessionUser();
-      if (session && session.token && session.user) {
+  const initializeAuth = useCallback(async () => {
+    // 1. Check for ephemeral session
+    const session = getSessionUser();
+    if (session && session.token && session.user) {
+      setAuthState({
+        user: session.user,
+        token: session.token,
+        isAuthenticated: true,
+        loading: false,
+        error: null,
+      });
+      return;
+    }
+
+    // 2. Check for persistent identity
+    try {
+      const identity = await getIdentity();
+      if (identity) {
+        // If identity exists, perform handshake to get a session
+        const sessionData = await performHandshake(identity);
+        const user: User = { userId: sessionData.aid, username: sessionData.username };
         setAuthState({
-          user: session.user,
-          token: session.token,
+          user,
+          token: sessionData.token,
           isAuthenticated: true,
           loading: false,
           error: null,
         });
-        return;
-      }
-
-      const storedToken = Cookies.get('token');
-
-      if (storedToken) {
-        try {
-          const userData = await getUser(storedToken);
-          setAuthState({
-            user: userData.data,
-            token: storedToken,
-            isAuthenticated: true,
-            loading: false,
-            error: null,
-          });
-          // cache in sessionStorage for the session
-          setSessionUser(userData.data, storedToken);
-        } catch (error: any) {
-          console.error("Failed to fetch user data on initialization:", error);
-          if (error.response && error.response.status === 401) {
-            Cookies.remove('token');
-            clearSessionUser();
-            setAuthState(prev => ({ ...prev, loading: false, isAuthenticated: false, token: null, user: null, error: 'Session expired. Please log in again.' }));
-          } else {
-            setAuthState(prev => ({ ...prev, loading: false, error: error.message || 'An unexpected error occurred.' }));
-          }
-        }
       } else {
         setAuthState(prev => ({ ...prev, loading: false, isAuthenticated: false }));
       }
-    };
+    } catch (error: any) {
+      console.error("Failed to perform handshake on initialization:", error);
+      setAuthState(prev => ({ 
+        ...prev, 
+        loading: false, 
+        isAuthenticated: false,
+        error: 'Failed to establish secure session'
+      }));
+    }
+  }, []);
 
+  useEffect(() => {
     initializeAuth();
-  }, []);
+  }, [initializeAuth]);
 
   /**
-   * Handles user login.
-   * @param {string} username - The username for login.
-   * @param {string} password - The password for login.
-   * @returns {Promise<void>}
+   * Joins the app anonymously by generating an identity and performing a handshake.
    */
-  const loginUser = useCallback(async (username: string, password: string) => {
+  const joinAnonymously = async (username: string) => {
     setAuthState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const response = await login({
-        username, password
+      const identity = await generateIdentity(username);
+      const sessionData = await performHandshake(identity);
+      const user: User = { userId: sessionData.aid, username: sessionData.username };
+      
+      setAuthState({
+        user,
+        token: sessionData.token,
+        isAuthenticated: true,
+        loading: false,
+        error: null,
       });
-      if (response.data.token && response.data.user) {
-        Cookies.set('token', response.data.token, { expires: 7 }); // Token expires in 7 days
-        // store session in sessionStorage to avoid repeated user fetches
-        setSessionUser(response.data.user, response.data.token);
-        setAuthState({
-          user: response.data.user,
-          token: response.data.token,
-          isAuthenticated: true,
-          loading: false,
-          error: null,
-        });
-      } else {
-        throw new Error(response.message || 'Login failed');
-      }
-    } catch (err: any) {
+    } catch (error: any) {
       setAuthState(prev => ({
         ...prev,
         loading: false,
-        isAuthenticated: false,
-        user: null,
-        token: null,
-        error: err.message || 'An unknown error occurred during login',
+        error: error.message || 'Failed to join anonymously',
       }));
+      throw error;
     }
-  }, []);
+  };
 
   /**
-   * Handles user registration.
-   * @param {string} username - The username for registration.
-   * @param {string} password - The password for registration.
-   * @returns {Promise<void>}
-   */
-  const registerUser = useCallback(async (username: string, password: string) => {
-    setAuthState(prev => ({ ...prev, loading: true, error: null }));
-    try {
-      const response = await createUser({username, password});
-      if (response.token && response.user) {
-        Cookies.set('token', response.token, { expires: 7 }); // Token expires in 7 days
-        setSessionUser(response.user, response.token);
-        setAuthState({
-          user: response.user,
-          token: response.token,
-          isAuthenticated: true,
-          loading: false,
-          error: null,
-        });
-      } else {
-        throw new Error(response.message || 'Registration failed');
-      }
-    } catch (err: any) {
-      setAuthState(prev => ({
-        ...prev,
-        loading: false,
-        isAuthenticated: false,
-        user: null,
-        token: null,
-        error: err.message || 'An unknown error occurred during registration',
-      }));
-    }
-  }, []);
-
-  /**
-   * Logs out the current user by removing token and user data from localStorage.
+   * Logs the user out by clearing the session storage.
+   * Persistent identity remains in IndexedDB.
    */
   const logout = useCallback(() => {
-    Cookies.remove('token');
     clearSessionUser();
     setAuthState({
       user: null,
@@ -193,13 +130,9 @@ export const useAuth = () => {
   }, []);
 
   return {
-    user: authState.user,
-    token: authState.token,
-    isAuthenticated: authState.isAuthenticated,
-    loading: authState.loading,
-    error: authState.error,
-    loginUser,
-    registerUser,
+    ...authState,
+    isLoading: authState.loading,
+    joinAnonymously,
     logout,
   };
 };

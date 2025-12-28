@@ -1,76 +1,70 @@
 import { getAPIBaseURL } from "lib/constants/api";
+import { getIdentity, type Identity } from "../helpers/identityManager";
+import { setSessionUser } from "../helpers/authStorage";
 
-export const login = async (credentials: {
-    username: string;
-    password: string;
-}) => {
+export const performHandshake = async (identity: Identity) => {
   try {
-    const response = await fetch(`${getAPIBaseURL()}/login`, {
+    // 1. Request Challenge
+    const challengeResponse = await fetch(`${getAPIBaseURL()}/auth/challenge`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ aid: identity.aid }),
     });
 
-    const data = await response.json();
+    const challengeData = await challengeResponse.json();
+    if (!challengeResponse.ok) throw new Error(challengeData.message || 'Challenge failed');
 
-    if (!response.ok) {
-      throw new Error(data.message || 'Login failed');
-    }
+    const { nonce } = challengeData.data;
 
-    return data;
+    // 2. Sign Challenge
+    const privateKeyBuffer = Uint8Array.from(atob(identity.identityKeyPair.privateKey), c => c.charCodeAt(0));
+    const privateKey = await window.crypto.subtle.importKey(
+      'pkcs8',
+      privateKeyBuffer,
+      { name: 'Ed25519' },
+      true,
+      ['sign']
+    );
+
+    const nonceBuffer = new TextEncoder().encode(nonce);
+    const signatureBuffer = await window.crypto.subtle.sign(
+      { name: 'Ed25519' },
+      privateKey,
+      nonceBuffer
+    );
+
+    const signature = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)));
+
+    // 3. Verify Signature & Get Session
+    const verifyResponse = await fetch(`${getAPIBaseURL()}/auth/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        aid: identity.aid,
+        signature,
+        username: identity.username,
+        publicKey: identity.identityKeyPair.publicKey,
+        exchangePublicKey: identity.exchangeKeyPair.publicKey,
+      }),
+    });
+
+    const verifyData = await verifyResponse.json();
+    if (!verifyResponse.ok) throw new Error(verifyData.message || 'Verification failed');
+
+    const { token, aid, username } = verifyData.data;
+
+    // 4. Store session (ephemeral sessionStorage)
+    setSessionUser({ userId: aid, username }, token);
+
+    return verifyData.data;
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Handshake error:', error);
     throw error;
   }
 };
 
-export const getUser = async (token: string) => {
-  try {
-    const response = await fetch(`${getAPIBaseURL()}/auth/user`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch user data');
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Get user error:', error);
-    throw error;
-  }
-};
-
-export const createUser = async (userData: {
-    username: string;
-    password:string;
-}) => {
-  try {
-    const response = await fetch(`${getAPIBaseURL()}/users`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'User creation failed');
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Create user error:', error);
-    throw error;
-  }
+export const logout = async () => {
+  // Simply clear session storage, backend session will expire on its own
+  sessionStorage.clear();
+  window.location.href = '/login';
 };

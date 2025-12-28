@@ -9,7 +9,7 @@ import ProtectedRoute from "../../components/ProtectedRoute";
 import ChatroomSkeleton from '../../components/ChatroomSkeleton';
 import { useAuth } from '../../hooks/useAuth';
 import { useChatroom, type ChatroomDetail } from '../../hooks/useChatroom';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Lock } from 'lucide-react';
 import EditChatroomModal from '../../components/EditChatroomModal';
 
 interface OutletContext {
@@ -47,7 +47,7 @@ const ChatroomPage: React.FC = () => {
         const data = await response.json();
         if (response.ok && data.data) {
           setChatroomDetails(data.data)
-          setIsHost(data.data.hostUserId === user.userId);
+          setIsHost(data.data.hostAid === user.userId);
         } else {
           console.error("Failed to fetch chatroom details:", data.message);
         }
@@ -61,19 +61,21 @@ const ChatroomPage: React.FC = () => {
 
   const {
     messages,
+    participants,
     sendMessage,
     joinChatroom,
     leaveChatroom,
     isConnected,
+    hasRoomKey,
     error,
     currentChatroomId,
   } = useChatroom();
 
+  const isJoined = currentChatroomId === chatroomId;
+
   useEffect(() => {
     // Do not auto-join on page load. Joining will be triggered by user action.
   }, [/* intentionally empty to avoid auto-joining */]);
-
-
 
   useEffect(() => {
     return () => {
@@ -82,6 +84,35 @@ const ChatroomPage: React.FC = () => {
       }
     };
   }, [currentChatroomId, leaveChatroom]);
+
+  if (isJoined && !hasRoomKey) {
+    return (
+      <ProtectedRoute>
+        <div className="flex flex-col h-[100dvh] bg-gray-50 relative">
+          <header className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                <ChevronDown className="w-5 h-5 rotate-90" />
+              </button>
+              <div>
+                <h1 className="font-bold text-gray-900 leading-tight">{chatroomDetail?.roomname || 'Loading...'}</h1>
+                <p className="text-xs text-gray-500">Securing room...</p>
+              </div>
+            </div>
+          </header>
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+            <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 animate-pulse">
+              <Lock className="w-8 h-8" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Establishing Secure Connection</h2>
+            <p className="text-gray-600 max-w-xs">
+              Waiting for other participants to securely share the room key. This ensures your messages remain private.
+            </p>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -112,20 +143,14 @@ const ChatroomPage: React.FC = () => {
   if (!user || !token) {
     return (
       <JoinRoomOverlay
-        message="Please log in to view chatrooms."
+        message="Please join anonymously to view chatrooms."
         replaceLoading={
           <div className="flex space-x-4 mt-4">
             <button
               onClick={() => navigate(`/login?redirect_to=${encodeURIComponent(window.location.pathname)}`)}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full transition-colors"
             >
-              Login
-            </button>
-            <button
-              onClick={() => navigate('/register')}
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Register
+              Join Anonymously
             </button>
           </div>
         }
@@ -140,8 +165,6 @@ const ChatroomPage: React.FC = () => {
   if (!isConnected) {
     return <JoinRoomOverlay message="Connecting to chat service..." />;
   }
-
-  const isJoined = currentChatroomId === chatroomId;
 
   const handleLeaveRoom = () => {
     leaveChatroom();
@@ -316,7 +339,7 @@ const ChatroomPage: React.FC = () => {
         {/* Message Input */}
         <MessageInput
           onSendMessage={handleSendMessage}
-          isDisabled={!isConnected || !currentChatroomId}
+          isDisabled={!isConnected || !hasRoomKey}
         />
       </div>
       <EditChatroomModal

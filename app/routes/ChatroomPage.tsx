@@ -53,6 +53,8 @@ const ChatroomPage: React.FC = () => {
   const [showJoinPassword, setShowJoinPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     const fetchChatroomDetails = async () => {
       if (!chatroomId || !token || !user) return;
@@ -116,12 +118,12 @@ const ChatroomPage: React.FC = () => {
     if (isConnected && chatroomId && displayDetail && !isJoined) {
       if (!displayDetail.isLocked) {
         joinChatroom(chatroomId);
-      } else if (joinPassword) {
+      } else if (isSubmitting && joinPassword) {
         // If it's locked and we just connected after clicking "Enter Room", try to join now
         joinChatroom(chatroomId, joinPassword);
       }
     }
-  }, [isConnected, chatroomId, displayDetail, isJoined, joinChatroom, joinPassword]);
+  }, [isConnected, chatroomId, displayDetail, isJoined, joinChatroom, joinPassword, isSubmitting]);
 
   useEffect(() => {
     if (
@@ -130,6 +132,7 @@ const ChatroomPage: React.FC = () => {
         error.toLowerCase().includes("locked"))
     ) {
       setPasswordError(error);
+      setIsSubmitting(false);
       clearError();
     }
   }, [error, clearError]);
@@ -227,18 +230,18 @@ const ChatroomPage: React.FC = () => {
   const handleJoinChatroom = async () => {
     if (!chatroomId) return;
     setPasswordError(null);
+    setIsSubmitting(true);
     try {
       // For locked rooms, we might need to connect first if we deferred it
       if (displayDetail?.isLocked && !isConnected) {
         reconnect();
-        // We need to wait a bit for connection or handle it in an effect
-        // But joinChatroom will fail if not connected, so we'll rely on the effect
-        // to call joinChatroom once connected, OR we just call it here and let it fail/retry
+        // The useEffect will handle joinChatroom once isConnected becomes true
+      } else {
+        await joinChatroom(chatroomId, joinPassword);
       }
-      await joinChatroom(chatroomId, joinPassword);
-      setJoinPassword("");
     } catch (err: any) {
       setPasswordError(err.message || "Failed to join chatroom");
+      setIsSubmitting(false);
     }
   };
 
@@ -377,7 +380,7 @@ const ChatroomPage: React.FC = () => {
 
   if (!isJoined) {
     const isLocked = displayDetail?.isLocked;
-    const isConnecting = isLocked && !isConnected && joinPassword !== "";
+    const isConnecting = isLocked && !isConnected && isSubmitting;
 
     // show skeleton with overlay prompting the user to join
     return (

@@ -14,7 +14,7 @@ const JoinRoomOverlay: React.FC<JoinRoomOverlayProps> = ({
   replaceLoading,
 }) => {
   return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
+    <div className="absolute inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg text-center">
         <p className="text-lg font-semibold text-gray-800">{message}</p>
         {replaceLoading ? (

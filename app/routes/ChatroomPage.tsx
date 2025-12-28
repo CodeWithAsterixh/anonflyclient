@@ -447,9 +447,9 @@ const ChatroomPage: React.FC = () => {
               </div>
             )}
 
-            {/* Join Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center bg-white/20 backdrop-blur-[2px] z-20">
-              <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50 max-w-sm w-full mx-4 text-center">
+            {/* Join Overlay - Now contained within the messages area */}
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-20">
+              <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full mx-4 text-center">
                 <h2 className="text-lg font-semibold mb-2">
                   {displayDetail?.roomname || "Chatroom"}
                 </h2>

@@ -75,7 +75,7 @@ const ChatLayout: React.FC = () => {
               ? 'hidden'
               : 'flex'
             : 'hidden md:flex'
-        } flex-1 flex-col bg-gray-50 overflow-hidden w-full md:w-auto`}
+        } flex-1 flex-col bg-gray-50 overflow-hidden relative isolate w-full md:w-auto`}
       >
         {chatroomId ? (
           <Outlet context={{ onBack: handleBackFromChat, isMobile }} />

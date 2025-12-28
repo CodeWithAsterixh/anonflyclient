@@ -9,7 +9,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="flex items-center justify-center min-h-[100dvh] bg-gray-100">
         <p className="text-lg text-gray-700">Loading authentication...</p>
       </div>
     ); // Or a spinner component

@@ -369,7 +369,7 @@ const ChatroomPage: React.FC = () => {
 
           <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3 shadow-sm flex flex-col justify-between items-center z-10">
             <Logo showText size={32} />
-            <div className="w-full flex justify-between items-center">
+            <div className="w-full flex justify-between items-center bg-neutral-200/50">
               <div className="flex items-center gap-3">
                 <button
                   onClick={onBack}
@@ -488,10 +488,10 @@ const ChatroomPage: React.FC = () => {
 
   return (
     <ProtectedRoute>
-      <div className="flex flex-col h-screen bg-gray-50 relative overflow-hidden">
+      <div className="flex isolate flex-col h-[100dvh] bg-gray-50 relative overflow-hidden">
         {/* Background Image with Opacity */}
         <div
-          className="absolute inset-0 z-0 pointer-events-none opacity-[0.07]"
+          className="absolute inset-0 -z-10 pointer-events-none opacity-[0.07]"
           style={{
             backgroundImage: "url(/chatroom-bg.jpg)",
             backgroundSize: "cover",
@@ -502,7 +502,7 @@ const ChatroomPage: React.FC = () => {
         {/* Header */}
         <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3 shadow-sm flex flex-col justify-between items-center z-10">
           <Logo showText size={32} />
-          <div className="w-full flex justify-between items-center">
+          <div className="w-full flex justify-between items-center bg-neutral-200/50">
             <div className="flex items-center gap-3">
               <button
                 onClick={onBack}
@@ -536,7 +536,7 @@ const ChatroomPage: React.FC = () => {
         <div
           ref={messagesContainerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto p-4 space-y-4 relative z-10"
+          className="flex-1 overflow-y-auto p-4 space-y-4 relative z-[1]"
         >
           {messages.map((msg, index) => (
             <MessageDisplay key={index} message={msg} />

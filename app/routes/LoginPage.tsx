@@ -45,7 +45,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-gray-50 px-4">
       <div className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border border-gray-100">
         <div className="flex flex-col items-center mb-8">
           <Logo size={64} className="mb-4" />

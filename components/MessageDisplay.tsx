@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { ShieldCheck, Lock } from 'lucide-react';
+import { getUserAvatar, getUserBubbleColors } from '../lib/controllers/colorsProcessors/userAvatar';
 
 interface Message {
   id?: string;
@@ -30,6 +31,16 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message }) => {
   const isCurrentUser = user && user.userId === message.senderAid;
   const isSystemMessage = message.type === 'system';
 
+  const avatarUrl = useMemo(() => 
+    getUserAvatar(message.senderUsername, message.senderAid, 32),
+    [message.senderUsername, message.senderAid]
+  );
+
+  const bubbleColors = useMemo(() => 
+    getUserBubbleColors(message.senderAid),
+    [message.senderAid]
+  );
+
   // Render system messages (like user join notifications)
   if (isSystemMessage) {
     return (
@@ -42,40 +53,52 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message }) => {
   }
 
   return (
-    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex items-end gap-2 mb-4 ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'}`}>
+      {/* Avatar */}
+      <div className="flex-shrink-0 mb-1">
+        <img 
+          src={avatarUrl} 
+          alt={message.senderUsername} 
+          className="w-8 h-8 rounded-full shadow-sm border border-gray-100"
+        />
+      </div>
+
       <div
-        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-sm ${
+        style={{ 
+          backgroundColor: bubbleColors.primary,
+          color: bubbleColors.text
+        }}
+        className={`max-w-[75%] lg:max-w-md px-4 py-2 rounded-2xl shadow-sm ${
           isCurrentUser
-            ? 'bg-blue-500 text-white rounded-br-none'
-            : 'bg-gray-200 text-gray-900 rounded-bl-none'
+            ? 'rounded-br-none'
+            : 'rounded-bl-none'
         }`}
       >
         {!isCurrentUser && (
-          <div className="flex items-center justify-between mb-1">
-            <p className="font-semibold text-sm">{message.senderUsername}</p>
+          <div className="flex items-center justify-between mb-1 gap-2">
+            <p className="font-bold text-xs truncate" style={{ color: bubbleColors.text }}>
+              {message.senderUsername}
+            </p>
             {message.isEncrypted && (
-              <ShieldCheck className="w-3 h-3 text-green-500" xlinkTitle="End-to-End Encrypted" />
+              <ShieldCheck className="w-3 h-3 opacity-70" />
             )}
           </div>
         )}
+        
         {isCurrentUser && message.isEncrypted && (
           <div className="flex justify-end mb-1">
-            <ShieldCheck className="w-3 h-3 text-green-200" xlinkTitle="End-to-End Encrypted" />
+            <ShieldCheck className="w-3 h-3 opacity-70" />
           </div>
         )}
-        <p className="break-words">{message.content}</p>
-        <div className="flex items-center justify-between mt-1 gap-2">
-          <span
-            className={`text-xs opacity-70 ${
-              isCurrentUser ? 'text-blue-100' : 'text-gray-700'
-            }`}
-          >
-            {new Date(message.timestamp).toLocaleTimeString()}
+
+        <p className="break-words text-sm md:text-base whitespace-pre-wrap">{message.content}</p>
+        
+        <div className="flex items-center justify-between mt-1 gap-3">
+          <span className="text-[10px] opacity-60 font-medium">
+            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
           {message.isEncrypted && (
-            <span className={`text-[10px] uppercase font-bold tracking-wider opacity-50 ${
-              isCurrentUser ? 'text-blue-100' : 'text-gray-700'
-            }`}>
+            <span className="text-[10px] uppercase font-bold tracking-wider opacity-40">
               E2EE
             </span>
           )}

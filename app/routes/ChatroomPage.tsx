@@ -9,7 +9,8 @@ import ProtectedRoute from "../../components/ProtectedRoute";
 import ChatroomSkeleton from '../../components/ChatroomSkeleton';
 import { useAuth } from '../../hooks/useAuth';
 import { useChatroom, type ChatroomDetail } from '../../hooks/useChatroom';
-import { ChevronDown, ChevronLeft, Lock } from 'lucide-react';
+import { ChevronLeft, ChevronDown, Lock, Shield, Info, MoreVertical, LogOut, Trash2, Edit, Eye, EyeOff } from 'lucide-react';
+import Logo from '../../components/Logo';
 import EditChatroomModal from '../../components/EditChatroomModal';
 import NoChatSelectedFallback from 'components/NoChatSelectedFallback';
 
@@ -35,6 +36,7 @@ const ChatroomPage: React.FC = () => {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [joinPassword, setJoinPassword] = useState('');
+  const [showJoinPassword, setShowJoinPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -69,6 +71,7 @@ const ChatroomPage: React.FC = () => {
   const {
     messages,
     participants,
+    chatroomDetail: sseChatroomDetail,
     sendMessage,
     joinChatroom,
     leaveChatroom,
@@ -79,6 +82,15 @@ const ChatroomPage: React.FC = () => {
     clearError,
     currentChatroomId,
   } = useChatroom(chatroomId);
+
+  // Sync isHost with SSE updates
+  useEffect(() => {
+    if (sseChatroomDetail?.hostAid && user) {
+      setIsHost(sseChatroomDetail.hostAid === user.userId);
+    }
+  }, [sseChatroomDetail, user]);
+
+  const displayDetail = sseChatroomDetail || chatroomDetail;
 
   useEffect(() => {
     if (error && (error.toLowerCase().includes('password') || error.toLowerCase().includes('locked'))) {
@@ -185,19 +197,33 @@ const ChatroomPage: React.FC = () => {
   if (isJoined && !hasRoomKey) {
     return (
       <ProtectedRoute>
-        <div className="flex flex-col h-[100dvh] bg-gray-50 relative">
-          <header className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm flex justify-between items-center">
+        <div className="flex flex-col h-[100dvh] bg-gray-50 relative overflow-hidden">
+          {/* Background Image with Opacity */}
+          <div 
+            className="absolute inset-0 z-0 pointer-events-none opacity-[0.07]"
+            style={{ 
+              backgroundImage: 'url(/chatroom-bg.jpg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
+          />
+          <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3 shadow-sm flex justify-between items-center z-10">
             <div className="flex items-center gap-3">
               <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                 <ChevronDown className="w-5 h-5 rotate-90" />
               </button>
               <div>
-                <h1 className="font-bold text-gray-900 leading-tight">{chatroomDetail?.roomname || 'Loading...'}</h1>
-                <p className="text-xs text-gray-500">Securing room...</p>
+                <h1 className="font-bold text-gray-900 leading-tight">{displayDetail?.roomname || 'Loading...'}</h1>
+                <p className="text-xs text-gray-500">
+                  {displayDetail?.participantCount !== undefined 
+                    ? `${displayDetail.participantCount} participants • Securing room...` 
+                    : 'Securing room...'}
+                </p>
               </div>
             </div>
           </header>
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center z-10">
             <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 animate-pulse">
               <Lock className="w-8 h-8" />
             </div>
@@ -279,9 +305,19 @@ const ChatroomPage: React.FC = () => {
     // show skeleton with overlay prompting the user to join
     return (
       <ProtectedRoute>
-        <div className="flex flex-col h-[100dvh] bg-gray-50 relative">
+        <div className="flex flex-col h-[100dvh] bg-gray-50 relative overflow-hidden">
+          {/* Background Image with Opacity */}
+          <div 
+            className="absolute inset-0 z-0 pointer-events-none opacity-[0.07]"
+            style={{ 
+              backgroundImage: 'url(/chatroom-bg.jpg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
+          />
           {/* Header */}
-          <header className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm flex justify-between items-center">
+          <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3 shadow-sm flex justify-between items-center z-10">
             <div className="flex items-center gap-3 flex-1">
               {isMobile && (
                 <button
@@ -292,9 +328,16 @@ const ChatroomPage: React.FC = () => {
                   <ChevronLeft className='w-6 h-6' />Back
                 </button>
               )}
-              <h1 className="text-xl font-bold text-gray-900">
-                {chatroomDetail?.roomname || 'Chatroom'}
-              </h1>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900 leading-tight">
+                  {displayDetail?.roomname || 'Chatroom'}
+                </h1>
+                {displayDetail?.participantCount !== undefined && (
+                  <p className="text-xs text-gray-500">
+                    {displayDetail.participantCount} participants
+                  </p>
+                )}
+              </div>
             </div>
             <ChatroomMenu
               onLeaveRoom={handleLeaveRoom}
@@ -305,13 +348,13 @@ const ChatroomPage: React.FC = () => {
             />
           </header>
 
-          {/* Skeleton content */}
-          <div className="flex-1 relative">
+          {/* Messages Area Skeleton */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 relative z-10">
             <ChatroomSkeleton />
 
-            {/* Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center bg-neutral-200 bg-opacity-40">
-              <div className="bg-white rounded-lg p-6 max-w-md mx-4 text-center shadow-lg">
+            {/* Join Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center bg-white/20 backdrop-blur-[2px] z-20">
+              <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50 max-w-sm w-full mx-4 text-center">
                 <h2 className="text-lg font-semibold mb-2">{chatroomDetail?.roomname || 'Chatroom'}</h2>
                 <p className="text-sm text-gray-600 mb-4">{chatroomDetail?.description || 'Join the room to see messages and participate.'}</p>
                 
@@ -321,14 +364,24 @@ const ChatroomPage: React.FC = () => {
                       <Lock size={16} />
                       <span className="text-sm font-medium">This room is password protected</span>
                     </div>
-                    <input
-                      type="password"
-                      value={joinPassword}
-                      onChange={(e) => setJoinPassword(e.target.value)}
-                      placeholder="Enter room password"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
-                      onKeyDown={(e) => e.key === 'Enter' && handleJoinChatroom()}
-                    />
+                    <div className="relative">
+                      <input
+                        type={showJoinPassword ? 'text' : 'password'}
+                        value={joinPassword}
+                        onChange={(e) => setJoinPassword(e.target.value)}
+                        placeholder="Enter room password"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 pr-10"
+                        onKeyDown={(e) => e.key === 'Enter' && handleJoinChatroom()}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowJoinPassword(!showJoinPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 -mt-1 text-gray-400 hover:text-gray-600 transition-colors"
+                        aria-label={showJoinPassword ? "Hide password" : "Show password"}
+                      >
+                        {showJoinPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                     {passwordError && (
                       <p className="text-xs text-red-500 mb-2">{passwordError}</p>
                     )}
@@ -366,10 +419,21 @@ const ChatroomPage: React.FC = () => {
 
   return (
     <ProtectedRoute>
-      <div className="flex flex-col h-screen bg-gray-50">
+      <div className="flex flex-col h-screen bg-gray-50 relative overflow-hidden">
+        {/* Background Image with Opacity */}
+        <div 
+          className="absolute inset-0 z-0 pointer-events-none opacity-[0.07]"
+          style={{ 
+            backgroundImage: 'url(/chatroom-bg.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm flex justify-between items-center">
+        <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3 shadow-sm flex justify-between items-center z-10">
           <div className="flex items-center gap-3 flex-1">
+            <Logo size={28} />
             {/* Back button for mobile */}
             {isMobile && (
               <button
@@ -380,9 +444,16 @@ const ChatroomPage: React.FC = () => {
                 <ChevronLeft/> Back
               </button>
             )}
-            <h1 className="text-xl font-bold text-gray-900">
-              {chatroomDetail?.roomname || 'Chatroom'}
-            </h1>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 leading-tight">
+                {displayDetail?.roomname || 'Chatroom'}
+              </h1>
+              {displayDetail?.participantCount !== undefined && (
+                <p className="text-xs text-gray-500">
+                  {displayDetail.participantCount} participants
+                </p>
+              )}
+            </div>
           </div>
           <ChatroomMenu
             onLeaveRoom={handleLeaveRoom}
@@ -397,7 +468,7 @@ const ChatroomPage: React.FC = () => {
         <div 
           ref={messagesContainerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto p-4 space-y-4 relative"
+          className="flex-1 overflow-y-auto p-4 space-y-4 relative z-10"
         >
           {messages.map((msg, index) => (
             <MessageDisplay key={index} message={msg} />
@@ -427,8 +498,8 @@ const ChatroomPage: React.FC = () => {
         onClose={() => setIsEditModalOpen(false)}
         onSuccess={handleEditSuccess}
         chatroomId={chatroomId || ''}
-        initialRoomname={chatroomDetail?.roomname || ''}
-        initialDescription={chatroomDetail?.description || ''}
+        initialRoomname={displayDetail?.roomname || ''}
+        initialDescription={displayDetail?.description || ''}
       />
     </ProtectedRoute>
   );

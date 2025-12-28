@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { EllipsisVerticalIcon, Edit } from 'lucide-react';
+import { LogOut, Settings, UserMinus, Trash2, MoreVertical } from 'lucide-react';
 
 interface ChatroomMenuProps {
   onLeaveRoom: () => void;
@@ -21,8 +21,8 @@ const ChatroomMenu: React.FC<ChatroomMenuProps> = ({
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
-        <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500">
-          <EllipsisVerticalIcon className="-mr-1 h-5 w-5 text-white" aria-hidden="true" />
+        <Menu.Button className="inline-flex w-full justify-center rounded-lg p-2 text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <MoreVertical className="h-6 w-6" aria-hidden="true" />
         </Menu.Button>
       </div>
 
@@ -35,15 +35,18 @@ const ChatroomMenu: React.FC<ChatroomMenuProps> = ({
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="py-1">
+        <Menu.Items className="absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-xl bg-white shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none p-1.5 border border-gray-100">
+          <div className="flex flex-col gap-1">
             <Menu.Item>
               {({ active }) => (
                 <button
                   onClick={onLeaveRoom}
-                  className={`block px-4 py-2 text-sm ${active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'}`}
+                  className={`flex w-full items-center gap-1 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                    active ? 'bg-gray-50 text-gray-900' : 'text-gray-700'
+                  }`}
                 >
-                  Leave Room
+                  <LogOut size={18} />
+                  <span>Leave Room</span>
                 </button>
               )}
             </Menu.Item>
@@ -52,10 +55,12 @@ const ChatroomMenu: React.FC<ChatroomMenuProps> = ({
                 {({ active }) => (
                   <button
                     onClick={onEditRoom}
-                    className={`block px-4 py-2 text-sm ${active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'} flex items-center gap-2`}
+                    className={`flex w-full items-center gap-1 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                      active ? 'bg-gray-50 text-gray-900' : 'text-gray-700'
+                    }`}
                   >
-                    <Edit size={16} />
-                    Edit Room
+                    <Settings size={18} />
+                    <span>Room Settings</span>
                   </button>
                 )}
               </Menu.Item>
@@ -65,21 +70,30 @@ const ChatroomMenu: React.FC<ChatroomMenuProps> = ({
                 {({ active }) => (
                   <button
                     onClick={onRemoveParticipant}
-                    className={`block px-4 py-2 text-sm ${active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'}`}
+                    className={`flex w-full items-center gap-1 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                      active ? 'bg-gray-50 text-gray-900' : 'text-gray-700'
+                    }`}
                   >
-                    Remove Participant
+                    <UserMinus size={18} />
+                    <span>Manage Users</span>
                   </button>
                 )}
               </Menu.Item>
+            )}
+            {isHost && (
+              <div className="h-px bg-gray-100 my-0.5 mx-2" />
             )}
             {isHost && (
               <Menu.Item>
                 {({ active }) => (
                   <button
                     onClick={onDeleteRoom}
-                    className={`block px-4 py-2 text-sm text-red-700 ${active ? 'bg-red-100' : ''}`}
+                    className={`flex w-full items-center gap-1 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                      active ? 'bg-red-50 text-red-600' : 'text-red-600'
+                    }`}
                   >
-                    Delete Room
+                    <Trash2 size={18} />
+                    <span>Delete Room</span>
                   </button>
                 )}
               </Menu.Item>

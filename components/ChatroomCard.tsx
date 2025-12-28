@@ -1,6 +1,7 @@
 import { User, Lock } from 'lucide-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router';
+import { getUserAvatar } from '../lib/controllers/colorsProcessors/userAvatar';
 
 interface ChatroomCardProps {
   id: string;
@@ -21,6 +22,7 @@ const ChatroomCard: React.FC<ChatroomCardProps> = ({
   isLocked,
   onClick,
 }) => {
+  const avatarUrl = useMemo(() => getUserAvatar(roomname, id, 48), [roomname, id]);
 
   return (
     <Link
@@ -31,12 +33,15 @@ const ChatroomCard: React.FC<ChatroomCardProps> = ({
           onClick();
         }
       }}
+      aria-label={`Join chatroom ${roomname}`}
     >
       {/* Avatar */}
       <div className="relative flex-shrink-0">
-        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 font-semibold">
-          {roomname ? roomname.charAt(0).toUpperCase() : 'R'}
-        </div>
+        <img 
+          src={avatarUrl} 
+          alt={roomname} 
+          className="w-12 h-12 rounded-full border border-gray-100 shadow-sm"
+        />
         {isLocked && (
           <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm border border-gray-100">
             <Lock size={12} className="text-gray-600" />

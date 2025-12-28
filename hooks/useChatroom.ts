@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "./useAuth";
-import { getChatWSURL } from "../lib/constants/api";
+import { getChatWSURL, getAPIBaseURL } from "../lib/constants/api";
 import { getIdentity, saveRoomKey, getRoomKey } from "../lib/helpers/identityManager";
 import {
   encryptMessage,
@@ -38,11 +38,13 @@ export interface ChatroomDetail {
   hostAid: string;
   isLocked: boolean;
   participants: Participant[];
+  participantCount?: number;
 }
 
 interface UseChatroomReturn {
   messages: Message[];
   participants: Map<string, Participant>;
+  chatroomDetail: ChatroomDetail | null;
   sendMessage: (content: string) => void;
   joinChatroom: (chatroomId: string, password?: string) => void;
   leaveChatroom: () => void;
@@ -70,6 +72,7 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
   const participantsRef = useRef(participants);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [hasRoomKey, setHasRoomKey] = useState<boolean>(false);
+  const [chatroomDetail, setChatroomDetail] = useState<ChatroomDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [currentChatroomId, setCurrentChatroomId] = useState<string | null>(
     initialChatroomId || null
@@ -92,6 +95,38 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
   useEffect(() => {
     currentChatroomIdRef.current = currentChatroomId;
   }, [currentChatroomId]);
+
+  // SSE for Chatroom Details
+  useEffect(() => {
+    if (!currentChatroomId || !token) {
+      setChatroomDetail(null);
+      return;
+    }
+
+    const sseUrl = `${getAPIBaseURL()}/chatroom/${currentChatroomId}/details/sse?token=${token}`;
+    const eventSource = new EventSource(sseUrl);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        setChatroomDetail((prev) => ({
+          ...(prev || {}),
+          ...data,
+        }));
+      } catch (err) {
+        console.error("Failed to parse SSE data:", err);
+      }
+    };
+
+    eventSource.onerror = (err) => {
+      console.error("SSE Error:", err);
+      eventSource.close();
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, [currentChatroomId, token]);
 
   const decryptStoredMessages = useCallback(async (key: CryptoKey) => {
     const updatedMessages = await Promise.all(
@@ -611,6 +646,7 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
   return {
     messages,
     participants,
+    chatroomDetail,
     sendMessage,
     joinChatroom,
     leaveChatroom,

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { useChatroomList } from "../../hooks/useChatroomList";
-import ChatroomCard from "../../components/ChatroomCard";
-import ProtectedRoute from "../../components/ProtectedRoute";
-import { useNavigate } from "react-router";
-import ChatListSkeleton from '../../components/ChatListSkeleton';
-import CreateChatroomModal from "../../components/CreateChatroomModal";
 import { Plus } from "lucide-react";
+import React, { useState } from "react";
+import ChatListSkeleton from '../../components/ChatListSkeleton';
+import ChatroomCard from "../../components/ChatroomCard";
+import CreateChatroomModal from "../../components/CreateChatroomModal";
+import Logo from "../../components/Logo";
+import ProtectedRoute from "../../components/ProtectedRoute";
+import { useChatroomList } from "../../hooks/useChatroomList";
 
 interface ChatroomListPageProps {
   onChatroomSelect?: (chatroomId: string) => void;
@@ -13,7 +13,6 @@ interface ChatroomListPageProps {
 
 const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect }) => {
   const { chatrooms, loading, error } = useChatroomList();
-  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleCreateSuccess = () => {
@@ -27,8 +26,8 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect })
   return (
     <ProtectedRoute>
       <div className="p-4 h-full overflow-y-auto flex flex-col">
-        <div className="flex justify-between items-center mb-4 sticky top-0 bg-white z-10 border-b border-gray-300 pb-3">
-          <h1 className="text-2xl font-bold text-left">Chats</h1>
+        <div className="flex justify-between items-center mb-4 sticky top-0 bg-white/80 backdrop-blur-md z-10 border-b border-gray-100 pb-3">
+          <Logo showText size={32} />
           <button
             onClick={() => setIsModalOpen(true)}
             className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-2 rounded-lg transition-colors"

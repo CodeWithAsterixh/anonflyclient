@@ -73,7 +73,6 @@ export const useAuth = () => {
         setAuthState(prev => ({ ...prev, loading: false, isAuthenticated: false }));
       }
     } catch (error: any) {
-      console.error("Failed to perform handshake on initialization:", error);
       setAuthState(prev => ({ 
         ...prev, 
         loading: false, 

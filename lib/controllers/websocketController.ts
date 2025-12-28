@@ -19,7 +19,6 @@ class WebSocketController {
     this.ws = new WebSocket(wsUrl);
 
     this.ws.onopen = () => {
-      console.log('WebSocket connected.');
       if (onOpen) onOpen();
     };
 
@@ -38,7 +37,6 @@ class WebSocketController {
     };
 
     this.ws.onclose = () => {
-      console.log('WebSocket disconnected.');
       if (onClose) onClose();
     };
 

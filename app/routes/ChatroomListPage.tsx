@@ -32,7 +32,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect })
           <h1 className="text-2xl font-bold text-left">Chats</h1>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition-colors"
+            className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-2 rounded-lg transition-colors"
             aria-label="Create new chatroom"
           >
             <Plus size={28} />

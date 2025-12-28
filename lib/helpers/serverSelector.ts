@@ -161,7 +161,6 @@ async function getCachedServerSelector(): Promise<string | null> {
 
     // Check if cache has expired
     if (age > CACHE_DURATION) {
-      console.log('Server selector cache expired, will fetch new location');
       localStorage.removeItem(CACHE_KEY);
       return null;
     }
@@ -178,9 +177,7 @@ async function getCachedServerSelector(): Promise<string | null> {
           if (location) {
             // If the cached server does not serve the user's continent, ignore the cache
             if (!server.continents.includes(location.continent)) {
-              console.log(
-                `Cached server ${serverId} (${server.region}) is not suitable for continent ${location.continent}; ignoring cache`
-              );
+              
               // Clear the bad cache to avoid repeated mismatches
               localStorage.removeItem(CACHE_KEY);
               return null;
@@ -191,9 +188,6 @@ async function getCachedServerSelector(): Promise<string | null> {
           console.warn('Could not verify cached server against user location, using cache as fallback');
         }
 
-        console.log(
-          `Using cached server selector: ${serverId} (${server.region}) - Cache age: ${(age / 1000 / 60).toFixed(1)} minutes`
-        );
         return serverId;
       }
     }
@@ -213,7 +207,6 @@ async function cacheServerSelector(serverId: string): Promise<void> {
     const encrypted = await encryptServerId(serverId);
     localStorage.setItem(CACHE_KEY, JSON.stringify(encrypted));
     const server = SERVERS.find(s => s.id === serverId);
-    console.log(`Cached server selector: ${serverId} (${server?.region})`);
   } catch (error) {
     console.error('Error caching server selector:', error);
   }
@@ -225,7 +218,6 @@ async function cacheServerSelector(serverId: string): Promise<void> {
 export function clearServerCache(): void {
   try {
     localStorage.removeItem(CACHE_KEY);
-    console.log('Server selector cache cleared');
   } catch (error) {
     console.error('Error clearing cache:', error);
   }
@@ -329,10 +321,6 @@ export async function selectBestServer(): Promise<string> {
       closestServer = server;
     }
   }
-
-  console.log(
-    `Selected server: ${closestServer.id} (${closestServer.region}) - Distance: ${minDistance.toFixed(2)}km`
-  );
 
   // Cache the selected server selector (encrypted)
   await cacheServerSelector(closestServer.id);

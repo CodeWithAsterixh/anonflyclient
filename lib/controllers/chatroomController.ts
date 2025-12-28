@@ -34,7 +34,6 @@ export const createChatroom = async (roomname: string, description?: string) => 
 
     return data;
   } catch (error) {
-    console.error('Create chatroom error:', error);
     throw error;
   }
 };
@@ -54,7 +53,6 @@ export const getChatroomMessages = async (chatroomId: string) => {
 
     return data;
   } catch (error) {
-    console.error('Get chatroom messages error:', error);
     throw error;
   }
 };
@@ -74,7 +72,6 @@ export const joinChatroom = async (chatroomId: string) => {
 
     return data;
   } catch (error) {
-    console.error('Join chatroom error:', error);
     throw error;
   }
 };
@@ -94,7 +91,6 @@ export const leaveChatroom = async (chatroomId: string) => {
 
     return data;
   } catch (error) {
-    console.error('Leave chatroom error:', error);
     throw error;
   }
 };
@@ -114,7 +110,6 @@ export const deleteChatroom = async (chatroomId: string) => {
 
     return data;
   } catch (error) {
-    console.error('Delete chatroom error:', error);
     throw error;
   }
 };
@@ -135,7 +130,6 @@ export const editChatroom = async (chatroomId: string, roomname: string, descrip
 
     return data;
   } catch (error) {
-    console.error('Edit chatroom error:', error);
     throw error;
   }
 };
@@ -155,7 +149,6 @@ export const deleteMessage = async (chatroomId: string, messageId: string) => {
 
     return data;
   } catch (error) {
-    console.error('Delete message error:', error);
     throw error;
   }
 };
@@ -168,7 +161,6 @@ export const getChatroomListSSE = (onMessage: (data: any) => void, onError: (eve
   };
 
   eventSource.onerror = (event) => {
-    console.error('EventSource error:', event);
     eventSource.close();
     onError(event);
   };

@@ -82,7 +82,6 @@ export const useChatroom = (): UseChatroomReturn => {
     ws.current.onopen = () => {
       setIsConnected(true);
       setError(null);
-      console.log('WebSocket connected.');
     };
 
     ws.current.onmessage = async (event) => {
@@ -90,7 +89,6 @@ export const useChatroom = (): UseChatroomReturn => {
 
       switch (message.type) {
         case 'joinSuccess':
-          console.log(`Successfully joined chatroom: ${message.chatroomId}`);
           setCurrentChatroomId(message.chatroomId);
           setMessages([]); // Clear messages on joining a new room
           
@@ -105,13 +103,11 @@ export const useChatroom = (): UseChatroomReturn => {
 
           // If I'm the first one, generate a room key
           if (participantMap.size <= 1) {
-            console.log('First participant, generating room key...');
             const key = await generateRoomKey();
             roomKeyRef.current = key;
             setHasRoomKey(true);
           } else {
             // Request room key from others
-            console.log('Requesting room key from participants...');
             ws.current?.send(JSON.stringify({
               type: 'roomKeyRequest',
               chatroomId: message.chatroomId,
@@ -121,7 +117,6 @@ export const useChatroom = (): UseChatroomReturn => {
 
         case 'roomKeyRequest':
           if (roomKeyRef.current && user) {
-            console.log(`Received roomKeyRequest from ${message.senderAid}`);
             const requester = participantsRef.current.get(message.senderAid);
             if (requester && requester.exchangePublicKey) {
               const identity = await getIdentity();
@@ -145,7 +140,6 @@ export const useChatroom = (): UseChatroomReturn => {
         case 'roomKeyShare':
           const identityForShare = await getIdentity();
           if (identityForShare && message.targetAid === identityForShare.aid) {
-            console.log(`Received roomKeyShare from ${message.senderAid}`);
             const sender = participantsRef.current.get(message.senderAid);
             if (sender && sender.exchangePublicKey) {
               const sharedSecret = await deriveSharedSecret(identityForShare.exchangeKeyPair.privateKey, sender.exchangePublicKey);
@@ -153,7 +147,6 @@ export const useChatroom = (): UseChatroomReturn => {
               const key = await importRoomKey(decryptedKeyBase64);
               roomKeyRef.current = key;
               setHasRoomKey(true);
-              console.log('Successfully decrypted and imported room key.');
             }
           }
           break;
@@ -186,8 +179,6 @@ export const useChatroom = (): UseChatroomReturn => {
           break;
 
         case 'userJoined':
-          console.log('Received userJoined message:', message);
-          
           // Add to participants map
           setParticipants((prev) => {
             const next = new Map(prev);
@@ -235,7 +226,6 @@ export const useChatroom = (): UseChatroomReturn => {
           break;
 
         case 'leaveSuccess':
-          console.log(`Successfully left chatroom: ${message.chatroomId}`);
           setCurrentChatroomId(null);
           setMessages([]); // Clear messages on leaving a room
           roomKeyRef.current = null;
@@ -249,26 +239,21 @@ export const useChatroom = (): UseChatroomReturn => {
 
         case 'error':
           setError(message.message);
-          console.error('WebSocket error from server:', message.message);
           break;
 
         default:
-          console.log('Unknown message type:', message.type);
+          break;
       }
     };
-    console.log('WebSocket onmessage handler set.');
 
     ws.current.onclose = (event) => {
-      console.log('WebSocket disconnected. Event:', event);
       setIsConnected(false);
       if (currentChatroomIdRef.current) {
-        console.log('Attempting to reconnect...');
         setTimeout(connect, 3000);
       }
     };
 
     ws.current.onerror = (error) => {
-      console.error('WebSocket error:', error);
       setError('WebSocket connection error.');
     };
 

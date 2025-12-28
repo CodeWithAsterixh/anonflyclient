@@ -58,7 +58,6 @@ export const performHandshake = async (identity: Identity) => {
 
     return verifyData.data;
   } catch (error) {
-    console.error('Handshake error:', error);
     throw error;
   }
 };

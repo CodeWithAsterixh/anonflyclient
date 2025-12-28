@@ -9,7 +9,7 @@ import ProtectedRoute from "../../components/ProtectedRoute";
 import ChatroomSkeleton from '../../components/ChatroomSkeleton';
 import { useAuth } from '../../hooks/useAuth';
 import { useChatroom, type ChatroomDetail } from '../../hooks/useChatroom';
-import { ChevronDown, Lock } from 'lucide-react';
+import { ChevronDown, ChevronLeftIcon, Lock } from 'lucide-react';
 import EditChatroomModal from '../../components/EditChatroomModal';
 
 interface OutletContext {
@@ -48,11 +48,9 @@ const ChatroomPage: React.FC = () => {
         if (response.ok && data.data) {
           setChatroomDetails(data.data)
           setIsHost(data.data.hostAid === user.userId);
-        } else {
-          console.error("Failed to fetch chatroom details:", data.message);
         }
       } catch (error) {
-        console.error("Error fetching chatroom details:", error);
+        // Silently fail
       }
     };
 
@@ -194,7 +192,6 @@ const ChatroomPage: React.FC = () => {
         alert(`Failed to delete chatroom: ${errorData.message}`);
       }
     } catch (error) {
-      console.error("Error deleting chatroom:", error);
       alert('An error occurred while deleting the chatroom.');
     }
   };
@@ -213,7 +210,9 @@ const ChatroomPage: React.FC = () => {
             setChatroomDetails(data.data);
           }
         })
-        .catch(err => console.error('Error refetching chatroom details:', err));
+        .catch(err => {
+          // Silently fail
+        });
     }
   };
   if (!isJoined) {
@@ -239,7 +238,7 @@ const ChatroomPage: React.FC = () => {
             </div>
             <ChatroomMenu
               onLeaveRoom={handleLeaveRoom}
-              onRemoveParticipant={() => console.log('Remove participant clicked')}
+              onRemoveParticipant={() => {}}
               onDeleteRoom={handleDeleteRoom}
               onEditRoom={() => setIsEditModalOpen(true)}
               isHost={isHost}
@@ -294,10 +293,10 @@ const ChatroomPage: React.FC = () => {
             {isMobile && (
               <button
                 onClick={() => navigate('/')}
-                className="text-blue-500 hover:text-blue-700 font-semibold text-lg"
+                className="text-blue-500 hover:text-blue-700 font-semibold text-lg flex items-center justify-start gap-1"
                 aria-label="Back"
               >
-                ← Back
+                <ChevronLeftIcon/> Back
               </button>
             )}
             <h1 className="text-xl font-bold text-gray-900">
@@ -306,7 +305,7 @@ const ChatroomPage: React.FC = () => {
           </div>
           <ChatroomMenu
             onLeaveRoom={handleLeaveRoom}
-            onRemoveParticipant={() => console.log('Remove participant clicked')}
+            onRemoveParticipant={() => {}}
             onDeleteRoom={handleDeleteRoom}
             onEditRoom={() => setIsEditModalOpen(true)}
             isHost={isHost}

@@ -79,7 +79,7 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
   );
   const roomKeyRef = useRef<CryptoKey | null>(null);
   const ws = useRef<WebSocket | null>(null);
-  const { user, token, isLoading: loading, logout } = useAuth();
+  const { user, token, isLoading: loading, logout, isAuthenticated } = useAuth();
   const joiningRef = useRef<string | null>(null);
 
   const currentChatroomIdRef = useRef(currentChatroomId);
@@ -218,8 +218,13 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
       return;
     }
 
-    if (!token) {
+    if (!isAuthenticated) {
       setError("Authentication session has expired or is invalid.");
+      return;
+    }
+
+    if (!token) {
+      setError("Working in offline mode. Reconnecting when network is available...");
       return;
     }
 

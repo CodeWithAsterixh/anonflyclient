@@ -66,26 +66,17 @@ export const useAuth = () => {
           const sessionData = await performHandshake(identity);
           const user: User = { userId: sessionData.aid, username: sessionData.username };
           setSessionUser(user, sessionData.token);
-          setAuthState(prev => ({
-            ...prev,
-            user,
-            token: sessionData.token,
-            isAuthenticated: true,
-            loading: false,
-            error: null
-          }));
+          
+          // Force a full page reload to clear all states and reconnect WebSockets
+          window.location.reload();
         } catch (handshakeError) {
           // If handshake fails (bad network), we still "switch" but without a token
           // This prevents being locked out
           const user: User = { userId: identity.aid, username: identity.username };
-          setAuthState(prev => ({
-            ...prev,
-            user,
-            token: null,
-            isAuthenticated: true,
-            loading: false,
-            error: 'Switched account, but failed to connect to server. Working in offline mode.'
-          }));
+          setSessionUser(user, ""); // Empty token for offline mode
+          
+          // Force a full page reload to clear all states and reconnect WebSockets
+          window.location.reload();
         }
       }
     } catch (error) {
@@ -99,13 +90,13 @@ export const useAuth = () => {
 
     // 1. Check for ephemeral session
     const session = getSessionUser();
-    if (session && session.token && session.user) {
+    if (session && session.user) {
       setAuthState({
         user: session.user,
-        token: session.token,
+        token: session.token || null,
         isAuthenticated: true,
         loading: false,
-        error: null,
+        error: session.token ? null : 'Network issue: Working in offline mode.',
         identities: allIdentities,
       });
       return;
@@ -174,16 +165,11 @@ export const useAuth = () => {
       const sessionData = await performHandshake(identity);
       const user: User = { userId: sessionData.aid, username: sessionData.username };
       
-      const allIdentities = await getAllIdentities();
+      // Store session
+      setSessionUser(user, sessionData.token);
       
-      setAuthState({
-        user,
-        token: sessionData.token,
-        isAuthenticated: true,
-        loading: false,
-        error: null,
-        identities: allIdentities,
-      });
+      // Force a full page reload to clear all states and redirect to home
+      window.location.href = '/';
     } catch (error: any) {
       setAuthState(prev => ({
         ...prev,

@@ -29,11 +29,11 @@ export const useChatroomList = (): UseChatroomListReturn => {
   const [chatrooms, setChatrooms] = useState<Chatroom[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { token, isLoading: loadingAuth } = useAuth();
+  const { token, isLoading: loadingAuth, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!token && !loadingAuth) {
+    if (!isAuthenticated && !loadingAuth) {
       setError("Authentication token not found.");
       setLoading(false);
       navigate("/login");
@@ -41,6 +41,13 @@ export const useChatroomList = (): UseChatroomListReturn => {
     }
 
     if (loadingAuth) return;
+    
+    // If we are authenticated but have no token, we are in offline mode
+    if (!token) {
+      setError("Working in offline mode. Please check your connection to see chatrooms.");
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     setError(null);

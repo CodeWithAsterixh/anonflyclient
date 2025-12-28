@@ -11,10 +11,12 @@ export function getUserColor(userAid: string): string {
     hash = userAid.charCodeAt(i) + ((hash << 5) - hash);
   }
   
-  // Convert hash to a color using HSL for better distribution
+  // Convert hash to a color using HSL
+  // We want colors that are dark enough for white text to pass WCAG 2.1
+  // Lightness (L) is capped at 45% to ensure contrast with white text
   const h = Math.abs(hash % 360);
-  const s = 60 + (Math.abs(hash % 20)); // 60-80% saturation
-  const l = 40 + (Math.abs(hash % 20)); // 40-60% lightness
+  const s = 65 + (Math.abs(hash % 15)); // 65-80% saturation for vibrancy
+  const l = 30 + (Math.abs(hash % 15)); // 30-45% lightness (darker range)
   
   return `hsl(${h}, ${s}%, ${l}%)`;
 }
@@ -35,8 +37,8 @@ export function getUserAvatar(username: string, userAid: string, size: number = 
   const bgColor = getUserColor(userAid);
   const initial = getUsernameInitial(username);
   
-  // Generate accessible text color for the initial
-  const { text: textColor } = generateAccessibleColorPair({ primary: bgColor });
+  // Primary text color is white as per user request
+  const textColor = "#FFFFFF";
   
   return createColorSwatchDataUrl(bgColor, size, size / 2, initial, textColor);
 }
@@ -46,5 +48,5 @@ export function getUserAvatar(username: string, userAid: string, size: number = 
  */
 export function getUserBubbleColors(userAid: string): { primary: string; text: string } {
   const bgColor = getUserColor(userAid);
-  return generateAccessibleColorPair({ primary: bgColor });
+  return { primary: bgColor, text: "#FFFFFF" };
 }

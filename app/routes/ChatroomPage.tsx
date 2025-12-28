@@ -317,28 +317,24 @@ const ChatroomPage: React.FC = () => {
             }}
           />
           {/* Header */}
-          <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3 shadow-sm flex justify-between items-center z-10">
-            <div className="flex items-center gap-3 flex-1">
-              {isMobile && (
-                <button
-                  onClick={() => navigate('/')}
-                  className="text-blue-500 hover:text-blue-700 font-semibold text-lg"
-                  aria-label="Back"
-                >
-                  <ChevronLeft className='w-6 h-6' />Back
-                </button>
-              )}
+          
+          <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3 shadow-sm flex flex-col justify-between items-center z-10">
+          <Logo showText size={32} />
+            <div className='w-full flex justify-between items-center'>
+              <div className="flex items-center gap-3">
+              <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                <ChevronDown className="w-5 h-5 rotate-90" />
+              </button>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 leading-tight">
-                  {displayDetail?.roomname || 'Chatroom'}
-                </h1>
-                {displayDetail?.participantCount !== undefined && (
-                  <p className="text-xs text-gray-500">
-                    {displayDetail.participantCount} participants
-                  </p>
-                )}
+                <h1 className="font-bold text-gray-900 leading-tight">{displayDetail?.roomname || 'Loading...'}</h1>
+                <p className="text-xs text-gray-500">
+                  {displayDetail?.participantCount !== undefined 
+                    ? `${displayDetail.participantCount} participants • connected` 
+                    : 'connected'}
+                </p>
               </div>
             </div>
+            
             <ChatroomMenu
               onLeaveRoom={handleLeaveRoom}
               onRemoveParticipant={() => {}}
@@ -346,6 +342,7 @@ const ChatroomPage: React.FC = () => {
               onEditRoom={() => setIsEditModalOpen(true)}
               isHost={isHost}
             />
+            </div>
           </header>
 
           {/* Messages Area Skeleton */}

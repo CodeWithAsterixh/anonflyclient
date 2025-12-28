@@ -85,11 +85,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message }) => {
           </div>
         )}
         
-        {isCurrentUser && message.isEncrypted && (
-          <div className="flex justify-end mb-1">
-            <ShieldCheck className="w-3 h-3 opacity-70" />
-          </div>
-        )}
+
 
         <p className="break-words text-sm md:text-base whitespace-pre-wrap">{message.content}</p>
         
@@ -97,11 +93,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message }) => {
           <span className="text-[10px] opacity-60 font-medium">
             {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
-          {message.isEncrypted && (
-            <span className="text-[10px] uppercase font-bold tracking-wider opacity-40">
-              E2EE
-            </span>
-          )}
+          
         </div>
       </div>
     </div>

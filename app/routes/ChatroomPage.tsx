@@ -75,13 +75,9 @@ const ChatroomPage: React.FC = () => {
     error,
     reconnect,
     currentChatroomId,
-  } = useChatroom();
+  } = useChatroom(chatroomId);
 
   const isJoined = currentChatroomId === chatroomId;
-
-  useEffect(() => {
-    // Do not auto-join on page load. Joining will be triggered by user action.
-  }, [/* intentionally empty to avoid auto-joining */]);
 
   useEffect(() => {
     return () => {

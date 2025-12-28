@@ -51,7 +51,7 @@ interface UseChatroomReturn {
  *
  * @returns {UseChatroomReturn} An object containing chatroom state and functions.
  */
-export const useChatroom = (): UseChatroomReturn => {
+export const useChatroom = (initialChatroomId?: string | null): UseChatroomReturn => {
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesRef = useRef<Message[]>([]);
   const [participants, setParticipants] = useState<Map<string, Participant>>(
@@ -62,7 +62,7 @@ export const useChatroom = (): UseChatroomReturn => {
   const [hasRoomKey, setHasRoomKey] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [currentChatroomId, setCurrentChatroomId] = useState<string | null>(
-    null
+    initialChatroomId || null
   );
   const roomKeyRef = useRef<CryptoKey | null>(null);
   const ws = useRef<WebSocket | null>(null);
@@ -70,7 +70,7 @@ export const useChatroom = (): UseChatroomReturn => {
 
   const currentChatroomIdRef = useRef(currentChatroomId);
 
-  // Keep messagesRef in sync with messages state
+  // Keep refs in sync with state
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
@@ -108,6 +108,7 @@ export const useChatroom = (): UseChatroomReturn => {
       decryptStoredMessages(roomKeyRef.current);
     }
   }, [hasRoomKey, decryptStoredMessages]);
+
   const joinChatroom = useCallback(
     async (chatroomId: string) => {
       if (!user && !loading) {
@@ -121,22 +122,43 @@ export const useChatroom = (): UseChatroomReturn => {
       currentChatroomIdRef.current = chatroomId; // Update ref too
 
       if (ws.current?.readyState === WebSocket.OPEN && user) {
-        const identity = await getIdentity();
-        if (identity) {
-          ws.current.send(
-            JSON.stringify({
-              type: "joinChatroom",
-              chatroomId,
-              token, // Send token for authentication
-              userAid: identity.aid,
-              username: identity.username,
-            })
-          );
+        try {
+          const identity = await getIdentity();
+          if (identity) {
+            ws.current.send(
+              JSON.stringify({
+                type: "joinChatroom",
+                chatroomId,
+                token, // Send token for authentication
+                userAid: identity.aid,
+                username: identity.username,
+              })
+            );
+          } else {
+            console.error("[useChatroom] Identity not found in joinChatroom");
+            setError("Failed to join chatroom: Identity not found. Please try logging in again.");
+          }
+        } catch (err) {
+          console.error("[useChatroom] Error getting identity in joinChatroom:", err);
+          setError("Failed to join chatroom: Identity error.");
         }
       }
     },
     [user, token, loading]
   );
+
+  // Initialize room ID if provided
+  useEffect(() => {
+    if (initialChatroomId && initialChatroomId !== currentChatroomId) {
+      setCurrentChatroomId(initialChatroomId);
+      currentChatroomIdRef.current = initialChatroomId;
+      
+      // If already connected, join the new room immediately
+      if (ws.current?.readyState === WebSocket.OPEN) {
+        joinChatroom(initialChatroomId);
+      }
+    }
+  }, [initialChatroomId, joinChatroom, currentChatroomId]);
 
   const connect = useCallback(() => {
     if (loading) {
@@ -201,8 +223,8 @@ export const useChatroom = (): UseChatroomReturn => {
             participantsRef.current = participantMap; // Update ref
           }
 
+          // Try to get identity, but don't break yet as some cases don't need it
           const identity = await getIdentity();
-          if (!identity) break;
 
           const existingKeyBase64 = await getRoomKey(message.chatroomId);
 

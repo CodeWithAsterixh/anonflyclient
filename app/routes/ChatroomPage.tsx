@@ -39,7 +39,7 @@ interface OutletContext {
 const ChatroomPage: React.FC = () => {
   const { chatroomId } = useParams<{ chatroomId: string }>();
   const navigate = useNavigate();
-  const { user, loading, token, logout } = useAuth();
+  const { user, isLoading: loading, token, logout } = useAuth();
   const { onBack, isMobile } = useOutletContext<OutletContext>();
   const [isHost, setIsHost] = useState(false);
   const [chatroomDetail, setChatroomDetails] = useState<ChatroomDetail | null>(

@@ -5,7 +5,7 @@ import { useAuth } from "../hooks/useAuth";
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isLoading: loading } = useAuth();
 
   if (loading) {
     return (

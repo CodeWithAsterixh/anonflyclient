@@ -202,6 +202,7 @@ export const useAuth = () => {
     switchAccount,
     logout,
     isLoading: authState.loading,
+    isAuthenticated: authState.isAuthenticated,
     error: authState.error,
   };
 };

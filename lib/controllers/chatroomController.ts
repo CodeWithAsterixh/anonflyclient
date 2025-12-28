@@ -1,15 +1,12 @@
 import { getAPIBaseURL } from "lib/constants/api";
 import { getSessionUser } from '../helpers/authStorage';
-import Cookies from 'js-cookie';
 
 const getAuthHeaders = () => {
-  // Try to get token from sessionStorage first, then fall back to cookies
+  // Get token from sessionStorage
   let token = null;
   const session = getSessionUser();
   if (session && session.token) {
     token = session.token;
-  } else {
-    token = Cookies.get('token');
   }
   
   return {

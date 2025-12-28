@@ -2,9 +2,15 @@ import type { User } from '../../types/User';
 
 const SESSION_KEY = 'anonfly_session_user';
 
+export interface SessionPayload {
+  user: User;
+  token: string;
+  ts: number;
+}
+
 export function setSessionUser(user: User, token: string) {
   try {
-    const payload = { user, token, ts: Date.now() };
+    const payload: SessionPayload = { user, token, ts: Date.now() };
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(payload));
   } catch (e) {
     // Silently fail
@@ -15,7 +21,7 @@ export function getSessionUser(): { user: User; token: string } | null {
   try {
     const raw = sessionStorage.getItem(SESSION_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(raw) as SessionPayload;
     return { user: parsed.user, token: parsed.token };
   } catch (e) {
     return null;

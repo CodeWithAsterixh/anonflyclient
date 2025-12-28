@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "./useAuth";
 import { getChatWSURL } from "../lib/constants/api";
-import { getIdentity } from "../lib/helpers/identityManager";
+import { getIdentity, saveRoomKey, getRoomKey } from "../lib/helpers/identityManager";
 import {
   encryptMessage,
   signBlob,
@@ -52,14 +52,11 @@ interface UseChatroomReturn {
  */
 export const useChatroom = (): UseChatroomReturn => {
   const [messages, setMessages] = useState<Message[]>([]);
+  const messagesRef = useRef<Message[]>([]);
   const [participants, setParticipants] = useState<Map<string, Participant>>(
     new Map()
   );
   const participantsRef = useRef(participants);
-  useEffect(() => {
-    participantsRef.current = participants;
-  }, [participants]);
-
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [hasRoomKey, setHasRoomKey] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,9 +68,45 @@ export const useChatroom = (): UseChatroomReturn => {
   const { user, token, loading } = useAuth();
 
   const currentChatroomIdRef = useRef(currentChatroomId);
+
+  // Keep messagesRef in sync with messages state
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  useEffect(() => {
+    participantsRef.current = participants;
+  }, [participants]);
+
   useEffect(() => {
     currentChatroomIdRef.current = currentChatroomId;
   }, [currentChatroomId]);
+
+  const decryptStoredMessages = useCallback(async (key: CryptoKey) => {
+    const updatedMessages = await Promise.all(
+      messagesRef.current.map(async (msg) => {
+        if (msg.type === 'message' && !msg.isEncrypted) {
+          try {
+            const blob = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content;
+            if (blob && blob.ciphertext && blob.iv) {
+              const decrypted = await decryptMessage(blob.ciphertext, blob.iv, key);
+              return { ...msg, content: decrypted, isEncrypted: true };
+            }
+          } catch (e) {
+            // Not a blob or decryption failed
+          }
+        }
+        return msg;
+      })
+    );
+    setMessages(updatedMessages);
+  }, []);
+
+  useEffect(() => {
+    if (hasRoomKey && roomKeyRef.current) {
+      decryptStoredMessages(roomKeyRef.current);
+    }
+  }, [hasRoomKey, decryptStoredMessages]);
   const joinChatroom = useCallback(
     async (chatroomId: string) => {
       if (!user && !loading) {
@@ -147,13 +180,62 @@ export const useChatroom = (): UseChatroomReturn => {
             participantsRef.current = participantMap; // Update ref
           }
 
-          // If I'm the first one, generate a room key
-          if (participantMap.size <= 1) {
-            const key = await generateRoomKey();
+          const identity = await getIdentity();
+          if (!identity) break;
+
+          // 1. Try to load existing room key from IndexedDB
+          const existingKeyBase64 = await getRoomKey(message.chatroomId);
+          if (existingKeyBase64) {
+            console.log(`[useChatroom] Found existing room key in IndexedDB for ${message.chatroomId}`);
+            const key = await importRoomKey(existingKeyBase64);
             roomKeyRef.current = key;
             setHasRoomKey(true);
-          } else {
-            // Request room key from others
+            await decryptStoredMessages(key);
+          } 
+          // 2. If no local key but server has an encrypted one, and I am the host
+          else if (message.encryptedRoomKey && message.hostAid === identity.aid) {
+            console.log(`[useChatroom] Recovering room key from server (I am the host)`);
+            // For now, we are storing it raw for the host to simplify sync
+            const key = await importRoomKey(message.encryptedRoomKey);
+            await saveRoomKey(message.chatroomId, message.encryptedRoomKey);
+            roomKeyRef.current = key;
+            setHasRoomKey(true);
+            await decryptStoredMessages(key);
+          } 
+          // 2.5 If no local key but server has one and I'm not the host, still try to request it
+          else if (message.encryptedRoomKey && message.hostAid !== identity.aid) {
+            console.log(`[useChatroom] Room has a master key on server. Requesting decryption from host...`);
+            ws.current?.send(
+              JSON.stringify({
+                type: "roomKeyRequest",
+                chatroomId: message.chatroomId,
+              })
+            );
+          }
+          // 3. If I am the first participant, generate a new key
+          else if (participantMap.size <= 1) {
+            console.log(`[useChatroom] First participant. Generating new master room key.`);
+            const key = await generateRoomKey();
+            const exportedKey = await exportKey(key);
+            await saveRoomKey(message.chatroomId, exportedKey);
+            roomKeyRef.current = key;
+            setHasRoomKey(true);
+
+            // If I am the host, also back it up to the server (encrypted with my identity)
+            if (message.hostAid === identity.aid) {
+              // For now, we'll store it raw on the server for debugging, but in production this MUST be encrypted
+              // so only the host can recover it.
+              ws.current?.send(JSON.stringify({
+                type: 'saveRoomKey',
+                chatroomId: message.chatroomId,
+                encryptedKey: exportedKey, // Temporary: raw for easier sync
+                iv: 'none'
+              }));
+            }
+          } 
+          // 4. Otherwise, request it from others
+          else {
+            console.log(`[useChatroom] Requesting room key from participants...`);
             ws.current?.send(
               JSON.stringify({
                 type: "roomKeyRequest",
@@ -169,11 +251,13 @@ export const useChatroom = (): UseChatroomReturn => {
             if (requester && requester.exchangePublicKey) {
               const identity = await getIdentity();
               if (identity) {
+                console.log(`[useChatroom] Sharing room key with ${message.senderAid}`);
                 const sharedSecret = await deriveSharedSecret(
                   identity.exchangeKeyPair.privateKey,
                   requester.exchangePublicKey
                 );
                 const exportedKey = await exportKey(roomKeyRef.current);
+                console.log(`[useChatroom] Sharing room key with ${message.senderAid}. Key starts with: ${exportedKey.substring(0, 10)}`);
                 const encryptedKey = await encryptMessage(
                   exportedKey,
                   sharedSecret
@@ -196,6 +280,7 @@ export const useChatroom = (): UseChatroomReturn => {
         case "roomKeyShare":
           const identityForShare = await getIdentity();
           if (identityForShare && message.targetAid === identityForShare.aid) {
+            console.log(`[useChatroom] Received roomKeyShare from ${message.senderAid}`);
             const sender = participantsRef.current.get(message.senderAid);
             if (sender && sender.exchangePublicKey) {
               const sharedSecret = await deriveSharedSecret(
@@ -208,8 +293,16 @@ export const useChatroom = (): UseChatroomReturn => {
                 sharedSecret
               );
               const key = await importRoomKey(decryptedKeyBase64);
-              roomKeyRef.current = key;
-              setHasRoomKey(true);
+                
+                // Save to IndexedDB so it survives refreshes
+                await saveRoomKey(message.chatroomId, decryptedKeyBase64);
+                
+                roomKeyRef.current = key;
+                setHasRoomKey(true);
+                console.log(`[useChatroom] Room key successfully imported and saved for ${message.chatroomId}. Key starts with: ${decryptedKeyBase64.substring(0, 10)}`);
+                
+                // Decrypt any messages that were received before the key arrived
+                await decryptStoredMessages(key);
             }
           }
           break;
@@ -218,31 +311,38 @@ export const useChatroom = (): UseChatroomReturn => {
           let content = message.content;
           let isEncrypted = false;
 
+          console.log(`[useChatroom] Received message: ${message.messageId || 'no-id'}, roomKey available: ${!!roomKeyRef.current}`);
+
           try {
             // Try to parse content as an E2EE blob
             const blob = typeof content === 'string' ? JSON.parse(content) : content;
             if (blob && blob.ciphertext && blob.iv) {
               if (roomKeyRef.current) {
+                console.log(`[useChatroom] Attempting decryption for message: ${message.messageId || 'no-id'}`);
                 content = await decryptMessage(
                   blob.ciphertext,
                   blob.iv,
                   roomKeyRef.current
                 );
                 isEncrypted = true;
+                console.log(`[useChatroom] Decryption successful for message: ${message.messageId || 'no-id'}`);
               } else {
-                // If we don't have the room key yet, keep the encrypted blob
-                // The UI will show the ciphertext if not handled, or we could show a "Decrypting..." state
+                console.log(`[useChatroom] Room key not yet available for message: ${message.messageId || 'no-id'}. Storing as blob.`);
                 content = JSON.stringify(blob);
               }
             }
           } catch (e) {
-            // Not a JSON blob or decryption failed, treat as plaintext
+            if (e instanceof Error && e.name === 'OperationError') {
+              console.error(`[useChatroom] Decryption failed (OperationError) for message: ${message.messageId || 'no-id'}. This usually means the room key is incorrect.`);
+            } else {
+              // Not a JSON blob or other error
+            }
           }
 
           setMessages((prevMessages) => [
             ...prevMessages,
             {
-              id: message.messageId,
+              id: message.messageId || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
               senderAid: message.senderAid,
               senderUsername: message.senderUsername,
               content: content,

@@ -61,16 +61,27 @@ export async function encryptMessage(content: string, sharedSecret: CryptoKey): 
  * Decrypts a message using a shared secret.
  */
 export async function decryptMessage(ciphertextBase64: string, ivBase64: string, sharedSecret: CryptoKey): Promise<string> {
-  const ciphertext = Uint8Array.from(atob(ciphertextBase64), c => c.charCodeAt(0));
-  const iv = Uint8Array.from(atob(ivBase64), c => c.charCodeAt(0));
+  try {
+    const ciphertext = Uint8Array.from(atob(ciphertextBase64), c => c.charCodeAt(0));
+    const iv = Uint8Array.from(atob(ivBase64), c => c.charCodeAt(0));
 
-  const decryptedBuffer = await window.crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv },
-    sharedSecret,
-    ciphertext
-  );
+    const decryptedBuffer = await window.crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv },
+      sharedSecret,
+      ciphertext
+    );
 
-  return new TextDecoder().decode(decryptedBuffer);
+    return new TextDecoder().decode(decryptedBuffer);
+  } catch (error) {
+    console.error('[Encryption] Decryption error details:', {
+      error,
+      ciphertextLength: ciphertextBase64.length,
+      ivLength: ivBase64.length,
+      keyAlgorithm: sharedSecret.algorithm,
+      keyUsages: sharedSecret.usages
+    });
+    throw error;
+  }
 }
 
 /**
@@ -89,13 +100,16 @@ export async function generateRoomKey(): Promise<CryptoKey> {
  */
 export async function exportKey(key: CryptoKey): Promise<string> {
   const exported = await window.crypto.subtle.exportKey('raw', key);
-  return btoa(String.fromCharCode(...new Uint8Array(exported)));
+  const base64 = btoa(String.fromCharCode(...new Uint8Array(exported)));
+  console.log('[Encryption] Exported key (first 10 chars):', base64.substring(0, 10));
+  return base64;
 }
 
 /**
  * Imports a base64 string as an AES-GCM CryptoKey.
  */
 export async function importRoomKey(keyBase64: string): Promise<CryptoKey> {
+  console.log('[Encryption] Importing key (first 10 chars):', keyBase64.substring(0, 10));
   const keyBuffer = Uint8Array.from(atob(keyBase64), c => c.charCodeAt(0));
   return window.crypto.subtle.importKey(
     'raw',

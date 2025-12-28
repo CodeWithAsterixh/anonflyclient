@@ -84,35 +84,6 @@ const ChatroomPage: React.FC = () => {
     };
   }, [currentChatroomId, leaveChatroom]);
 
-  if (isJoined && !hasRoomKey) {
-    return (
-      <ProtectedRoute>
-        <div className="flex flex-col h-[100dvh] bg-gray-50 relative">
-          <header className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <ChevronDown className="w-5 h-5 rotate-90" />
-              </button>
-              <div>
-                <h1 className="font-bold text-gray-900 leading-tight">{chatroomDetail?.roomname || 'Loading...'}</h1>
-                <p className="text-xs text-gray-500">Securing room...</p>
-              </div>
-            </div>
-          </header>
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-            <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 animate-pulse">
-              <Lock className="w-8 h-8" />
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Establishing Secure Connection</h2>
-            <p className="text-gray-600 max-w-xs">
-              Waiting for other participants to securely share the room key. This ensures your messages remain private.
-            </p>
-          </div>
-        </div>
-      </ProtectedRoute>
-    );
-  }
-
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -134,36 +105,6 @@ const ChatroomPage: React.FC = () => {
   const handleSendMessage = (content: string) => {
     sendMessage(content);
   };
-
-  if (loading) {
-    return <JoinRoomOverlay message="Loading room." />;
-  }
-
-  if (!user || !token) {
-    return (
-      <JoinRoomOverlay
-        message="Please join anonymously to view chatrooms."
-        replaceLoading={
-          <div className="flex space-x-4 mt-4">
-            <button
-              onClick={() => navigate(`/login?redirect_to=${encodeURIComponent(window.location.pathname)}`)}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full transition-colors"
-            >
-              Join Anonymously
-            </button>
-          </div>
-        }
-      />
-    );
-  }
-
-  if (error && !loading) {
-    return <JoinRoomOverlay message={`Error: ${error}`} />;
-  }
-
-  if (!isConnected) {
-    return <JoinRoomOverlay message="Connecting to chat service..." />;
-  }
 
   const handleLeaveRoom = () => {
     leaveChatroom();
@@ -217,10 +158,65 @@ const ChatroomPage: React.FC = () => {
     }
   };
 
-  if(!chatroomDetail) {
-    navigate('/')
-    return null;
+  if (isJoined && !hasRoomKey) {
+    return (
+      <ProtectedRoute>
+        <div className="flex flex-col h-[100dvh] bg-gray-50 relative">
+          <header className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                <ChevronDown className="w-5 h-5 rotate-90" />
+              </button>
+              <div>
+                <h1 className="font-bold text-gray-900 leading-tight">{chatroomDetail?.roomname || 'Loading...'}</h1>
+                <p className="text-xs text-gray-500">Securing room...</p>
+              </div>
+            </div>
+          </header>
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+            <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 animate-pulse">
+              <Lock className="w-8 h-8" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Establishing Secure Connection</h2>
+            <p className="text-gray-600 max-w-xs">
+              Waiting for other participants to securely share the room key. This ensures your messages remain private.
+            </p>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
   }
+
+  if (loading) {
+    return <JoinRoomOverlay message="Loading room." />;
+  }
+
+  if (!user || !token) {
+    return (
+      <JoinRoomOverlay
+        message="Please join anonymously to view chatrooms."
+        replaceLoading={
+          <div className="flex space-x-4 mt-4">
+            <button
+              onClick={() => navigate(`/login?redirect_to=${encodeURIComponent(window.location.pathname)}`)}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full transition-colors"
+            >
+              Join Anonymously
+            </button>
+          </div>
+        }
+      />
+    );
+  }
+
+  if (error && !loading) {
+    return <JoinRoomOverlay message={`Error: ${error}`} />;
+  }
+
+  if (!isConnected) {
+    return <JoinRoomOverlay message="Connecting to chat service..." />;
+  }
+
   if (!isJoined) {
     // show skeleton with overlay prompting the user to join
     return (

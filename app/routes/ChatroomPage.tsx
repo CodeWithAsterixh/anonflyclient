@@ -26,7 +26,7 @@ interface OutletContext {
 const ChatroomPage: React.FC = () => {
   const { chatroomId } = useParams<{ chatroomId: string }>();
   const navigate = useNavigate();
-  const { user, loading, token } = useAuth();
+  const { user, loading, token, logout } = useAuth();
   const { onBack, isMobile } = useOutletContext<OutletContext>();
   const [isHost, setIsHost] = useState(false);
   const [chatroomDetail, setChatroomDetails] = useState<ChatroomDetail | null>(null)
@@ -45,6 +45,12 @@ const ChatroomPage: React.FC = () => {
             'Authorization': `Bearer ${token}`,
           },
         });
+        
+        if (response.status === 401) {
+          logout();
+          return;
+        }
+
         const data = await response.json();
         if (response.ok && data.data) {
           setChatroomDetails(data.data)
@@ -67,6 +73,7 @@ const ChatroomPage: React.FC = () => {
     isConnected,
     hasRoomKey,
     error,
+    reconnect,
     currentChatroomId,
   } = useChatroom();
 
@@ -209,8 +216,42 @@ const ChatroomPage: React.FC = () => {
     );
   }
 
-  if (error && !loading) {
-    return <JoinRoomOverlay message={`Error: ${error}`} />;
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-full bg-gray-50 p-6 text-center">
+        <div className="bg-white p-8 rounded-2xl shadow-sm max-w-md w-full border border-gray-100">
+          <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Lock className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Connection Error</h2>
+          <p className="text-gray-500 mb-6">{error}</p>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => reconnect()}
+              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors"
+            >
+              Retry Connection
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors"
+            >
+              Back to Home
+            </button>
+            <button
+              onClick={() => logout()}
+              className="text-sm text-gray-400 hover:text-gray-600 underline mt-2"
+            >
+              Sign in as different user
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!chatroomId) {
+    return <NoChatSelectedFallback />;
   }
 
   if (!isConnected) {

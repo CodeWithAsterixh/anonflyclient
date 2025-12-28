@@ -37,6 +37,7 @@ interface UseChatroomReturn {
   sendMessage: (content: string) => void;
   joinChatroom: (chatroomId: string) => void;
   leaveChatroom: () => void;
+  reconnect: () => void;
   isConnected: boolean;
   hasRoomKey: boolean;
   error: string | null;
@@ -65,7 +66,7 @@ export const useChatroom = (): UseChatroomReturn => {
   );
   const roomKeyRef = useRef<CryptoKey | null>(null);
   const ws = useRef<WebSocket | null>(null);
-  const { user, token, loading } = useAuth();
+  const { user, token, loading, logout } = useAuth();
 
   const currentChatroomIdRef = useRef(currentChatroomId);
 
@@ -114,6 +115,7 @@ export const useChatroom = (): UseChatroomReturn => {
         return;
       }
 
+      setError(null);
       // Set the current chatroom ID immediately
       setCurrentChatroomId(chatroomId);
       currentChatroomIdRef.current = chatroomId; // Update ref too
@@ -125,6 +127,7 @@ export const useChatroom = (): UseChatroomReturn => {
             JSON.stringify({
               type: "joinChatroom",
               chatroomId,
+              token, // Send token for authentication
               userAid: identity.aid,
               username: identity.username,
             })
@@ -132,40 +135,58 @@ export const useChatroom = (): UseChatroomReturn => {
         }
       }
     },
-    [user, loading]
+    [user, token, loading]
   );
 
   const connect = useCallback(() => {
-    if (!token || loading) {
-      if (!loading) {
-        setError("Authentication token not found or still loading.");
-      }
+    if (loading) {
       return;
     }
 
-    // Reuse existing WebSocket if it's already open
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+    if (!token) {
+      setError("Authentication session has expired or is invalid.");
       return;
+    }
+
+    // Close existing connection if any before creating a new one
+    if (ws.current) {
+      if (ws.current.readyState === WebSocket.OPEN || ws.current.readyState === WebSocket.CONNECTING) {
+        return; // Already connected or connecting
+      }
+      ws.current.close();
     }
 
     const baseWs = getChatWSURL();
     const websocketUrl = `${baseWs}?token=${encodeURIComponent(token)}`;
-    ws.current = new WebSocket(websocketUrl);
+    const socket = new WebSocket(websocketUrl);
+    ws.current = socket;
 
-    ws.current.onopen = () => {
+    socket.onopen = () => {
       setIsConnected(true);
       setError(null);
-      // Re-join current chatroom if we have one
-      if (currentChatroomIdRef.current) {
-        joinChatroom(currentChatroomIdRef.current);
+      
+      const roomIdToJoin = currentChatroomIdRef.current;
+      if (roomIdToJoin) {
+        joinChatroom(roomIdToJoin);
       }
     };
 
-    ws.current.onmessage = async (event) => {
-      const message = JSON.parse(event.data);
+    socket.onmessage = async (event) => {
+      try {
+        const message = JSON.parse(event.data);
 
-      switch (message.type) {
-        case "joinSuccess":
+        if (message.type === "error") {
+          if (message.message === "Unauthorized") {
+            console.error("[useChatroom] Unauthorized. Logging out.");
+            logout();
+            return;
+          }
+          setError(message.message);
+          return;
+        }
+
+        switch (message.type) {
+            case "joinSuccess":
           setCurrentChatroomId(message.chatroomId);
           currentChatroomIdRef.current = message.chatroomId; // Update ref
           setMessages([]); // Clear messages on joining a new room
@@ -183,59 +204,59 @@ export const useChatroom = (): UseChatroomReturn => {
           const identity = await getIdentity();
           if (!identity) break;
 
-          // 1. Try to load existing room key from IndexedDB
           const existingKeyBase64 = await getRoomKey(message.chatroomId);
-          if (existingKeyBase64) {
-            console.log(`[useChatroom] Found existing room key in IndexedDB for ${message.chatroomId}`);
+
+          // 1. Source of Truth: Server Master Key
+          if (message.encryptedRoomKey) {
+            console.log(`[useChatroom] Using Master Room Key from server for ${message.chatroomId}`);
+            const key = await importRoomKey(message.encryptedRoomKey);
+            
+            // Sync local storage
+            await saveRoomKey(message.chatroomId, message.encryptedRoomKey);
+            
+            roomKeyRef.current = key;
+            setHasRoomKey(true);
+            await decryptStoredMessages(key);
+          } 
+          // 2. Fallback: Local IndexedDB (if server was offline or key missing)
+          else if (existingKeyBase64) {
+            console.log(`[useChatroom] No server key, using local key from IndexedDB`);
             const key = await importRoomKey(existingKeyBase64);
             roomKeyRef.current = key;
             setHasRoomKey(true);
             await decryptStoredMessages(key);
-          } 
-          // 2. If no local key but server has an encrypted one, and I am the host
-          else if (message.encryptedRoomKey && message.hostAid === identity.aid) {
-            console.log(`[useChatroom] Recovering room key from server (I am the host)`);
-            // For now, we are storing it raw for the host to simplify sync
-            const key = await importRoomKey(message.encryptedRoomKey);
-            await saveRoomKey(message.chatroomId, message.encryptedRoomKey);
-            roomKeyRef.current = key;
-            setHasRoomKey(true);
-            await decryptStoredMessages(key);
-          } 
-          // 2.5 If no local key but server has one and I'm not the host, still try to request it
-          else if (message.encryptedRoomKey && message.hostAid !== identity.aid) {
-            console.log(`[useChatroom] Room has a master key on server. Requesting decryption from host...`);
-            ws.current?.send(
-              JSON.stringify({
-                type: "roomKeyRequest",
-                chatroomId: message.chatroomId,
-              })
-            );
+            
+            // Try to back up this local key to server so others can use it
+            ws.current?.send(JSON.stringify({
+              type: 'saveRoomKey',
+              chatroomId: message.chatroomId,
+              encryptedKey: existingKeyBase64,
+              iv: 'none'
+            }));
           }
-          // 3. If I am the first participant, generate a new key
+          // 3. Last Resort: Generate New Key
           else if (participantMap.size <= 1) {
-            console.log(`[useChatroom] First participant. Generating new master room key.`);
+            console.log(`[useChatroom] No key found anywhere. Generating new Master Room Key.`);
             const key = await generateRoomKey();
             const exportedKey = await exportKey(key);
+            
+            // Save locally
             await saveRoomKey(message.chatroomId, exportedKey);
+            
+            // Save to server
+            ws.current?.send(JSON.stringify({
+              type: 'saveRoomKey',
+              chatroomId: message.chatroomId,
+              encryptedKey: exportedKey,
+              iv: 'none'
+            }));
+
             roomKeyRef.current = key;
             setHasRoomKey(true);
-
-            // If I am the host, also back it up to the server (encrypted with my identity)
-            if (message.hostAid === identity.aid) {
-              // For now, we'll store it raw on the server for debugging, but in production this MUST be encrypted
-              // so only the host can recover it.
-              ws.current?.send(JSON.stringify({
-                type: 'saveRoomKey',
-                chatroomId: message.chatroomId,
-                encryptedKey: exportedKey, // Temporary: raw for easier sync
-                iv: 'none'
-              }));
-            }
           } 
-          // 4. Otherwise, request it from others
+          // 4. Request from others (if multiple people are in but no master key on server yet)
           else {
-            console.log(`[useChatroom] Requesting room key from participants...`);
+            console.log(`[useChatroom] Requesting key from active participants...`);
             ws.current?.send(
               JSON.stringify({
                 type: "roomKeyRequest",
@@ -280,6 +301,14 @@ export const useChatroom = (): UseChatroomReturn => {
         case "roomKeyShare":
           const identityForShare = await getIdentity();
           if (identityForShare && message.targetAid === identityForShare.aid) {
+            // If we already have a master key from the server, ignore peer shares 
+            // unless we are specifically looking for one.
+            const serverKey = await getRoomKey(message.chatroomId);
+            if (serverKey && roomKeyRef.current) {
+              console.log(`[useChatroom] Already have a master key for ${message.chatroomId}, ignoring peer share.`);
+              break;
+            }
+
             console.log(`[useChatroom] Received roomKeyShare from ${message.senderAid}`);
             const sender = participantsRef.current.get(message.senderAid);
             if (sender && sender.exchangePublicKey) {
@@ -304,6 +333,17 @@ export const useChatroom = (): UseChatroomReturn => {
                 // Decrypt any messages that were received before the key arrived
                 await decryptStoredMessages(key);
             }
+          }
+          break;
+
+        case "masterKeyUpdate":
+          if (message.encryptedRoomKey) {
+            console.log(`[useChatroom] Received Master Key Update from server`);
+            const key = await importRoomKey(message.encryptedRoomKey);
+            await saveRoomKey(message.chatroomId, message.encryptedRoomKey);
+            roomKeyRef.current = key;
+            setHasRoomKey(true);
+            await decryptStoredMessages(key);
           }
           break;
 
@@ -426,24 +466,36 @@ export const useChatroom = (): UseChatroomReturn => {
         default:
           break;
       }
-    };
+    } catch (e) {
+      setError("Failed to process message");
+    }
+  };
 
-    ws.current.onclose = (event) => {
+    socket.onclose = (event) => {
       setIsConnected(false);
-      if (currentChatroomIdRef.current) {
-        setTimeout(connect, 3000);
+      
+      if (event.code !== 1000) {
+        setError("Connection lost. Retrying in 3 seconds...");
+      }
+
+      const activeRoomId = currentChatroomIdRef.current;
+      if (activeRoomId) {
+        setTimeout(() => {
+          // Re-check if we still need to connect to this room
+          if (currentChatroomIdRef.current === activeRoomId) {
+            connect();
+          }
+        }, 3000);
       }
     };
 
-    ws.current.onerror = (error) => {
-      setError("WebSocket connection error.");
+    socket.onerror = (event) => {
+      console.error("[useChatroom] WebSocket error:", event);
+      setError("Failed to connect to chat server. Please check your connection.");
     };
 
-    return () => {
-      // Don't close WebSocket on unmount to keep multi-room/persistent connection
-      // We only close it if we explicitly leave or go offline
-    };
-  }, [token, user, joinChatroom]);
+  }, [token, user, loading, joinChatroom, logout]);
+
 
   useEffect(() => {
     connect();
@@ -503,12 +555,22 @@ export const useChatroom = (): UseChatroomReturn => {
     }
   }, [currentChatroomId]);
 
+  const reconnect = useCallback(() => {
+    if (ws.current) {
+      ws.current.close();
+      ws.current = null;
+    }
+    setError(null);
+    connect();
+  }, [connect]);
+
   return {
     messages,
     participants,
     sendMessage,
     joinChatroom,
     leaveChatroom,
+    reconnect,
     isConnected,
     hasRoomKey,
     error,

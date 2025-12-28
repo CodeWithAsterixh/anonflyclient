@@ -41,6 +41,18 @@ export const useAuth = () => {
     error: null,
   });
 
+  const logout = useCallback(() => {
+    clearSessionUser();
+    setAuthState({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      loading: false,
+      error: null,
+    });
+    window.location.href = '/login';
+  }, []);
+
   const initializeAuth = useCallback(async () => {
     // 1. Check for ephemeral session
     const session = getSessionUser();
@@ -113,24 +125,11 @@ export const useAuth = () => {
     }
   };
 
-  /**
-   * Logs the user out by clearing the session storage.
-   * Persistent identity remains in IndexedDB.
-   */
-  const logout = useCallback(() => {
-    clearSessionUser();
-    setAuthState({
-      user: null,
-      token: null,
-      isAuthenticated: false,
-      loading: false,
-      error: null,
-    });
-  }, []);
-
   return {
     ...authState,
     isLoading: authState.loading,
+    error: authState.error,
+    isAuthenticated: authState.isAuthenticated,
     joinAnonymously,
     logout,
   };

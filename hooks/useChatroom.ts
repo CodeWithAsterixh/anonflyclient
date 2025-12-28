@@ -164,8 +164,9 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
         return;
       }
 
-      // If we are already joining this room, don't send another request
-      if (joiningRef.current === chatroomId && ws.current?.readyState === WebSocket.OPEN) {
+      // If we are already joining this room with the same password, don't send another request
+      // We use a ref to track the last join attempt to avoid duplicates
+      if (joiningRef.current === `${chatroomId}:${password || ''}` && ws.current?.readyState === WebSocket.OPEN) {
         return;
       }
 
@@ -179,7 +180,7 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
         try {
           const identity = await getIdentity();
           if (identity) {
-            joiningRef.current = chatroomId;
+            joiningRef.current = `${chatroomId}:${password || ''}`;
             ws.current.send(
               JSON.stringify({
                 type: "joinChatroom",
@@ -208,13 +209,8 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
     if (initialChatroomId && initialChatroomId !== currentChatroomId) {
       setCurrentChatroomId(initialChatroomId);
       currentChatroomIdRef.current = initialChatroomId;
-      
-      // If already connected, join the new room immediately
-      if (ws.current?.readyState === WebSocket.OPEN) {
-        joinChatroom(initialChatroomId);
-      }
     }
-  }, [initialChatroomId, joinChatroom, currentChatroomId]);
+  }, [initialChatroomId, currentChatroomId]);
 
   const connect = useCallback(() => {
     if (loading) {
@@ -247,11 +243,6 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
     socket.onopen = () => {
       setIsConnected(true);
       setError(null);
-      
-      const roomIdToJoin = currentChatroomIdRef.current;
-      if (roomIdToJoin) {
-        joinChatroom(roomIdToJoin);
-      }
     };
 
     socket.onmessage = async (event) => {
@@ -556,6 +547,7 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
     socket.onclose = (event) => {
       setIsConnected(false);
       setIsJoined(false);
+      joiningRef.current = null;
       
       if (event.code !== 1000) {
         setError("Connection lost. Retrying in 3 seconds...");
@@ -641,8 +633,9 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
       );
     }
     setCurrentChatroomId(null);
-    currentChatroomIdRef.current = null;
-    setIsJoined(false);
+      currentChatroomIdRef.current = null;
+      joiningRef.current = null;
+      setIsJoined(false);
     setHasRoomKey(false);
     setMessages([]);
     setParticipants(new Map());

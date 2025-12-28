@@ -110,6 +110,13 @@ const ChatroomPage: React.FC = () => {
 
   const displayDetail = sseChatroomDetail || chatroomDetail;
 
+  // Auto-join if room is not locked and we are connected
+  useEffect(() => {
+    if (isConnected && chatroomId && displayDetail && !displayDetail.isLocked && !isJoined) {
+      joinChatroom(chatroomId);
+    }
+  }, [isConnected, chatroomId, displayDetail, isJoined, joinChatroom]);
+
   useEffect(() => {
     if (
       error &&
@@ -236,26 +243,29 @@ const ChatroomPage: React.FC = () => {
               backgroundRepeat: "no-repeat",
             }}
           />
-          <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3 shadow-sm flex justify-between items-center z-10">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => {
-                  onBack();
-                  navigate("/");
-                }}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <ChevronDown className="w-5 h-5 rotate-90" />
-              </button>
-              <div>
-                <h1 className="font-bold text-gray-900 leading-tight">
-                  {displayDetail?.roomname || "Loading..."}
-                </h1>
-                <p className="text-xs text-gray-500">
-                  {displayDetail?.participantCount !== undefined
-                    ? `${displayDetail.participantCount} participants • Securing room...`
-                    : "Securing room..."}
-                </p>
+          <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
+            {isMobile&&<Logo showText size={32} className="py-2"/>}
+            <div className="w-full flex justify-between items-center bg-neutral-200/50 px-4 py-3">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    onBack();
+                    navigate("/");
+                  }}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <ChevronDown className="w-5 h-5 rotate-90" />
+                </button>
+                <div>
+                  <h1 className="font-bold text-gray-900 leading-tight">
+                    {displayDetail?.roomname || "Loading..."}
+                  </h1>
+                  <p className="text-xs text-gray-500">
+                    {displayDetail?.participantCount !== undefined
+                      ? `${displayDetail.participantCount} participants • Securing room...`
+                      : "Securing room..."}
+                  </p>
+                </div>
               </div>
             </div>
           </header>
@@ -388,8 +398,8 @@ const ChatroomPage: React.FC = () => {
                   </h1>
                   <p className="text-xs text-gray-500">
                     {displayDetail?.participantCount !== undefined
-                      ? `${displayDetail.participantCount} participants • connected`
-                      : "connected"}
+                      ? `${displayDetail.participantCount} participants • ${isConnected ? 'connected' : 'connecting...'}`
+                      : isConnected ? 'connected' : 'connecting...'}
                   </p>
                 </div>
               </div>
@@ -412,17 +422,17 @@ const ChatroomPage: React.FC = () => {
             <div className="absolute inset-0 flex items-center justify-center bg-white/20 backdrop-blur-[2px] z-20">
               <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50 max-w-sm w-full mx-4 text-center">
                 <h2 className="text-lg font-semibold mb-2">
-                  {chatroomDetail?.roomname || "Chatroom"}
+                  {displayDetail?.roomname || "Chatroom"}
                 </h2>
                 <p className="text-sm text-gray-600 mb-4">
-                  {chatroomDetail?.description ||
+                  {displayDetail?.description ||
                     "Join the room to see messages and participate."}
                 </p>
 
-                {(chatroomDetail?.isLocked ||
+                {(displayDetail?.isLocked ||
                   (passwordError &&
                     (passwordError.toLowerCase().includes("password") ||
-                      passwordError.toLowerCase().includes("locked")))) && (
+                      passwordError.toLowerCase().includes("locked")))) ? (
                   <div className="mb-4">
                     <div className="flex items-center justify-center gap-2 text-amber-600 mb-2">
                       <Lock size={16} />
@@ -461,23 +471,37 @@ const ChatroomPage: React.FC = () => {
                         {passwordError}
                       </p>
                     )}
+                    <div className="flex items-center justify-center space-x-3 mt-4">
+                      <button
+                        onClick={handleJoinChatroom}
+                        disabled={!isConnected}
+                        className={`px-4 py-2 rounded font-medium text-white transition-colors ${
+                          isConnected 
+                            ? "bg-blue-600 hover:bg-blue-700" 
+                            : "bg-blue-400 cursor-not-allowed"
+                        }`}
+                      >
+                        {isConnected ? "Enter Room" : "Connecting..."}
+                      </button>
+                      <button
+                        onClick={() => {
+                          onBack();
+                          navigate("/");
+                        }}
+                        className="bg-gray-100 px-4 py-2 rounded hover:bg-gray-200 text-gray-700 font-medium transition-colors"
+                      >
+                        Back
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+                    <p className="text-sm text-gray-500">
+                      {isConnected ? "Joining room..." : "Connecting to service..."}
+                    </p>
                   </div>
                 )}
-
-                <div className="flex items-center justify-center space-x-3">
-                  <button
-                    onClick={handleJoinChatroom}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  >
-                    Enter Room
-                  </button>
-                  <button
-                    onClick={() => navigate("/")}
-                    className="bg-gray-100 px-4 py-2 rounded hover:bg-gray-200"
-                  >
-                    Back
-                  </button>
-                </div>
               </div>
             </div>
           </div>

@@ -51,6 +51,7 @@ interface UseChatroomReturn {
   reconnect: () => void;
   clearError: () => void;
   isConnected: boolean;
+  isJoined: boolean;
   hasRoomKey: boolean;
   error: string | null;
   currentChatroomId: string | null;
@@ -71,6 +72,7 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
   );
   const participantsRef = useRef(participants);
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [isJoined, setIsJoined] = useState<boolean>(false);
   const [hasRoomKey, setHasRoomKey] = useState<boolean>(false);
   const [chatroomDetail, setChatroomDetail] = useState<ChatroomDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -168,6 +170,7 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
       }
 
       setError(null);
+      setIsJoined(false);
       // Set the current chatroom ID immediately
       setCurrentChatroomId(chatroomId);
       currentChatroomIdRef.current = chatroomId; // Update ref too
@@ -268,6 +271,7 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
         switch (message.type) {
             case "joinSuccess":
           joiningRef.current = null;
+          setIsJoined(true);
           setCurrentChatroomId(message.chatroomId);
           currentChatroomIdRef.current = message.chatroomId; // Update ref
           setMessages([]); // Clear messages on joining a new room
@@ -551,6 +555,7 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
 
     socket.onclose = (event) => {
       setIsConnected(false);
+      setIsJoined(false);
       
       if (event.code !== 1000) {
         setError("Connection lost. Retrying in 3 seconds...");
@@ -634,9 +639,14 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
           chatroomId: currentChatroomId,
         })
       );
-    } else {
-      setError("Cannot leave chatroom: Not connected or not in a chatroom.");
     }
+    setCurrentChatroomId(null);
+    currentChatroomIdRef.current = null;
+    setIsJoined(false);
+    setHasRoomKey(false);
+    setMessages([]);
+    setParticipants(new Map());
+    roomKeyRef.current = null;
   }, [currentChatroomId]);
 
   const reconnect = useCallback(() => {
@@ -662,6 +672,7 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
     reconnect,
     clearError,
     isConnected,
+    isJoined,
     hasRoomKey,
     error,
     currentChatroomId,

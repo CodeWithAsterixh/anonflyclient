@@ -93,6 +93,7 @@ const ChatroomPage: React.FC = () => {
     joinChatroom,
     leaveChatroom,
     isConnected,
+    isJoined,
     hasRoomKey,
     error,
     reconnect,
@@ -119,8 +120,6 @@ const ChatroomPage: React.FC = () => {
       clearError();
     }
   }, [error, clearError]);
-
-  const isJoined = currentChatroomId === chatroomId;
 
   useEffect(() => {
     return () => {
@@ -240,7 +239,10 @@ const ChatroomPage: React.FC = () => {
           <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3 shadow-sm flex justify-between items-center z-10">
             <div className="flex items-center gap-3">
               <button
-                onClick={onBack}
+                onClick={() => {
+                  onBack();
+                  navigate("/");
+                }}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <ChevronDown className="w-5 h-5 rotate-90" />
@@ -372,7 +374,10 @@ const ChatroomPage: React.FC = () => {
             <div className="w-full flex justify-between items-center bg-neutral-200/50 px-4 py-3">
               <div className="flex items-center gap-3">
                 <button
-                  onClick={onBack}
+                  onClick={() => {
+                    onBack();
+                    navigate("/");
+                  }}
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
                   <ChevronDown className="w-5 h-5 rotate-90" />
@@ -505,7 +510,10 @@ const ChatroomPage: React.FC = () => {
           <div className="w-full flex justify-between items-center bg-neutral-200/50 px-4 py-3">
             <div className="flex items-center gap-3">
               <button
-                onClick={onBack}
+                onClick={() => {
+                  onBack();
+                  navigate("/");
+                }}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <ChevronDown className="w-5 h-5 rotate-90" />

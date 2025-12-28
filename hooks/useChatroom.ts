@@ -284,7 +284,6 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
 
           // 1. Source of Truth: Server Master Key
           if (message.encryptedRoomKey) {
-            console.log(`[useChatroom] Using Master Room Key from server for ${message.chatroomId}`);
             const key = await importRoomKey(message.encryptedRoomKey);
             
             // Sync local storage
@@ -296,7 +295,6 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
           } 
           // 2. Fallback: Local IndexedDB (if server was offline or key missing)
           else if (existingKeyBase64) {
-            console.log(`[useChatroom] No server key, using local key from IndexedDB`);
             const key = await importRoomKey(existingKeyBase64);
             roomKeyRef.current = key;
             setHasRoomKey(true);
@@ -312,7 +310,6 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
           }
           // 3. Last Resort: Generate New Key
           else if (participantMap.size <= 1) {
-            console.log(`[useChatroom] No key found anywhere. Generating new Master Room Key.`);
             const key = await generateRoomKey();
             const exportedKey = await exportKey(key);
             
@@ -332,7 +329,6 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
           } 
           // 4. Request from others (if multiple people are in but no master key on server yet)
           else {
-            console.log(`[useChatroom] Requesting key from active participants...`);
             ws.current?.send(
               JSON.stringify({
                 type: "roomKeyRequest",
@@ -348,13 +344,11 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
             if (requester && requester.exchangePublicKey) {
               const identity = await getIdentity();
               if (identity) {
-                console.log(`[useChatroom] Sharing room key with ${message.senderAid}`);
                 const sharedSecret = await deriveSharedSecret(
                   identity.exchangeKeyPair.privateKey,
                   requester.exchangePublicKey
                 );
                 const exportedKey = await exportKey(roomKeyRef.current);
-                console.log(`[useChatroom] Sharing room key with ${message.senderAid}. Key starts with: ${exportedKey.substring(0, 10)}`);
                 const encryptedKey = await encryptMessage(
                   exportedKey,
                   sharedSecret
@@ -381,11 +375,9 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
             // unless we are specifically looking for one.
             const serverKey = await getRoomKey(message.chatroomId);
             if (serverKey && roomKeyRef.current) {
-              console.log(`[useChatroom] Already have a master key for ${message.chatroomId}, ignoring peer share.`);
               break;
             }
 
-            console.log(`[useChatroom] Received roomKeyShare from ${message.senderAid}`);
             const sender = participantsRef.current.get(message.senderAid);
             if (sender && sender.exchangePublicKey) {
               const sharedSecret = await deriveSharedSecret(
@@ -404,7 +396,6 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
                 
                 roomKeyRef.current = key;
                 setHasRoomKey(true);
-                console.log(`[useChatroom] Room key successfully imported and saved for ${message.chatroomId}. Key starts with: ${decryptedKeyBase64.substring(0, 10)}`);
                 
                 // Decrypt any messages that were received before the key arrived
                 await decryptStoredMessages(key);
@@ -414,7 +405,6 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
 
         case "masterKeyUpdate":
           if (message.encryptedRoomKey) {
-            console.log(`[useChatroom] Received Master Key Update from server`);
             const key = await importRoomKey(message.encryptedRoomKey);
             await saveRoomKey(message.chatroomId, message.encryptedRoomKey);
             roomKeyRef.current = key;
@@ -434,23 +424,19 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
           let chatContent = message.content;
           let isMsgEncrypted = false;
 
-          console.log(`[useChatroom] Received message: ${messageId}, roomKey available: ${!!roomKeyRef.current}`);
 
           try {
             // Try to parse content as an E2EE blob
             const blob = typeof chatContent === 'string' ? JSON.parse(chatContent) : chatContent;
             if (blob && blob.ciphertext && blob.iv) {
               if (roomKeyRef.current) {
-                console.log(`[useChatroom] Attempting decryption for message: ${messageId}`);
                 chatContent = await decryptMessage(
                   blob.ciphertext,
                   blob.iv,
                   roomKeyRef.current
                 );
                 isMsgEncrypted = true;
-                console.log(`[useChatroom] Decryption successful for message: ${messageId}`);
               } else {
-                console.log(`[useChatroom] Room key not yet available for message: ${messageId}. Storing as blob.`);
                 chatContent = JSON.stringify(blob);
               }
             }
@@ -588,7 +574,6 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
     connect();
     return () => {
       if (ws.current) {
-        console.log("[useChatroom] Cleaning up WebSocket on unmount");
         ws.current.close();
         ws.current = null;
       }

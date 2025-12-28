@@ -101,7 +101,6 @@ export async function generateRoomKey(): Promise<CryptoKey> {
 export async function exportKey(key: CryptoKey): Promise<string> {
   const exported = await window.crypto.subtle.exportKey('raw', key);
   const base64 = btoa(String.fromCharCode(...new Uint8Array(exported)));
-  console.log('[Encryption] Exported key (first 10 chars):', base64.substring(0, 10));
   return base64;
 }
 
@@ -109,7 +108,6 @@ export async function exportKey(key: CryptoKey): Promise<string> {
  * Imports a base64 string as an AES-GCM CryptoKey.
  */
 export async function importRoomKey(keyBase64: string): Promise<CryptoKey> {
-  console.log('[Encryption] Importing key (first 10 chars):', keyBase64.substring(0, 10));
   const keyBuffer = Uint8Array.from(atob(keyBase64), c => c.charCodeAt(0));
   return window.crypto.subtle.importKey(
     'raw',

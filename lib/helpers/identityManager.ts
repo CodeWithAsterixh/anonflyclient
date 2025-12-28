@@ -27,11 +27,9 @@ async function openDB(): Promise<IDBDatabase> {
     request.onsuccess = () => resolve(request.result);
     request.onupgradeneeded = (event) => {
       const db = request.result;
-      console.log(`[identityManager] Upgrading IndexedDB from ${event.oldVersion} to ${event.newVersion}`);
       
       // If upgrading from an older version, clear the stores to ensure correct schema
       if (event.oldVersion > 0 && event.oldVersion < 5) {
-        console.log("[identityManager] Older version detected. Recreating object stores...");
         if (db.objectStoreNames.contains(STORE_NAME)) {
           db.deleteObjectStore(STORE_NAME);
         }
@@ -41,12 +39,10 @@ async function openDB(): Promise<IDBDatabase> {
       }
 
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        console.log(`[identityManager] Creating ${STORE_NAME} with keyPath 'aid'`);
         db.createObjectStore(STORE_NAME, { keyPath: 'aid' });
       }
       
       if (!db.objectStoreNames.contains(ROOM_KEY_STORE)) {
-        console.log(`[identityManager] Creating ${ROOM_KEY_STORE} (out-of-line keys)`);
         db.createObjectStore(ROOM_KEY_STORE);
       }
     };

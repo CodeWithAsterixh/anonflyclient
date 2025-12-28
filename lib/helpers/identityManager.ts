@@ -12,7 +12,7 @@ export interface Identity {
 }
 
 const DB_NAME = 'anonfly_identity_db';
-const DB_VERSION = 3;
+const DB_VERSION = 5;
 const STORE_NAME = 'identity_store';
 const ROOM_KEY_STORE = 'room_key_store';
 const ACTIVE_IDENTITY_KEY = 'active_identity_aid';
@@ -20,14 +20,33 @@ const ACTIVE_IDENTITY_KEY = 'active_identity_aid';
 async function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => {
+      console.error("[identityManager] Failed to open IndexedDB:", request.error);
+      reject(request.error);
+    };
     request.onsuccess = () => resolve(request.result);
     request.onupgradeneeded = (event) => {
       const db = request.result;
+      console.log(`[identityManager] Upgrading IndexedDB from ${event.oldVersion} to ${event.newVersion}`);
+      
+      // If upgrading from an older version, clear the stores to ensure correct schema
+      if (event.oldVersion > 0 && event.oldVersion < 5) {
+        console.log("[identityManager] Older version detected. Recreating object stores...");
+        if (db.objectStoreNames.contains(STORE_NAME)) {
+          db.deleteObjectStore(STORE_NAME);
+        }
+        if (db.objectStoreNames.contains(ROOM_KEY_STORE)) {
+          db.deleteObjectStore(ROOM_KEY_STORE);
+        }
+      }
+
       if (!db.objectStoreNames.contains(STORE_NAME)) {
+        console.log(`[identityManager] Creating ${STORE_NAME} with keyPath 'aid'`);
         db.createObjectStore(STORE_NAME, { keyPath: 'aid' });
       }
+      
       if (!db.objectStoreNames.contains(ROOM_KEY_STORE)) {
+        console.log(`[identityManager] Creating ${ROOM_KEY_STORE} (out-of-line keys)`);
         db.createObjectStore(ROOM_KEY_STORE);
       }
     };
@@ -35,6 +54,10 @@ async function openDB(): Promise<IDBDatabase> {
 }
 
 export async function saveRoomKey(chatroomId: string, keyBase64: string): Promise<void> {
+  if (!chatroomId) {
+    console.error("[identityManager] Cannot save room key: chatroomId is missing");
+    return;
+  }
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(ROOM_KEY_STORE, 'readwrite');
@@ -46,6 +69,7 @@ export async function saveRoomKey(chatroomId: string, keyBase64: string): Promis
 }
 
 export async function getRoomKey(chatroomId: string): Promise<string | null> {
+  if (!chatroomId) return null;
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(ROOM_KEY_STORE, 'readonly');
@@ -68,12 +92,27 @@ export async function clearRoomKeys(): Promise<void> {
 }
 
 export async function saveIdentity(identity: Identity): Promise<void> {
+  if (!identity || !identity.aid) {
+    console.error("[identityManager] Cannot save identity: aid is missing");
+    return;
+  }
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
+    
+    // Safety check: ensure the store has the expected keyPath
+    if (store.keyPath !== 'aid') {
+      console.error(`[identityManager] Object store ${STORE_NAME} has incorrect keyPath: ${store.keyPath}. Expected 'aid'.`);
+      reject(new Error(`Incorrect keyPath for ${STORE_NAME}`));
+      return;
+    }
+
     const request = store.put(identity);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => {
+      console.error("[identityManager] Error in saveIdentity put request:", request.error);
+      reject(request.error);
+    };
     request.onsuccess = () => {
       localStorage.setItem(ACTIVE_IDENTITY_KEY, identity.aid);
       resolve();

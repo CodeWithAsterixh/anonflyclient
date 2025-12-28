@@ -29,7 +29,7 @@ export const useChatroomList = (): UseChatroomListReturn => {
   const [chatrooms, setChatrooms] = useState<Chatroom[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { token, loading:loadingAuth } = useAuth();
+  const { token, isLoading: loadingAuth } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {

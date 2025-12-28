@@ -12,22 +12,23 @@ export interface Identity {
 }
 
 const DB_NAME = 'anonfly_identity_db';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const STORE_NAME = 'identity_store';
 const ROOM_KEY_STORE = 'room_key_store';
-const IDENTITY_KEY = 'current_identity';
+const ACTIVE_IDENTITY_KEY = 'active_identity_aid';
 
 async function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onerror = () => reject(request.error);
     request.onsuccess = () => resolve(request.result);
-    request.onupgradeneeded = () => {
-      if (!request.result.objectStoreNames.contains(STORE_NAME)) {
-        request.result.createObjectStore(STORE_NAME);
+    request.onupgradeneeded = (event) => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'aid' });
       }
-      if (!request.result.objectStoreNames.contains(ROOM_KEY_STORE)) {
-        request.result.createObjectStore(ROOM_KEY_STORE);
+      if (!db.objectStoreNames.contains(ROOM_KEY_STORE)) {
+        db.createObjectStore(ROOM_KEY_STORE);
       }
     };
   });
@@ -71,31 +72,89 @@ export async function saveIdentity(identity: Identity): Promise<void> {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
-    const request = store.put(identity, IDENTITY_KEY);
+    const request = store.put(identity);
     request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve();
+    request.onsuccess = () => {
+      localStorage.setItem(ACTIVE_IDENTITY_KEY, identity.aid);
+      resolve();
+    };
   });
 }
 
 export async function getIdentity(): Promise<Identity | null> {
   const db = await openDB();
+  const activeAid = localStorage.getItem(ACTIVE_IDENTITY_KEY);
+  
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, 'readonly');
     const store = transaction.objectStore(STORE_NAME);
-    const request = store.get(IDENTITY_KEY);
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result || null);
+    
+    if (activeAid) {
+      const request = store.get(activeAid);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result || null);
+    } else {
+      // Fallback: Get the first available identity if no active one is set
+      const request = store.openCursor();
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const cursor = request.result;
+        if (cursor) {
+          localStorage.setItem(ACTIVE_IDENTITY_KEY, cursor.value.aid);
+          resolve(cursor.value);
+        } else {
+          resolve(null);
+        }
+      };
+    }
   });
 }
 
-export async function clearIdentity(): Promise<void> {
+export async function getAllIdentities(): Promise<Identity[]> {
   const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.getAll();
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result || []);
+  });
+}
+
+export async function switchIdentity(aid: string): Promise<Identity | null> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get(aid);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      if (request.result) {
+        localStorage.setItem(ACTIVE_IDENTITY_KEY, aid);
+        resolve(request.result);
+      } else {
+        resolve(null);
+      }
+    };
+  });
+}
+
+export async function clearIdentity(aid?: string): Promise<void> {
+  const db = await openDB();
+  const targetAid = aid || localStorage.getItem(ACTIVE_IDENTITY_KEY);
+  if (!targetAid) return;
+
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
-    const request = store.delete(IDENTITY_KEY);
+    const request = store.delete(targetAid);
     request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve();
+    request.onsuccess = () => {
+      if (targetAid === localStorage.getItem(ACTIVE_IDENTITY_KEY)) {
+        localStorage.removeItem(ACTIVE_IDENTITY_KEY);
+      }
+      resolve();
+    };
   });
 }
 

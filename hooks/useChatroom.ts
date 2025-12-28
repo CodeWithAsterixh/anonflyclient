@@ -79,7 +79,8 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
   );
   const roomKeyRef = useRef<CryptoKey | null>(null);
   const ws = useRef<WebSocket | null>(null);
-  const { user, token, loading, logout } = useAuth();
+  const { user, token, isLoading: loading, logout } = useAuth();
+  const joiningRef = useRef<string | null>(null);
 
   const currentChatroomIdRef = useRef(currentChatroomId);
 
@@ -161,6 +162,11 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
         return;
       }
 
+      // If we are already joining this room, don't send another request
+      if (joiningRef.current === chatroomId && ws.current?.readyState === WebSocket.OPEN) {
+        return;
+      }
+
       setError(null);
       // Set the current chatroom ID immediately
       setCurrentChatroomId(chatroomId);
@@ -170,6 +176,7 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
         try {
           const identity = await getIdentity();
           if (identity) {
+            joiningRef.current = chatroomId;
             ws.current.send(
               JSON.stringify({
                 type: "joinChatroom",
@@ -255,6 +262,7 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
 
         switch (message.type) {
             case "joinSuccess":
+          joiningRef.current = null;
           setCurrentChatroomId(message.chatroomId);
           currentChatroomIdRef.current = message.chatroomId; // Update ref
           setMessages([]); // Clear messages on joining a new room
@@ -416,48 +424,53 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
           break;
 
         case "chatMessage":
-          let content = message.content;
-          let isEncrypted = false;
+          const messageId = message.messageId || `msg-${message.timestamp || Date.now()}-${message.senderAid}`;
+          
+          // Prevent duplicates early
+          if (messagesRef.current.some((m) => m.id === messageId)) {
+            break;
+          }
 
-          console.log(`[useChatroom] Received message: ${message.messageId || 'no-id'}, roomKey available: ${!!roomKeyRef.current}`);
+          let chatContent = message.content;
+          let isMsgEncrypted = false;
+
+          console.log(`[useChatroom] Received message: ${messageId}, roomKey available: ${!!roomKeyRef.current}`);
 
           try {
             // Try to parse content as an E2EE blob
-            const blob = typeof content === 'string' ? JSON.parse(content) : content;
+            const blob = typeof chatContent === 'string' ? JSON.parse(chatContent) : chatContent;
             if (blob && blob.ciphertext && blob.iv) {
               if (roomKeyRef.current) {
-                console.log(`[useChatroom] Attempting decryption for message: ${message.messageId || 'no-id'}`);
-                content = await decryptMessage(
+                console.log(`[useChatroom] Attempting decryption for message: ${messageId}`);
+                chatContent = await decryptMessage(
                   blob.ciphertext,
                   blob.iv,
                   roomKeyRef.current
                 );
-                isEncrypted = true;
-                console.log(`[useChatroom] Decryption successful for message: ${message.messageId || 'no-id'}`);
+                isMsgEncrypted = true;
+                console.log(`[useChatroom] Decryption successful for message: ${messageId}`);
               } else {
-                console.log(`[useChatroom] Room key not yet available for message: ${message.messageId || 'no-id'}. Storing as blob.`);
-                content = JSON.stringify(blob);
+                console.log(`[useChatroom] Room key not yet available for message: ${messageId}. Storing as blob.`);
+                chatContent = JSON.stringify(blob);
               }
             }
           } catch (e) {
             if (e instanceof Error && e.name === 'OperationError') {
-              console.error(`[useChatroom] Decryption failed (OperationError) for message: ${message.messageId || 'no-id'}. This usually means the room key is incorrect.`);
-            } else {
-              // Not a JSON blob or other error
+              console.error(`[useChatroom] Decryption failed (OperationError) for message: ${messageId}. This usually means the room key is incorrect.`);
             }
           }
 
           setMessages((prevMessages) => [
             ...prevMessages,
             {
-              id: message.messageId || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              id: messageId,
               senderAid: message.senderAid,
               senderUsername: message.senderUsername,
-              content: content,
+              content: chatContent,
               signature: message.signature,
-              timestamp: message.timestamp,
+              timestamp: message.timestamp || new Date().toISOString(),
               type: "message",
-              isEncrypted,
+              isEncrypted: isMsgEncrypted,
             },
           ]);
           break;
@@ -476,13 +489,16 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
             return next;
           });
 
+          const joinMsgId = `system-join-${message.userAid}-${message.timestamp || Date.now()}`;
           setMessages((prevMessages) => {
+            if (prevMessages.some(m => m.id === joinMsgId)) return prevMessages;
+            
             const newMessage: Message = {
-              id: `system-${Date.now()}`,
+              id: joinMsgId,
               senderAid: "system",
               senderUsername: "System",
               content: `${message.username} just joined`,
-              timestamp: new Date().toISOString(),
+              timestamp: message.timestamp || new Date().toISOString(),
               type: "system",
             };
             return [...prevMessages, newMessage];
@@ -498,13 +514,16 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
             return next;
           });
 
+          const leftMsgId = `system-leave-${message.userAid}-${message.timestamp || Date.now()}`;
           setMessages((prevMessages) => {
+            if (prevMessages.some(m => m.id === leftMsgId)) return prevMessages;
+
             const newMessage: Message = {
-              id: `system-${Date.now()}`,
+              id: leftMsgId,
               senderAid: "system",
               senderUsername: "System",
               content: `${message.username} left the chat`,
-              timestamp: new Date().toISOString(),
+              timestamp: message.timestamp || new Date().toISOString(),
               type: "system",
             };
             return [...prevMessages, newMessage];

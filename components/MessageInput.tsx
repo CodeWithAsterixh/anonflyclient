@@ -62,7 +62,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, isDisabled }
   };
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm p-3 border-t border-gray-200 flex items-end gap-2 z-10">
+    <div className="bg-white/80 sticky bottom-0 left-0 backdrop-blur-sm p-3 border-t border-gray-200 flex items-end gap-2 z-10">
       <div className="flex-1 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <textarea
           ref={textareaRef}

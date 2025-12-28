@@ -371,7 +371,7 @@ const ChatroomPage: React.FC = () => {
     return <NoChatSelectedFallback />;
   }
 
-  if (!isConnected) {
+  if (!isConnected && (!displayDetail || !displayDetail.isLocked)) {
     return <JoinRoomOverlay message="Connecting to chat service..." />;
   }
 

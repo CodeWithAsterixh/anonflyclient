@@ -367,9 +367,9 @@ const ChatroomPage: React.FC = () => {
           />
           {/* Header */}
 
-          <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3 shadow-sm flex flex-col justify-between items-center z-10">
+          <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm flex flex-col gap-2 justify-between items-center z-10">
             <Logo showText size={32} />
-            <div className="w-full flex justify-between items-center bg-neutral-200/50">
+            <div className="w-full flex justify-between items-center bg-neutral-200/50 px-4 py-3">
               <div className="flex items-center gap-3">
                 <button
                   onClick={onBack}
@@ -500,9 +500,9 @@ const ChatroomPage: React.FC = () => {
           }}
         />
         {/* Header */}
-        <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3 shadow-sm flex flex-col justify-between items-center z-10">
+        <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
           <Logo showText size={32} />
-          <div className="w-full flex justify-between items-center bg-neutral-200/50">
+          <div className="w-full flex justify-between items-center bg-neutral-200/50 px-4 py-3">
             <div className="flex items-center gap-3">
               <button
                 onClick={onBack}

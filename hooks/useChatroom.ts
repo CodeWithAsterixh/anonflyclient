@@ -521,6 +521,13 @@ export const useChatroom = (initialChatroomId?: string | null): UseChatroomRetur
 
   useEffect(() => {
     connect();
+    return () => {
+      if (ws.current) {
+        console.log("[useChatroom] Cleaning up WebSocket on unmount");
+        ws.current.close();
+        ws.current = null;
+      }
+    };
   }, [connect]);
 
   const sendMessage = useCallback(

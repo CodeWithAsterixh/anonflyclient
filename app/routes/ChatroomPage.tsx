@@ -218,7 +218,8 @@ const ChatroomPage: React.FC = () => {
   };
 
   if(!chatroomDetail) {
-    return <NoChatSelectedFallback/>;
+    navigate('/')
+    return null;
   }
   if (!isJoined) {
     // show skeleton with overlay prompting the user to join

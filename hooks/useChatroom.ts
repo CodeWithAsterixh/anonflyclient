@@ -1,8 +1,17 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useAuth } from './useAuth';
-import { getChatWSURL } from '../lib/constants/api';
-import { getIdentity } from '../lib/helpers/identityManager';
-import { encryptMessage, signBlob, deriveSharedSecret, decryptMessage, verifyBlobSignature, generateRoomKey, exportKey, importRoomKey } from '../lib/helpers/encryption';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useAuth } from "./useAuth";
+import { getChatWSURL } from "../lib/constants/api";
+import { getIdentity } from "../lib/helpers/identityManager";
+import {
+  encryptMessage,
+  signBlob,
+  deriveSharedSecret,
+  decryptMessage,
+  verifyBlobSignature,
+  generateRoomKey,
+  exportKey,
+  importRoomKey,
+} from "../lib/helpers/encryption";
 
 interface Participant {
   userAid: string;
@@ -18,7 +27,7 @@ interface Message {
   content: string;
   signature?: string;
   timestamp: string;
-  type?: 'message' | 'system';
+  type?: "message" | "system";
   isEncrypted?: boolean;
 }
 
@@ -43,7 +52,9 @@ interface UseChatroomReturn {
  */
 export const useChatroom = (): UseChatroomReturn => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [participants, setParticipants] = useState<Map<string, Participant>>(new Map());
+  const [participants, setParticipants] = useState<Map<string, Participant>>(
+    new Map()
+  );
   const participantsRef = useRef(participants);
   useEffect(() => {
     participantsRef.current = participants;
@@ -52,7 +63,9 @@ export const useChatroom = (): UseChatroomReturn => {
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [hasRoomKey, setHasRoomKey] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentChatroomId, setCurrentChatroomId] = useState<string | null>(null);
+  const [currentChatroomId, setCurrentChatroomId] = useState<string | null>(
+    null
+  );
   const roomKeyRef = useRef<CryptoKey | null>(null);
   const ws = useRef<WebSocket | null>(null);
   const { user, token, loading } = useAuth();
@@ -61,18 +74,45 @@ export const useChatroom = (): UseChatroomReturn => {
   useEffect(() => {
     currentChatroomIdRef.current = currentChatroomId;
   }, [currentChatroomId]);
+  const joinChatroom = useCallback(
+    async (chatroomId: string) => {
+      if (!user && !loading) {
+        setError("Cannot join chatroom: User not authenticated.");
+        return;
+      }
+
+      // Set the current chatroom ID immediately
+      setCurrentChatroomId(chatroomId);
+      currentChatroomIdRef.current = chatroomId; // Update ref too
+
+      if (ws.current?.readyState === WebSocket.OPEN && user) {
+        const identity = await getIdentity();
+        if (identity) {
+          ws.current.send(
+            JSON.stringify({
+              type: "joinChatroom",
+              chatroomId,
+              userAid: identity.aid,
+              username: identity.username,
+            })
+          );
+        }
+      }
+    },
+    [user, loading]
+  );
 
   const connect = useCallback(() => {
-    if (!token || loading) { // Only connect if token is available and auth is not loading
-      if (!loading) { // Only set error if not loading, otherwise it's a transient state
-        setError('Authentication token not found or still loading.');
+    if (!token || loading) {
+      if (!loading) {
+        setError("Authentication token not found or still loading.");
       }
       return;
     }
 
-    // Ensure previous WebSocket connection is closed before opening a new one
-    if (ws.current) {
-      ws.current.close();
+    // Reuse existing WebSocket if it's already open
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      return;
     }
 
     const baseWs = getChatWSURL();
@@ -82,16 +122,21 @@ export const useChatroom = (): UseChatroomReturn => {
     ws.current.onopen = () => {
       setIsConnected(true);
       setError(null);
+      // Re-join current chatroom if we have one
+      if (currentChatroomIdRef.current) {
+        joinChatroom(currentChatroomIdRef.current);
+      }
     };
 
     ws.current.onmessage = async (event) => {
       const message = JSON.parse(event.data);
 
       switch (message.type) {
-        case 'joinSuccess':
+        case "joinSuccess":
           setCurrentChatroomId(message.chatroomId);
+          currentChatroomIdRef.current = message.chatroomId; // Update ref
           setMessages([]); // Clear messages on joining a new room
-          
+
           // Populate participants
           const participantMap = new Map<string, Participant>();
           if (message.participants) {
@@ -99,6 +144,7 @@ export const useChatroom = (): UseChatroomReturn => {
               participantMap.set(p.userAid, p);
             });
             setParticipants(participantMap);
+            participantsRef.current = participantMap; // Update ref
           }
 
           // If I'm the first one, generate a room key
@@ -108,42 +154,59 @@ export const useChatroom = (): UseChatroomReturn => {
             setHasRoomKey(true);
           } else {
             // Request room key from others
-            ws.current?.send(JSON.stringify({
-              type: 'roomKeyRequest',
-              chatroomId: message.chatroomId,
-            }));
+            ws.current?.send(
+              JSON.stringify({
+                type: "roomKeyRequest",
+                chatroomId: message.chatroomId,
+              })
+            );
           }
           break;
 
-        case 'roomKeyRequest':
+        case "roomKeyRequest":
           if (roomKeyRef.current && user) {
             const requester = participantsRef.current.get(message.senderAid);
             if (requester && requester.exchangePublicKey) {
               const identity = await getIdentity();
               if (identity) {
-                const sharedSecret = await deriveSharedSecret(identity.exchangeKeyPair.privateKey, requester.exchangePublicKey);
+                const sharedSecret = await deriveSharedSecret(
+                  identity.exchangeKeyPair.privateKey,
+                  requester.exchangePublicKey
+                );
                 const exportedKey = await exportKey(roomKeyRef.current);
-                const encryptedKey = await encryptMessage(exportedKey, sharedSecret);
-                
-                ws.current?.send(JSON.stringify({
-                  type: 'roomKeyShare',
-                  chatroomId: message.chatroomId,
-                  targetAid: message.senderAid,
-                  encryptedKey: encryptedKey.ciphertext,
-                  iv: encryptedKey.iv,
-                }));
+                const encryptedKey = await encryptMessage(
+                  exportedKey,
+                  sharedSecret
+                );
+
+                ws.current?.send(
+                  JSON.stringify({
+                    type: "roomKeyShare",
+                    chatroomId: message.chatroomId,
+                    targetAid: message.senderAid,
+                    encryptedKey: encryptedKey.ciphertext,
+                    iv: encryptedKey.iv,
+                  })
+                );
               }
             }
           }
           break;
 
-        case 'roomKeyShare':
+        case "roomKeyShare":
           const identityForShare = await getIdentity();
           if (identityForShare && message.targetAid === identityForShare.aid) {
             const sender = participantsRef.current.get(message.senderAid);
             if (sender && sender.exchangePublicKey) {
-              const sharedSecret = await deriveSharedSecret(identityForShare.exchangeKeyPair.privateKey, sender.exchangePublicKey);
-              const decryptedKeyBase64 = await decryptMessage(message.encryptedKey, message.iv, sharedSecret);
+              const sharedSecret = await deriveSharedSecret(
+                identityForShare.exchangeKeyPair.privateKey,
+                sender.exchangePublicKey
+              );
+              const decryptedKeyBase64 = await decryptMessage(
+                message.encryptedKey,
+                message.iv,
+                sharedSecret
+              );
               const key = await importRoomKey(decryptedKeyBase64);
               roomKeyRef.current = key;
               setHasRoomKey(true);
@@ -151,34 +214,47 @@ export const useChatroom = (): UseChatroomReturn => {
           }
           break;
 
-        case 'chatMessage':
+        case "chatMessage":
           let content = message.content;
           let isEncrypted = false;
-          
+
           try {
             // Try to parse content as an E2EE blob
-            const blob = JSON.parse(content);
-            if (blob.ciphertext && blob.iv && roomKeyRef.current) {
-              content = await decryptMessage(blob.ciphertext, blob.iv, roomKeyRef.current);
-              isEncrypted = true;
+            const blob = typeof content === 'string' ? JSON.parse(content) : content;
+            if (blob && blob.ciphertext && blob.iv) {
+              if (roomKeyRef.current) {
+                content = await decryptMessage(
+                  blob.ciphertext,
+                  blob.iv,
+                  roomKeyRef.current
+                );
+                isEncrypted = true;
+              } else {
+                // If we don't have the room key yet, keep the encrypted blob
+                // The UI will show the ciphertext if not handled, or we could show a "Decrypting..." state
+                content = JSON.stringify(blob);
+              }
             }
           } catch (e) {
             // Not a JSON blob or decryption failed, treat as plaintext
           }
 
-          setMessages((prevMessages) => [...prevMessages, {
-            id: message.messageId,
-            senderAid: message.senderAid,
-            senderUsername: message.senderUsername,
-            content: content,
-            signature: message.signature,
-            timestamp: message.timestamp,
-            type: 'message',
-            isEncrypted,
-          }]);
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            {
+              id: message.messageId,
+              senderAid: message.senderAid,
+              senderUsername: message.senderUsername,
+              content: content,
+              signature: message.signature,
+              timestamp: message.timestamp,
+              type: "message",
+              isEncrypted,
+            },
+          ]);
           break;
 
-        case 'userJoined':
+        case "userJoined":
           // Add to participants map
           setParticipants((prev) => {
             const next = new Map(prev);
@@ -186,58 +262,64 @@ export const useChatroom = (): UseChatroomReturn => {
               userAid: message.userAid,
               username: message.username,
               publicKey: message.publicKey,
-              exchangePublicKey: message.exchangePublicKey
+              exchangePublicKey: message.exchangePublicKey,
             });
+            participantsRef.current = next; // Update ref
             return next;
           });
 
           setMessages((prevMessages) => {
             const newMessage: Message = {
               id: `system-${Date.now()}`,
-              senderAid: 'system',
-              senderUsername: 'System',
+              senderAid: "system",
+              senderUsername: "System",
               content: `${message.username} just joined`,
               timestamp: new Date().toISOString(),
-              type: 'system',
+              type: "system",
             };
             return [...prevMessages, newMessage];
           });
           break;
 
-        case 'userLeft':
+        case "userLeft":
           // Remove from participants map
           setParticipants((prev) => {
             const next = new Map(prev);
             next.delete(message.userAid);
+            participantsRef.current = next; // Update ref
             return next;
           });
 
           setMessages((prevMessages) => {
             const newMessage: Message = {
               id: `system-${Date.now()}`,
-              senderAid: 'system',
-              senderUsername: 'System',
+              senderAid: "system",
+              senderUsername: "System",
               content: `${message.username} left the chat`,
               timestamp: new Date().toISOString(),
-              type: 'system',
+              type: "system",
             };
             return [...prevMessages, newMessage];
           });
           break;
 
-        case 'leaveSuccess':
+        case "leaveSuccess":
           setCurrentChatroomId(null);
+          currentChatroomIdRef.current = null; // Update ref
           setMessages([]); // Clear messages on leaving a room
           roomKeyRef.current = null;
           setHasRoomKey(false);
+          participantsRef.current = new Map(); // Update ref
           setParticipants(new Map());
           break;
 
-        case 'messageDeleted':
-          setMessages((prevMessages) => prevMessages.filter(msg => msg.id !== message.messageId));
+        case "messageDeleted":
+          setMessages((prevMessages) =>
+            prevMessages.filter((msg) => msg.id !== message.messageId)
+          );
           break;
 
-        case 'error':
+        case "error":
           setError(message.message);
           break;
 
@@ -254,73 +336,70 @@ export const useChatroom = (): UseChatroomReturn => {
     };
 
     ws.current.onerror = (error) => {
-      setError('WebSocket connection error.');
+      setError("WebSocket connection error.");
     };
 
     return () => {
-      ws.current?.close();
+      // Don't close WebSocket on unmount to keep multi-room/persistent connection
+      // We only close it if we explicitly leave or go offline
     };
-  }, [token, user]);
+  }, [token, user, joinChatroom]);
 
   useEffect(() => {
     connect();
   }, [connect]);
 
-  const sendMessage = useCallback(async (content: string) => {
-    if (ws.current?.readyState === WebSocket.OPEN && currentChatroomId && user) {
-      try {
-        const identity = await getIdentity();
-        if (!identity) throw new Error('Identity not found');
+  const sendMessage = useCallback(
+    async (content: string) => {
+      if (
+        ws.current?.readyState === WebSocket.OPEN &&
+        currentChatroomId &&
+        user
+      ) {
+        try {
+          const identity = await getIdentity();
+          if (!identity) throw new Error("Identity not found");
 
-        let finalContent = content;
-        if (roomKeyRef.current) {
-          const encrypted = await encryptMessage(content, roomKeyRef.current);
-          finalContent = JSON.stringify(encrypted);
+          let finalContent = content;
+          if (roomKeyRef.current) {
+            const encrypted = await encryptMessage(content, roomKeyRef.current);
+            finalContent = JSON.stringify(encrypted);
+          }
+
+          const signature = await signBlob(
+            btoa(finalContent),
+            identity.identityKeyPair.privateKey
+          );
+
+          ws.current.send(
+            JSON.stringify({
+              type: "message",
+              chatroomId: currentChatroomId,
+              content: finalContent,
+              signature,
+              userAid: identity.aid,
+            })
+          );
+        } catch (err: any) {
+          setError("Failed to secure message");
         }
-        
-        const signature = await signBlob(btoa(finalContent), identity.identityKeyPair.privateKey);
-
-        ws.current.send(JSON.stringify({
-          type: 'message',
-          chatroomId: currentChatroomId,
-          content: finalContent,
-          signature,
-          userAid: identity.aid,
-        }));
-      } catch (err: any) {
-        setError('Failed to secure message');
+      } else {
+        setError("Cannot send message: Not connected or not in a chatroom.");
       }
-    } else {
-      setError('Cannot send message: Not connected or not in a chatroom.');
-    }
-  }, [currentChatroomId, user]);
-
-  const joinChatroom = useCallback(async (chatroomId: string) => {
-    if (!user && !loading) {
-      setError('Cannot join chatroom: User not authenticated.');
-      return;
-    }
-    if (ws.current?.readyState === WebSocket.OPEN && user) {
-      const identity = await getIdentity();
-      if (identity) {
-        ws.current.send(JSON.stringify({
-          type: 'joinChatroom',
-          chatroomId,
-          userAid: identity.aid,
-          username: identity.username,
-        }));
-      }
-    }
-  }, [user]);
+    },
+    [currentChatroomId, user]
+  );
 
   const leaveChatroom = useCallback(() => {
     if (ws.current?.readyState === WebSocket.OPEN && currentChatroomId) {
-      ws.current.send(JSON.stringify({
-        type: 'leaveChatroom',
-        chatroomId: currentChatroomId,
-      }));
+      ws.current.send(
+        JSON.stringify({
+          type: "leaveChatroom",
+          chatroomId: currentChatroomId,
+        })
+      );
     } else {
-      setError('Cannot leave chatroom: Not connected or not in a chatroom.');
+      setError("Cannot leave chatroom: Not connected or not in a chatroom.");
     }
   }, [currentChatroomId]);
 
@@ -349,4 +428,3 @@ export interface ChatroomDetail {
   hostAid: string;
   participants: ChatroomParticipant[];
 }
-

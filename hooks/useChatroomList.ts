@@ -42,11 +42,13 @@ export const useChatroomList = (): UseChatroomListReturn => {
     setLoading(true);
     setError(null);
 
-    const eventSource = new EventSource(`${CHATROOM_API_BASE_URL}/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    } as EventSourceInit);
+    // Append token as query parameter since standard EventSource doesn't support custom headers
+    const url = new URL(CHATROOM_API_BASE_URL, window.location.origin);
+    if (token) {
+      url.searchParams.append('token', token);
+    }
+
+    const eventSource = new EventSource(url.toString());
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);

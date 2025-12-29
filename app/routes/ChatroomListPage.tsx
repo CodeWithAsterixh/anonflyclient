@@ -15,7 +15,7 @@ interface ChatroomListPageProps {
 }
 
 const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect }) => {
-  const { chatrooms, loading, error } = useChatroomList();
+  const { chatrooms, loading, error, retryCountdown } = useChatroomList();
   const { user, identities, switchAccount, logout } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -88,13 +88,15 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect })
                     <Menu.Item>
                       {({ active }) => (
                         <button
-                          onClick={() => window.location.href = '/login'}
-                          className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                            active ? 'bg-gray-50 text-gray-900' : 'text-gray-600'
+                          onClick={() => setIsModalOpen(true)}
+                          className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                            active ? 'bg-green-50 text-green-700' : 'text-gray-700'
                           }`}
                         >
-                          <UserPlus size={18} />
-                          <span>Add Account</span>
+                          <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                            <Plus size={18} />
+                          </div>
+                          <span className="font-medium">Create Chatroom</span>
                         </button>
                       )}
                     </Menu.Item>
@@ -102,12 +104,14 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect })
                       {({ active }) => (
                         <button
                           onClick={logout}
-                          className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                            active ? 'bg-red-50 text-red-600' : 'text-red-600'
+                          className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                            active ? 'bg-red-50 text-red-700' : 'text-gray-700'
                           }`}
                         >
-                          <LogOut size={18} />
-                          <span>Sign Out</span>
+                          <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                            <LogOut size={18} />
+                          </div>
+                          <span className="font-medium">Logout</span>
                         </button>
                       )}
                     </Menu.Item>
@@ -115,40 +119,52 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect })
                 </Menu.Items>
               </Transition>
             </Menu>
-
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-2 rounded-lg transition-colors"
-              aria-label="Create new chatroom"
-            >
-              <Plus size={28} />
-            </button>
           </div>
         </div>
-        <div className="space-y-2 flex-1">
+
+        <div className="flex-1">
           {loading ? (
             <ChatListSkeleton />
           ) : error ? (
-            <div className="flex items-center justify-center h-full bg-gray-50">
-              <p className="text-lg text-red-600">Error: {error}</p>
+            <div className="flex flex-col items-center justify-center h-64 text-center">
+              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4">
+                <Users size={32} />
+              </div>
+              <p className="text-gray-600 font-medium">{error}</p>
+              {retryCountdown !== null && (
+                <p className="text-sm text-gray-400 mt-2">
+                  Retrying in <span className="font-bold text-blue-500">{retryCountdown}s</span>...
+                </p>
+              )}
             </div>
           ) : chatrooms.length === 0 ? (
-            <p className="text-center text-gray-600 py-8">
-              No chatrooms available. Create one!
-            </p>
+            <div className="flex flex-col items-center justify-center h-64 text-center">
+              <div className="w-16 h-16 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mb-4">
+                <Users size={32} />
+              </div>
+              <p className="text-gray-500 font-medium">No chatrooms found</p>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="mt-4 text-blue-600 font-semibold hover:text-blue-700 transition-colors"
+              >
+                Create the first one!
+              </button>
+            </div>
           ) : (
-            chatrooms.map((room) => (
-              <ChatroomCard
-                key={room.id}
-                id={room.id}
-                roomname={room.roomname}
-                description={room.description || ""}
-                participantCount={room.participantCount}
-                lastMessage={room.lastMessage}
-                isLocked={room.isLocked}
-                onClick={() => handleChatroomClick(room.id)}
-              />
-            ))
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {chatrooms.map((room) => (
+                <ChatroomCard
+                  key={room.id}
+                  id={room.id}
+                  roomname={room.roomname}
+                  description={room.description || ""}
+                  participantCount={room.participantCount}
+                  lastMessage={room.lastMessage}
+                  isLocked={room.isLocked}
+                  onClick={() => handleChatroomClick(room.id)}
+                />
+              ))}
+            </div>
           )}
         </div>
       </div>

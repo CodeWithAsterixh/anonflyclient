@@ -17,6 +17,7 @@ interface AuthState {
   loading: boolean;
   error: string | null;
   identities: Identity[];
+  retryCountdown: number | null;
 }
 
 interface AuthContextType {
@@ -28,6 +29,7 @@ interface AuthContextType {
   logout: () => void;
   isLoading: boolean;
   error: string | null;
+  retryCountdown: number | null;
 }
 
 export const useAuth = () => {
@@ -38,7 +40,10 @@ export const useAuth = () => {
     loading: true,
     error: null,
     identities: [],
+    retryCountdown: null,
   });
+
+  const [retryKey, setRetryKey] = useState(0);
 
   const logout = useCallback(() => {
     // We only clear the ephemeral session, NOT the IndexedDB identity
@@ -49,12 +54,13 @@ export const useAuth = () => {
       token: null,
       isAuthenticated: false,
       loading: false,
+      retryCountdown: null,
     }));
     window.location.href = '/login';
   }, []);
 
   const switchAccount = useCallback(async (aid: string) => {
-    setAuthState(prev => ({ ...prev, loading: true }));
+    setAuthState(prev => ({ ...prev, loading: true, retryCountdown: null }));
     try {
       const identity = await switchLocalIdentity(aid);
       if (identity) {
@@ -98,6 +104,7 @@ export const useAuth = () => {
         loading: false,
         error: session.token ? null : 'Network issue: Working in offline mode.',
         identities: allIdentities,
+        retryCountdown: null,
       });
       return;
     }
@@ -118,26 +125,26 @@ export const useAuth = () => {
             loading: false,
             error: null,
             identities: allIdentities,
+            retryCountdown: null,
           });
         } catch (handshakeError) {
           // HANDSHAKE FAILED (e.g. Bad Network)
-          // DO NOT clear user data. Keep the local identity as the "user".
-          const user: User = { userId: identity.aid, username: identity.username };
-          setAuthState({
-            user,
-            token: null, // No token yet
-            isAuthenticated: true, // Mark as authenticated locally
+          // Start retry countdown
+          setAuthState(prev => ({
+            ...prev,
             loading: false,
-            error: 'Network issue: Working in offline mode.',
+            error: 'Authentication failed. Retrying...',
             identities: allIdentities,
-          });
+            retryCountdown: 5,
+          }));
         }
       } else {
         setAuthState(prev => ({ 
           ...prev, 
           loading: false, 
           isAuthenticated: false,
-          identities: allIdentities 
+          identities: allIdentities,
+          retryCountdown: null,
         }));
       }
     } catch (error: any) {
@@ -146,20 +153,38 @@ export const useAuth = () => {
         loading: false, 
         isAuthenticated: false,
         identities: allIdentities,
-        error: 'Failed to access stored identity'
+        error: 'Failed to access stored identity',
+        retryCountdown: null,
       }));
     }
-  }, []);
+  }, [retryKey]);
 
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
 
+  useEffect(() => {
+    if (authState.retryCountdown === null) return;
+
+    if (authState.retryCountdown > 0) {
+      const timer = setTimeout(() => {
+        setAuthState(prev => ({
+          ...prev,
+          retryCountdown: (prev.retryCountdown || 1) - 1,
+        }));
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else {
+      // Countdown reached 0, trigger retry
+      setRetryKey(prev => prev + 1);
+    }
+  }, [authState.retryCountdown]);
+
   /**
    * Joins the app anonymously by generating an identity and performing a handshake.
    */
   const joinAnonymously = async (username: string) => {
-    setAuthState(prev => ({ ...prev, loading: true, error: null }));
+    setAuthState(prev => ({ ...prev, loading: true, error: null, retryCountdown: null }));
     try {
       const identity = await generateIdentity(username);
       const sessionData = await performHandshake(identity);
@@ -175,6 +200,7 @@ export const useAuth = () => {
         ...prev,
         loading: false,
         error: error.message || 'Failed to join anonymously',
+        retryCountdown: null,
       }));
       throw error;
     }
@@ -190,5 +216,6 @@ export const useAuth = () => {
     isLoading: authState.loading,
     isAuthenticated: authState.isAuthenticated,
     error: authState.error,
+    retryCountdown: authState.retryCountdown,
   };
 };

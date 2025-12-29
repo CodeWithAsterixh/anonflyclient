@@ -17,6 +17,7 @@ interface UseChatroomListReturn {
   chatrooms: Chatroom[];
   loading: boolean;
   error: string | null;
+  retryCountdown: number | null;
 }
 
 /**
@@ -29,6 +30,8 @@ export const useChatroomList = (): UseChatroomListReturn => {
   const [chatrooms, setChatrooms] = useState<Chatroom[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryCountdown, setRetryCountdown] = useState<number | null>(null);
+  const [retryKey, setRetryKey] = useState<number>(0);
   const { token, isLoading: loadingAuth, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -51,6 +54,7 @@ export const useChatroomList = (): UseChatroomListReturn => {
 
     setLoading(true);
     setError(null);
+    setRetryCountdown(null);
 
     // Append token as query parameter since standard EventSource doesn't support custom headers
     const baseUrl = getChatroomAPIURL();
@@ -65,18 +69,36 @@ export const useChatroomList = (): UseChatroomListReturn => {
       const data = JSON.parse(event.data);
       setChatrooms(data);
       setLoading(false);
+      setRetryCountdown(null);
     };
 
     eventSource.onerror = (err) => {
-      setError("Failed to load chatrooms.");
+      setError("Failed to load chatrooms. Retrying...");
       setLoading(false);
       eventSource.close();
+      
+      // Start 5-second countdown
+      setRetryCountdown(5);
     };
 
     return () => {
       eventSource.close();
     };
-  }, [token]);
+  }, [token, loadingAuth, isAuthenticated, retryKey]);
 
-  return { chatrooms, loading, error };
+  useEffect(() => {
+    if (retryCountdown === null) return;
+
+    if (retryCountdown > 0) {
+      const timer = setTimeout(() => {
+        setRetryCountdown(retryCountdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else {
+      // Countdown reached 0, trigger retry
+      setRetryKey(prev => prev + 1);
+    }
+  }, [retryCountdown]);
+
+  return { chatrooms, loading, error, retryCountdown };
 };

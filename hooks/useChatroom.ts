@@ -29,6 +29,11 @@ interface Message {
   timestamp: string;
   type?: "message" | "system";
   isEncrypted?: boolean;
+  replyTo?: {
+    messageId: string;
+    senderUsername: string;
+    content: string;
+  };
 }
 
 export interface ChatroomDetail {
@@ -45,7 +50,7 @@ interface UseChatroomReturn {
   messages: Message[];
   participants: Map<string, Participant>;
   chatroomDetail: ChatroomDetail | null;
-  sendMessage: (content: string) => void;
+  sendMessage: (content: string, replyTo?: { messageId: string; senderUsername: string; content: string }) => void;
   joinChatroom: (chatroomId: string, password?: string) => void;
   leaveChatroom: () => void;
   reconnect: () => void;
@@ -457,6 +462,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
               timestamp: message.timestamp || new Date().toISOString(),
               type: "message",
               isEncrypted: isMsgEncrypted,
+              replyTo: message.replyTo,
             },
           ]);
           break;
@@ -587,7 +593,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
   }, [connect, deferConnection]);
 
   const sendMessage = useCallback(
-    async (content: string) => {
+    async (content: string, replyTo?: { messageId: string; senderUsername: string; content: string }) => {
       if (
         ws.current?.readyState === WebSocket.OPEN &&
         currentChatroomId &&
@@ -615,6 +621,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
               content: finalContent,
               signature,
               userAid: identity.aid,
+              replyTo,
             })
           );
         } catch (err: any) {

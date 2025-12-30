@@ -54,6 +54,11 @@ const ChatroomPage: React.FC = () => {
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<{
+    messageId: string;
+    senderUsername: string;
+    content: string;
+  } | null>(null);
 
   useEffect(() => {
     const fetchChatroomDetails = async () => {
@@ -165,7 +170,8 @@ const ChatroomPage: React.FC = () => {
   };
 
   const handleSendMessage = (content: string) => {
-    sendMessage(content);
+    sendMessage(content, replyingTo || undefined);
+    setReplyingTo(null);
   };
 
   const handleLeaveRoom = () => {
@@ -613,7 +619,11 @@ const ChatroomPage: React.FC = () => {
           className="flex-1 overflow-y-auto p-4 space-y-4 relative z-[1]"
         >
           {messages.map((msg, index) => (
-            <MessageDisplay key={index} message={msg} />
+            <MessageDisplay
+              key={msg.id || index}
+              message={msg}
+              onReply={(replyInfo) => setReplyingTo(replyInfo)}
+            />
           ))}
           <div ref={messagesEndRef} />
 
@@ -633,6 +643,8 @@ const ChatroomPage: React.FC = () => {
         <MessageInput
           onSendMessage={handleSendMessage}
           isDisabled={!isConnected || !hasRoomKey}
+          replyingTo={replyingTo}
+          onCancelReply={() => setReplyingTo(null)}
         />
       </div>
       <EditChatroomModal

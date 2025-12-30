@@ -567,6 +567,10 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
           );
           break;
 
+        case "userTyping":
+          window.dispatchEvent(new CustomEvent('chatroom-typing', { detail: message }));
+          break;
+
         case "error":
           setError(message.message);
           break;
@@ -812,5 +816,6 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     hasRoomKey,
     error,
     currentChatroomId,
+    ws: ws.current
   };
 };

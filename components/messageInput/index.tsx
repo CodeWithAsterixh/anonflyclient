@@ -15,11 +15,42 @@ const MessageInput: React.FC<MessageInputProps> = ({
   replyingTo,
   onCancelReply,
   editingMessage,
-  onCancelEdit
+  onCancelEdit,
+  onTyping
 }) => {
   const [messageInput, setMessageInput] = useState<string>('');
   const isMobileDevice = useIsMobile();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isTypingRef = useRef<boolean>(false);
+
+  // Handle typing status
+  useEffect(() => {
+    if (messageInput.trim() && !isTypingRef.current) {
+      isTypingRef.current = true;
+      onTyping?.(true);
+    } else if (!messageInput.trim() && isTypingRef.current) {
+      isTypingRef.current = false;
+      onTyping?.(false);
+    }
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    if (messageInput.trim()) {
+      typingTimeoutRef.current = setTimeout(() => {
+        isTypingRef.current = false;
+        onTyping?.(false);
+      }, 3000);
+    }
+
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, [messageInput, onTyping]);
 
   // Sync input with editingMessage content
   useEffect(() => {
@@ -61,6 +92,14 @@ const MessageInput: React.FC<MessageInputProps> = ({
         onSendMessage(messageInput);
       }
       setMessageInput('');
+      
+      // Clear typing status immediately on send
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      isTypingRef.current = false;
+      onTyping?.(false);
+
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
       }

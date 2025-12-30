@@ -13,4 +13,5 @@ export interface MessageInputProps {
     content: string;
   } | null;
   onCancelEdit?: () => void;
+  onTyping?: (isTyping: boolean) => void;
 }

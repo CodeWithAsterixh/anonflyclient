@@ -18,4 +18,5 @@ export interface UseChatroomReturn {
   hasRoomKey: boolean;
   error: string | null;
   currentChatroomId: string | null;
+  ws: WebSocket | null;
 }

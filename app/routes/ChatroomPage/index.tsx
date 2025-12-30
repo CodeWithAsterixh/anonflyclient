@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router";
 import { useAuth } from "../../../hooks/useAuth/index";
 import { useChatroom } from "../../../hooks/useChatroom/index";
+import { useTyping } from "../../../components/typingIndicator";
 import type { ChatroomDetail } from "../../../lib/types/chat";
 import type { OutletContext, ReplyingTo, EditingMessage } from "./types";
 import {
@@ -92,7 +93,10 @@ const ChatroomPage: React.FC = () => {
     reconnect,
     clearError,
     currentChatroomId,
+    ws
   } = useChatroom(chatroomId, !chatroomDetail || chatroomDetail.isLocked);
+
+  const { typingUsers, sendTypingStatus } = useTyping(chatroomId, ws);
 
   // Sync isHost with SSE updates
   useEffect(() => {
@@ -338,6 +342,8 @@ const ChatroomPage: React.FC = () => {
       onDeleteMessage={deleteMessage}
       onSendReaction={sendReaction}
       onEditSuccess={handleEditSuccess}
+      onTyping={sendTypingStatus}
+      typingUsers={typingUsers}
     />
   );
 };

@@ -5,6 +5,7 @@ import EditChatroomModal from "../../../../components/editChatroomModal";
 import Logo from "../../../../components/logo";
 import MessageDisplay from "../../../../components/messageDisplay";
 import MessageInput from "../../../../components/messageInput";
+import { TypingIndicator, type TypingUser } from "../../../../components/typingIndicator";
 import ProtectedRoute from "../../../../components/protectedRoute";
 import type { ChatroomDetail, Message } from "../../../../lib/types/chat";
 import type { ReplyingTo, EditingMessage } from "../types";
@@ -15,6 +16,7 @@ interface ChatScreenProps {
   isConnected: boolean;
   isHost: boolean;
   messages: Message[];
+  typingUsers: TypingUser[];
   replyingTo: ReplyingTo | null;
   editingMessage: EditingMessage | null;
   showScrollButton: boolean;
@@ -36,6 +38,7 @@ interface ChatScreenProps {
   onDeleteMessage: (id: string) => void;
   onSendReaction: (id: string, emoji: any) => void;
   onEditSuccess: () => void;
+  onTyping: (isTyping: boolean) => void;
 }
 
 const ChatScreen: React.FC<ChatScreenProps> = ({
@@ -44,6 +47,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   isConnected,
   isHost,
   messages,
+  typingUsers,
   replyingTo,
   editingMessage,
   showScrollButton,
@@ -65,6 +69,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   onDeleteMessage,
   onSendReaction,
   onEditSuccess,
+  onTyping,
 }) => {
   const messagePortalRootRef = useRef<HTMLDivElement>(null);
 
@@ -148,6 +153,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
               portalRoot={messagePortalRootRef.current}
             />
           ))}
+          <TypingIndicator typingUsers={typingUsers} />
           <div ref={messagesEndRef} />
         </div>
 
@@ -171,6 +177,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
           onCancelReply={() => onSetReplyingTo(null)}
           editingMessage={editingMessage}
           onCancelEdit={() => onSetEditingMessage(null)}
+          onTyping={onTyping}
         />
 
         <EditChatroomModal

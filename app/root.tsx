@@ -10,6 +10,7 @@ import { useEffect } from "react";
 
 import type { Route } from "./+types/root";
 import { initializeAPI } from "../lib/constants/api";
+import { ThemeProvider } from "../hooks/useTheme/index";
 import "./app.css";
 
 export const meta: Route.MetaFunction = () => [
@@ -73,7 +74,9 @@ export default function App() {
   }, []);
 
   return (
-    <Outlet />
+    <ThemeProvider>
+      <Outlet />
+    </ThemeProvider>
   );
 }
 

@@ -47,7 +47,7 @@ const ChatLayout: React.FC = () => {
   };
 
   return (
-    <div className="flex h-[100dvh] bg-white overflow-hidden">
+    <div className="flex h-[100dvh] overflow-hidden bg-white">
       {/* Left Column: Chatroom List 
           - Desktop: Always visible (md:block)
           - Mobile: Shows based on JavaScript state or Tailwind hidden state
@@ -75,7 +75,7 @@ const ChatLayout: React.FC = () => {
               ? 'hidden'
               : 'flex'
             : 'hidden md:flex'
-        } flex-1 flex-col bg-gray-50 overflow-hidden relative isolate w-full md:w-auto`}
+        } flex-1 flex-col overflow-hidden relative isolate w-full md:w-auto bg-gray-50`}
       >
         {chatroomId ? (
           <Outlet context={{ onBack: handleBackFromChat, isMobile }} />

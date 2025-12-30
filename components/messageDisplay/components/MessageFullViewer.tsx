@@ -45,7 +45,7 @@ export const MessageFullViewer: React.FC<MessageFullViewerProps> = ({
 }) => {
   return (
     <div
-      className={`pointer-events-auto absolute top-0 h-full inset-0 z-[100] bg-black/10 backdrop-blur-2xl transition-all duration-300 flex items-center p-4 ${
+      className={`pointer-events-auto absolute top-0 h-full inset-0 z-[100] bg-black/10 dark:bg-black/40 backdrop-blur-2xl transition-all duration-300 flex items-center p-4 ${
         isCurrentUser ? "justify-end" : "justify-start"
       }`}
       onClick={closeMenus}

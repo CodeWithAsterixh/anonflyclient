@@ -213,10 +213,10 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
         id={`message-${message.id}`} 
         data-message-id={message.id}
         className={`flex justify-center my-4 transition-all duration-500 ${
-          highlight ? "bg-blue-300/50 rounded-lg p-1" : ""
+          highlight ? "bg-blue-400/20 dark:bg-blue-900/40 rounded-lg p-1" : ""
         }`}
       >
-        <div className="bg-gray-100 text-gray-600 px-4 py-2 rounded-full text-sm italic">
+        <div className="bg-gray-100/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 px-4 py-2 rounded-full text-sm italic backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
           {message.content}
         </div>
       </div>
@@ -230,7 +230,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
         data-message-id={message.id}
         className={`flex items-end gap-2 mb-4 relative transition-all duration-500 ${
           isCurrentUser ? "flex-row-reverse" : "flex-row"
-        } ${highlight ? "bg-blue-300/50 rounded-lg p-1" : ""}`}
+        } ${highlight ? "bg-blue-400/20 dark:bg-blue-900/40 rounded-lg p-1" : ""}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

@@ -46,7 +46,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
         <img
           src={avatarUrl}
           alt={message.senderUsername}
-          className="w-8 h-8 rounded-full shadow-sm border border-gray-100"
+          className="w-8 h-8 rounded-full shadow-sm border border-gray-100 dark:border-gray-800"
         />
       </div>
 
@@ -62,11 +62,11 @@ export const MessageRow: React.FC<MessageRowProps> = ({
           isCurrentUser ? "rounded-br-none" : "rounded-bl-none"
         } ${
           isPreview
-            ? "shadow-2xl ring-4 ring-black/5 min-w-[5rem]"
+            ? "shadow-2xl ring-4 ring-black/10 dark:ring-white/10 min-w-[5rem]"
             : showReactions
-            ? "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] max-w-[90%] md:max-w-[60%] w-auto shadow-2xl ring-4 ring-black/5 scale-110"
+            ? "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] max-w-[90%] md:max-w-[60%] w-auto shadow-2xl ring-4 ring-black/10 dark:ring-white/10 scale-110"
             : isFocused
-            ? "shadow-2xl ring-4 ring-black/5"
+            ? "shadow-2xl ring-4 ring-black/10 dark:ring-white/10"
             : ""
         }`}
       >

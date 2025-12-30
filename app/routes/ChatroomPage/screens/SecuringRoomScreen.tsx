@@ -19,35 +19,25 @@ const SecuringRoomScreen: React.FC<SecuringRoomScreenProps> = ({
 }) => {
   return (
     <ProtectedRoute>
-      <div className="flex flex-col h-[100dvh] bg-gray-50 relative overflow-hidden">
-        {/* Background Image with Opacity */}
-        <div
-          className="absolute inset-0 z-0 pointer-events-none opacity-[0.07]"
-          style={{
-            backgroundImage: "url(/chatroom-bg.jpg)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        />
-        <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
+      <div className="flex flex-col h-[100dvh] bg-transparent relative overflow-hidden transition-colors duration-300">
+        <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
           {isMobile && <Logo showText size={32} className="py-2" />}
-          <div className="w-full flex justify-between items-center bg-neutral-200/50 px-4 py-3">
+          <div className="w-full flex justify-between items-center bg-neutral-200/50 dark:bg-gray-800/50 px-4 py-3">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => {
                   onBack();
                   onNavigateHome();
                 }}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors group"
               >
-                <ChevronDown className="w-5 h-5 rotate-90" />
+                <ChevronDown className="w-5 h-5 rotate-90 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100" />
               </button>
               <div>
-                <h1 className="font-bold text-gray-900 leading-tight">
+                <h1 className="font-bold text-gray-900 dark:text-gray-100 leading-tight">
                   {displayDetail?.roomname || "Loading..."}
                 </h1>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {displayDetail?.participantCount !== undefined
                     ? `${displayDetail.participantCount} participants • Securing room...`
                     : "Securing room..."}
@@ -57,13 +47,13 @@ const SecuringRoomScreen: React.FC<SecuringRoomScreenProps> = ({
           </div>
         </header>
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center z-10">
-          <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 animate-pulse">
+          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mb-4 animate-pulse shadow-lg shadow-blue-500/10">
             <Lock className="w-8 h-8" />
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             Establishing Secure Connection
           </h2>
-          <p className="text-gray-600 max-w-xs">
+          <p className="text-gray-600 dark:text-gray-400 max-w-xs">
             Waiting for other participants to securely share the room key.
             This ensures your messages remain private.
           </p>

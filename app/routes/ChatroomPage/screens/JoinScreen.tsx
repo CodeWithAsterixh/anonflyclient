@@ -13,7 +13,7 @@ const JoinScreen: React.FC<JoinScreenProps> = ({ onNavigateToLogin }) => {
         <div className="flex space-x-4 mt-4">
           <button
             onClick={onNavigateToLogin}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full transition-colors"
+            className="bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full transition-colors"
           >
             Join Anonymously
           </button>

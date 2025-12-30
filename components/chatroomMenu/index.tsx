@@ -14,7 +14,7 @@ const ChatroomMenu: React.FC<ChatroomMenuProps> = ({
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
-        <Menu.Button className="inline-flex w-full justify-center rounded-lg p-2 text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <Menu.Button className="inline-flex w-full justify-center rounded-lg p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
           <MoreVertical className="h-6 w-6" aria-hidden="true" />
         </Menu.Button>
       </div>
@@ -28,14 +28,14 @@ const ChatroomMenu: React.FC<ChatroomMenuProps> = ({
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-xl bg-white shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none p-1.5 border border-gray-100">
+        <Menu.Items className="absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-xl bg-white dark:bg-gray-800 shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none p-1.5 border border-gray-100 dark:border-gray-700">
           <div className="flex flex-col gap-1">
             <Menu.Item>
               {({ active }) => (
                 <button
                   onClick={onLeaveRoom}
                   className={`flex w-full items-center gap-1 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
-                    active ? 'bg-gray-50 text-gray-900' : 'text-gray-700'
+                    active ? 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'
                   }`}
                 >
                   <LogOut size={18} />
@@ -49,7 +49,7 @@ const ChatroomMenu: React.FC<ChatroomMenuProps> = ({
                   <button
                     onClick={onEditRoom}
                     className={`flex w-full items-center gap-1 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
-                      active ? 'bg-gray-50 text-gray-900' : 'text-gray-700'
+                      active ? 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     <Settings size={18} />
@@ -64,7 +64,7 @@ const ChatroomMenu: React.FC<ChatroomMenuProps> = ({
                   <button
                     onClick={onRemoveParticipant}
                     className={`flex w-full items-center gap-1 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
-                      active ? 'bg-gray-50 text-gray-900' : 'text-gray-700'
+                      active ? 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     <UserMinus size={18} />
@@ -74,7 +74,7 @@ const ChatroomMenu: React.FC<ChatroomMenuProps> = ({
               </Menu.Item>
             )}
             {isHost && (
-              <div className="h-px bg-gray-100 my-0.5 mx-2" />
+              <div className="h-px bg-gray-100 dark:bg-gray-700 my-0.5 mx-2" />
             )}
             {isHost && (
               <Menu.Item>
@@ -82,7 +82,7 @@ const ChatroomMenu: React.FC<ChatroomMenuProps> = ({
                   <button
                     onClick={onDeleteRoom}
                     className={`flex w-full items-center gap-1 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
-                      active ? 'bg-red-50 text-red-600' : 'text-red-600'
+                      active ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'text-red-600 dark:text-red-400'
                     }`}
                   >
                     <Trash2 size={18} />

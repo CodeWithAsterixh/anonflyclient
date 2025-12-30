@@ -17,7 +17,7 @@ const ChatroomCard: React.FC<ChatroomCardProps> = ({
 
   return (
     <Link
-      className="flex items-center p-3 cursor-pointer hover:bg-gray-100"
+      className="flex items-center p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
       to={`/${id}`}
       onClick={(e) => {
         if (onClick) {
@@ -31,23 +31,23 @@ const ChatroomCard: React.FC<ChatroomCardProps> = ({
         <img 
           src={avatarUrl} 
           alt={roomname} 
-          className="w-12 h-12 rounded-full border border-gray-100 shadow-sm"
+          className="w-12 h-12 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm"
         />
         {isLocked && (
-          <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm border border-gray-100">
-            <Lock size={12} className="text-gray-600" />
+          <div className="absolute -bottom-1 -right-1 bg-white dark:bg-gray-800 rounded-full p-1 shadow-sm border border-gray-100 dark:border-gray-700">
+            <Lock size={12} className="text-gray-600 dark:text-gray-400" />
           </div>
         )}
       </div>
 
       {/* Name and description */}
       <div className="flex-1 mx-3 max-w-[calc(100%-80px)] overflow-hidden">
-        <h2 className="text-lg font-semibold truncate">{roomname}</h2>
-        <p className="text-gray-600 text-sm truncate">{description || 'No description'}</p>
+        <h2 className="text-lg font-semibold truncate dark:text-gray-100">{roomname}</h2>
+        <p className="text-gray-600 dark:text-gray-400 text-sm truncate">{description || 'No description'}</p>
       </div>
 
       {/* Users */}
-      <div className="flex items-center space-x-1 text-gray-500 text-sm flex-shrink-0">
+      <div className="flex items-center space-x-1 text-gray-500 dark:text-gray-400 text-sm flex-shrink-0">
         <User className="h-5 w-5" />
         <span>{participantCount}</span>
       </div>

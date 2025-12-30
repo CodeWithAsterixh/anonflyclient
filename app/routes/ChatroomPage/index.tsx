@@ -4,7 +4,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router";
 import { useAuth } from "../../../hooks/useAuth/index";
 import { useChatroom } from "../../../hooks/useChatroom/index";
+import { useTheme } from "../../../hooks/useTheme/index";
 import { useTyping } from "../../../components/typingIndicator";
+import { Background } from "../../../components/background";
 import type { ChatroomDetail } from "../../../lib/types/chat";
 import type { OutletContext, ReplyingTo, EditingMessage } from "./types";
 import {
@@ -97,6 +99,7 @@ const ChatroomPage: React.FC = () => {
   } = useChatroom(chatroomId, !chatroomDetail || chatroomDetail.isLocked);
 
   const { typingUsers, sendTypingStatus } = useTyping(chatroomId, ws);
+  const { theme } = useTheme();
 
   // Sync isHost with SSE updates
   useEffect(() => {
@@ -243,28 +246,36 @@ const ChatroomPage: React.FC = () => {
 
   if (isJoined && !hasRoomKey) {
     return (
-      <SecuringRoomScreen
-        isMobile={isMobile}
-        onBack={onBack}
-        onNavigateHome={() => navigate("/")}
-        displayDetail={displayDetail}
-      />
+      <Background mode={theme}>
+        <SecuringRoomScreen
+          isMobile={isMobile}
+          onBack={onBack}
+          onNavigateHome={() => navigate("/")}
+          displayDetail={displayDetail}
+        />
+      </Background>
     );
   }
 
   if (loading) {
-    return <LoadingScreen />;
+    return (
+      <Background mode={theme}>
+        <LoadingScreen />
+      </Background>
+    );
   }
 
   if (!user || !token) {
     return (
-      <JoinScreen
-        onNavigateToLogin={() =>
-          navigate(
-            `/login?redirect_to=${encodeURIComponent(window.location.pathname)}`
-          )
-        }
-      />
+      <Background mode={theme}>
+        <JoinScreen
+          onNavigateToLogin={() =>
+            navigate(
+              `/login?redirect_to=${encodeURIComponent(window.location.pathname)}`
+            )
+          }
+        />
+      </Background>
     );
   }
 
@@ -274,77 +285,91 @@ const ChatroomPage: React.FC = () => {
     !error.toLowerCase().includes("locked")
   ) {
     return (
-      <ErrorScreen
-        error={error}
-        onReconnect={reconnect}
-        onNavigateHome={() => navigate("/")}
-        onLogout={logout}
-      />
+      <Background mode={theme}>
+        <ErrorScreen
+          error={error}
+          onReconnect={reconnect}
+          onNavigateHome={() => navigate("/")}
+          onLogout={logout}
+        />
+      </Background>
     );
   }
 
   if (!chatroomId) {
-    return <NoChatSelectedFallback />;
+    return (
+      <Background mode={theme}>
+        <NoChatSelectedFallback />
+      </Background>
+    );
   }
 
   if (!isConnected && (!displayDetail || !displayDetail.isLocked)) {
-    return <ConnectingScreen />;
+    return (
+      <Background mode={theme}>
+        <ConnectingScreen />
+      </Background>
+    );
   }
 
   if (!isJoined) {
     return (
-      <JoinRoomScreen
-        isMobile={isMobile}
-        displayDetail={displayDetail}
-        isConnected={isConnected}
-        isSubmitting={isSubmitting}
-        isHost={isHost}
-        joinPassword={joinPassword}
-        showJoinPassword={showJoinPassword}
-        passwordError={passwordError}
-        onBack={onBack}
-        onNavigateHome={() => navigate("/")}
-        onLeaveRoom={handleLeaveRoom}
-        onDeleteRoom={handleDeleteRoom}
-        onEditRoom={() => setIsEditModalOpen(true)}
-        onSetJoinPassword={setJoinPassword}
-        onToggleShowJoinPassword={() => setShowJoinPassword(!showJoinPassword)}
-        onJoinChatroom={handleJoinChatroom}
-      />
+      <Background mode={theme}>
+        <JoinRoomScreen
+          isMobile={isMobile}
+          displayDetail={displayDetail}
+          isConnected={isConnected}
+          isSubmitting={isSubmitting}
+          isHost={isHost}
+          joinPassword={joinPassword}
+          showJoinPassword={showJoinPassword}
+          passwordError={passwordError}
+          onBack={onBack}
+          onNavigateHome={() => navigate("/")}
+          onLeaveRoom={handleLeaveRoom}
+          onDeleteRoom={handleDeleteRoom}
+          onEditRoom={() => setIsEditModalOpen(true)}
+          onSetJoinPassword={setJoinPassword}
+          onToggleShowJoinPassword={() => setShowJoinPassword(!showJoinPassword)}
+          onJoinChatroom={handleJoinChatroom}
+        />
+      </Background>
     );
   }
 
   return (
-    <ChatScreen
-      isMobile={isMobile}
-      displayDetail={displayDetail}
-      isConnected={isConnected}
-      isHost={isHost}
-      messages={messages}
-      replyingTo={replyingTo}
-      editingMessage={editingMessage}
-      showScrollButton={showScrollButton}
-      isEditModalOpen={isEditModalOpen}
-      messagesContainerRef={messagesContainerRef}
-      messagesEndRef={messagesEndRef}
-      onBack={onBack}
-      onNavigateHome={() => navigate("/")}
-      onLeaveRoom={handleLeaveRoom}
-      onDeleteRoom={handleDeleteRoom}
-      onOpenEditModal={() => setIsEditModalOpen(true)}
-      onCloseEditModal={() => setIsEditModalOpen(false)}
-      onScroll={handleScroll}
-      onScrollToBottom={scrollToBottom}
-      onSendMessage={handleSendMessage}
-      onEditMessage={handleEditMessage}
-      onSetReplyingTo={setReplyingTo}
-      onSetEditingMessage={setEditingMessage}
-      onDeleteMessage={deleteMessage}
-      onSendReaction={sendReaction}
-      onEditSuccess={handleEditSuccess}
-      onTyping={sendTypingStatus}
-      typingUsers={typingUsers}
-    />
+    <Background mode={theme} className="h-full">
+      <ChatScreen
+        isMobile={isMobile}
+        displayDetail={displayDetail}
+        isConnected={isConnected}
+        isHost={isHost}
+        messages={messages}
+        replyingTo={replyingTo}
+        editingMessage={editingMessage}
+        showScrollButton={showScrollButton}
+        isEditModalOpen={isEditModalOpen}
+        messagesContainerRef={messagesContainerRef}
+        messagesEndRef={messagesEndRef}
+        onBack={onBack}
+        onNavigateHome={() => navigate("/")}
+        onLeaveRoom={handleLeaveRoom}
+        onDeleteRoom={handleDeleteRoom}
+        onOpenEditModal={() => setIsEditModalOpen(true)}
+        onCloseEditModal={() => setIsEditModalOpen(false)}
+        onScroll={handleScroll}
+        onScrollToBottom={scrollToBottom}
+        onSendMessage={handleSendMessage}
+        onEditMessage={handleEditMessage}
+        onSetReplyingTo={setReplyingTo}
+        onSetEditingMessage={setEditingMessage}
+        onDeleteMessage={deleteMessage}
+        onSendReaction={sendReaction}
+        onEditSuccess={handleEditSuccess}
+        onTyping={sendTypingStatus}
+        typingUsers={typingUsers}
+      />
+    </Background>
   );
 };
 

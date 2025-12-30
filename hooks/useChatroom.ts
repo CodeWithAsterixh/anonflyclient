@@ -551,24 +551,67 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
           setParticipants(new Map());
           break;
 
-        case "messageDeleted":
-          setMessages((prevMessages) =>
-            prevMessages.map((msg) =>
-              msg.id === message.messageId
-                ? { ...msg, content: "This message was deleted", type: "system" as const }
-                : msg
-            )
-          );
-          break;
+        // case "messageDeleted":
+        //   setMessages((prevMessages) =>
+        //     prevMessages.map((msg) => {
+        //       if (msg.id === message.messageId) {
+        //         return { ...msg, content: "[This message was deleted]", type: "system" as const, isDeleted: true };
+        //       }
+        //       if (msg.replyTo && msg.replyTo.messageId === message.messageId) {
+        //         return { ...msg, replyTo: { ...msg.replyTo, content: "[This message was deleted]" } };
+        //       }
+        //       return msg;
+        //     })
+        //   );
+        //   break;
 
         case "messageEdited":
-          setMessages((prevMessages) =>
-            prevMessages.map((msg) =>
-              msg.id === message.messageId
-                ? { ...msg, content: message.newContent, isEdited: true }
-                : msg
-            )
+          const updatedMessages = await Promise.all(
+            messagesRef.current.map(async (msg) => {
+              // Update the message itself
+              if (msg.id === message.messageId) {
+                let newContent = message.newContent;
+                if (msg.isEncrypted && roomKeyRef.current) {
+                  try {
+                    const blob = typeof message.newContent === 'string' ? JSON.parse(message.newContent) : message.newContent;
+                    if (blob && blob.ciphertext && blob.iv) {
+                      newContent = await decryptMessage(
+                        blob.ciphertext,
+                        blob.iv,
+                        roomKeyRef.current
+                      );
+                    }
+                  } catch (e) {
+                    console.error("[useChatroom] Failed to decrypt edited message:", e);
+                  }
+                }
+                return { ...msg, content: newContent, isEdited: true };
+              }
+              
+              // Update messages that are replies to this message
+              if (msg.replyTo && msg.replyTo.messageId === message.messageId) {
+                let newReplyContent = message.newContent;
+                if (msg.isEncrypted && roomKeyRef.current) {
+                   try {
+                    const blob = typeof message.newContent === 'string' ? JSON.parse(message.newContent) : message.newContent;
+                    if (blob && blob.ciphertext && blob.iv) {
+                      newReplyContent = await decryptMessage(
+                        blob.ciphertext,
+                        blob.iv,
+                        roomKeyRef.current
+                      );
+                    }
+                  } catch (e) {
+                    // Fallback to the raw content if decryption fails
+                  }
+                }
+                return { ...msg, replyTo: { ...msg.replyTo, content: newReplyContent } };
+              }
+              
+              return msg;
+            })
           );
+          setMessages(updatedMessages);
           break;
 
         case "reactionUpdate":
@@ -704,6 +747,19 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
               newContent: finalContent,
             })
           );
+
+          // Optimistic UI update for the sender
+          setMessages((prevMessages) =>
+            prevMessages.map((msg) =>
+              msg.id === messageId
+                ? { ...msg, content: newContent, isEdited: true }
+                : msg
+            ).map((msg) =>
+              msg.replyTo && msg.replyTo.messageId === messageId
+                ? { ...msg, replyTo: { ...msg.replyTo, content: newContent } }
+                : msg
+            )
+          );
         } catch (err: any) {
           setError("Failed to secure edited message");
         }
@@ -712,24 +768,33 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     [currentChatroomId, user]
   );
 
-  const deleteMessage = useCallback(
-    (messageId: string) => {
-      if (
-        ws.current?.readyState === WebSocket.OPEN &&
-        currentChatroomId &&
-        user
-      ) {
-        ws.current.send(
-          JSON.stringify({
-            type: "deleteMessage",
-            chatroomId: currentChatroomId,
-            messageId,
-          })
-        );
-      }
-    },
-    [currentChatroomId, user]
-  );
+  const deleteMessage = useCallback(async (messageId: string) => {
+    if (!ws.current || ws.current.readyState !== WebSocket.OPEN || !currentChatroomId) {
+      setError("WebSocket not connected or not in a chatroom.");
+      return;
+    }
+
+    // Optimistic UI update for the sender
+    setMessages((prevMessages) =>
+      prevMessages.map((msg) =>
+        msg.id === messageId
+          ? { ...msg, content: "[This message was deleted]", isDeleted: true, type: "system" as const }
+          : msg
+      ).map((msg) =>
+        msg.replyTo && msg.replyTo.messageId === messageId
+          ? { ...msg, replyTo: { ...msg.replyTo, content: "[This message was deleted]" } }
+          : msg
+      )
+    );
+
+    ws.current.send(
+      JSON.stringify({
+        type: "deleteMessage",
+        chatroomId: currentChatroomId,
+        messageId,
+      })
+    );
+  }, [ws.current, currentChatroomId]);
 
   const sendReaction = useCallback(
     (messageId: string, emoji: Emoji) => {

@@ -35,6 +35,7 @@ const ChatroomPage: React.FC = () => {
   );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const messagePortalRootRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [joinPassword, setJoinPassword] = useState("");
@@ -620,21 +621,27 @@ const ChatroomPage: React.FC = () => {
         </header>
 
         {/* Messages Area */}
+            <div ref={messagePortalRootRef} id="message-portal-root" className="absolute inset-0 z-[100] size-full pointer-events-none" />
+
         <div
-          ref={messagesContainerRef}
-          onScroll={handleScroll}
-          className="flex-1 overflow-y-auto p-4 space-y-4 relative z-[1] overflow-x-hidden"
-        >
-          {messages.map((msg, index) => (
-            <MessageDisplay
-              key={msg.id || index}
-              message={msg}
-              onReply={(replyInfo) => setReplyingTo(replyInfo)}
-              onReact={sendReaction}
-              onEdit={(messageId, content) => setEditingMessage({ messageId, content })}
-              onDelete={deleteMessage}
-            />
-          ))}
+            ref={messagesContainerRef}
+            onScroll={handleScroll}
+            className="flex-1 isolate overflow-y-auto p-4 space-y-4 relative z-[1] overflow-x-hidden"
+          >
+            {/* Portal root for message actions modal */}
+            {messages.map((msg, index) => (
+              <MessageDisplay
+                key={msg.id || index}
+                message={msg}
+                onReply={(replyInfo) => setReplyingTo(replyInfo)}
+                onReact={sendReaction}
+                onEdit={(messageId, content) =>
+                  setEditingMessage({ messageId, content })
+                }
+                onDelete={deleteMessage}
+                portalRoot={messagePortalRootRef.current}
+              />
+            ))}
           <div ref={messagesEndRef} />
 
           {/* Scroll to bottom button */}

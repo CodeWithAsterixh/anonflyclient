@@ -6,16 +6,16 @@ import {
 
 export default [
   
-   route('/login', 'routes/LoginPage.tsx'),
+   route('/login', 'routes/LoginPage/index.tsx'),
 
-  layout("routes/ChatLayout.tsx", [
+  layout("routes/ChatLayout/index.tsx", [
     {
       path: "/",
-      file: "routes/home.tsx",
+      file: "routes/Home/index.tsx",
     },
     {
       path: "/:chatroomId",
-      file: "routes/ChatroomPage.tsx",
+      file: "routes/ChatroomPage/index.tsx",
     },
   ]),
 ] satisfies RouteConfig;

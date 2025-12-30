@@ -1,17 +1,15 @@
-import React, { useMemo, useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
 import { Reply } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "../../hooks/useAuth/index";
+import { useIsMobile } from "../../hooks/useIsMobile/index";
+import { type Emoji } from "../../lib/assets/emojis";
 import {
   getUserAvatar,
   getUserBubbleColors,
 } from "../../lib/controllers/colorsProcessors/userAvatar";
-import { useIsMobile } from "../../hooks/useIsMobile/index";
-import { type Emoji } from "../../lib/assets/emojis";
+import { MessageFullViewer } from "./components/MessageFullViewer";
 import { MessageRow } from "./components/MessageRow";
-import { ReactionPicker } from "./components/ReactionPicker";
-import { EmojiGrid } from "./components/EmojiGrid";
-import { ActionMenu } from "./components/ActionMenu";
 import { useSwipe } from "./hooks/useSwipe";
 import type { MessageDisplayProps } from "./types";
 
@@ -39,7 +37,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
   const [showReactions, setShowReactions] = useState(false);
   const [showAllEmojis, setShowAllEmojis] = useState(false);
   const [isBubbleFocused, setIsBubbleFocused] = useState(false);
-  
+
   const bubbleRef = useRef<HTMLDivElement>(null);
   const reactionsRef = useRef<HTMLDivElement>(null);
 
@@ -108,13 +106,28 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
   }, [message.id]);
 
   const scrollToRepliedMessage = (messageId: string) => {
-    const element = document.getElementById(`message-${messageId}`);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "center" });
-      window.dispatchEvent(
-        new CustomEvent("highlight-message", { detail: { messageId } })
-      );
-    }
+    closeMenus();
+    // Use a small delay to ensure any layout shifts have completed
+    setTimeout(() => {
+      const element = document.getElementById(`message-${messageId}`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        
+        // Dispatch highlight event
+        window.dispatchEvent(
+          new CustomEvent("highlight-message", { detail: { messageId } })
+        );
+      } else {
+        // Fallback: search by data attribute if ID lookup fails
+        const fallbackElement = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (fallbackElement) {
+          fallbackElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          window.dispatchEvent(
+            new CustomEvent("highlight-message", { detail: { messageId } })
+          );
+        }
+      }
+    }, 100);
   };
 
   const handleEmojiClick = (emoji: Emoji) => {
@@ -146,13 +159,14 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
     }
   };
 
-  const { swipeOffset, handleTouchStart, handleTouchMove, handleTouchEnd } = useSwipe({
-    isCurrentUser,
-    minSwipeDistance: 50,
-    onReply: handleReply,
-    isMobile,
-    onLongPress: handleLongPress,
-  });
+  const { swipeOffset, handleTouchStart, handleTouchMove, handleTouchEnd } =
+    useSwipe({
+      isCurrentUser,
+      minSwipeDistance: 50,
+      onReply: handleReply,
+      isMobile,
+      onLongPress: handleLongPress,
+    });
 
   const handleEdit = () => {
     if (onEdit && message.id) {
@@ -195,7 +209,13 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
 
   if (isSystemMessage) {
     return (
-      <div className="flex justify-center my-4">
+      <div 
+        id={`message-${message.id}`} 
+        data-message-id={message.id}
+        className={`flex justify-center my-4 transition-all duration-500 ${
+          highlight ? "bg-blue-300/50 rounded-lg p-1" : ""
+        }`}
+      >
         <div className="bg-gray-100 text-gray-600 px-4 py-2 rounded-full text-sm italic">
           {message.content}
         </div>
@@ -205,14 +225,9 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
 
   return (
     <>
-      {showReactions && (
-        <div 
-          className="fixed inset-0 z-[100] backdrop-blur-sm bg-black/40 transition-all duration-300 animate-in fade-in" 
-          onClick={closeMenus} 
-        />
-      )}
       <div
         id={`message-${message.id}`}
+        data-message-id={message.id}
         className={`flex items-end gap-2 mb-4 relative transition-all duration-500 ${
           isCurrentUser ? "flex-row-reverse" : "flex-row"
         } ${highlight ? "bg-blue-300/50 rounded-lg p-1" : ""}`}
@@ -236,8 +251,6 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
           bubbleColors={bubbleColors}
           isReplyToMe={isReplyToMe}
           scrollToRepliedMessage={scrollToRepliedMessage}
-          isFocused={isBubbleFocused || showReactions}
-          showReactions={showReactions}
           swipeOffset={swipeOffset}
           onDoubleClick={handleDoubleClick}
           bubbleRef={bubbleRef}
@@ -246,52 +259,24 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
       {showReactions &&
         portalRoot &&
         createPortal(
-          <div
-            className={`pointer-events-auto absolute top-0 h-full inset-0 z-[100] bg-black/10 backdrop-blur-2xl transition-all duration-300 flex items-center p-4 ${
-              isCurrentUser ? "justify-end" : "justify-start"
-            }`}
-            onClick={closeMenus}
-          >
-            <div
-              className={`relative flex flex-col items-center gap-2 animate-in zoom-in-90 fade-in-80 duration-300 ${
-                isCurrentUser ? "items-end" : "items-start"
-              }`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <MessageRow
-                message={message}
-                isCurrentUser={isCurrentUser}
-                avatarUrl={avatarUrl}
-                bubbleColors={bubbleColors}
-                isReplyToMe={isReplyToMe}
-                scrollToRepliedMessage={scrollToRepliedMessage}
-                isFocused={true}
-                showReactions={showReactions}
-                isPreview={true}
-              />
-
-              <div
-                ref={reactionsRef}
-                className="flex flex-col items-center gap-4 w-max animate-in zoom-in duration-200"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <ReactionPicker
-                  onReact={handleEmojiClick}
-                  onShowAll={() => setShowAllEmojis(!showAllEmojis)}
-                  showAllEmojis={showAllEmojis}
-                />
-
-                {showAllEmojis && <EmojiGrid onReact={handleEmojiClick} />}
-
-                <ActionMenu
-                  onReply={handleReply}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  isEditable={isEditable}
-                />
-              </div>
-            </div>
-          </div>,
+          <MessageFullViewer
+            message={message}
+            isCurrentUser={isCurrentUser}
+            avatarUrl={avatarUrl}
+            bubbleColors={bubbleColors}
+            isReplyToMe={isReplyToMe}
+            scrollToRepliedMessage={scrollToRepliedMessage}
+            showReactions={showReactions}
+            closeMenus={closeMenus}
+            reactionsRef={reactionsRef}
+            onReact={handleEmojiClick}
+            onShowAllEmojis={() => setShowAllEmojis(!showAllEmojis)}
+            showAllEmojis={showAllEmojis}
+            onReply={handleReply}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            isEditable={isEditable}
+          />,
           portalRoot
         )}
     </>

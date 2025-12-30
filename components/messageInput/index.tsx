@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
 import { useIsMobile } from '../../hooks/useIsMobile/index';
 import { MessagePreview } from './components/MessagePreview';
-import { MessageInputProps } from './types';
+import type { MessageInputProps } from './types';
 
 /**
  * MessageInput component provides an auto-expanding textarea and a send button for chat messages.

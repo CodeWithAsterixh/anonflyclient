@@ -1,20 +1,20 @@
 import NoChatSelectedFallback from "../../../components/noChatSelectedFallback";
 import { getAPIBaseURL } from "../../../lib/constants/api";
-import { ChevronDown, Eye, EyeOff, Lock } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router";
-import ChatroomMenu from "../../../components/chatroomMenu";
-import ChatroomSkeleton from "../../../components/chatroomSkeleton";
-import JoinRoomOverlay from "../../../components/joinRoomOverlay";
-import Logo from "../../../components/logo";
-import MessageDisplay from "../../../components/messageDisplay";
-import MessageInput from "../../../components/messageInput";
-import ProtectedRoute from "../../../components/protectedRoute";
 import { useAuth } from "../../../hooks/useAuth/index";
 import { useChatroom } from "../../../hooks/useChatroom/index";
 import type { ChatroomDetail } from "../../../lib/types/chat";
-import EditChatroomModal from "../../../components/editChatroomModal";
 import type { OutletContext, ReplyingTo, EditingMessage } from "./types";
+import {
+  ChatScreen,
+  ConnectingScreen,
+  ErrorScreen,
+  JoinRoomScreen,
+  JoinScreen,
+  LoadingScreen,
+  SecuringRoomScreen,
+} from "./screens";
 
 /**
  * ChatroomPage component displays the messages within a specific chatroom,
@@ -239,84 +239,26 @@ const ChatroomPage: React.FC = () => {
 
   if (isJoined && !hasRoomKey) {
     return (
-      <ProtectedRoute>
-        <div className="flex flex-col h-[100dvh] bg-gray-50 relative overflow-hidden">
-          {/* Background Image with Opacity */}
-          <div
-            className="absolute inset-0 z-0 pointer-events-none opacity-[0.07]"
-            style={{
-              backgroundImage: "url(/chatroom-bg.jpg)",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }}
-          />
-          <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
-            {isMobile && <Logo showText size={32} className="py-2" />}
-            <div className="w-full flex justify-between items-center bg-neutral-200/50 px-4 py-3">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => {
-                    onBack();
-                    navigate("/");
-                  }}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <ChevronDown className="w-5 h-5 rotate-90" />
-                </button>
-                <div>
-                  <h1 className="font-bold text-gray-900 leading-tight">
-                    {displayDetail?.roomname || "Loading..."}
-                  </h1>
-                  <p className="text-xs text-gray-500">
-                    {displayDetail?.participantCount !== undefined
-                      ? `${displayDetail.participantCount} participants • Securing room...`
-                      : "Securing room..."}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </header>
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center z-10">
-            <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 animate-pulse">
-              <Lock className="w-8 h-8" />
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">
-              Establishing Secure Connection
-            </h2>
-            <p className="text-gray-600 max-w-xs">
-              Waiting for other participants to securely share the room key.
-              This ensures your messages remain private.
-            </p>
-          </div>
-        </div>
-      </ProtectedRoute>
+      <SecuringRoomScreen
+        isMobile={isMobile}
+        onBack={onBack}
+        onNavigateHome={() => navigate("/")}
+        displayDetail={displayDetail}
+      />
     );
   }
 
   if (loading) {
-    return <JoinRoomOverlay message="Loading room." />;
+    return <LoadingScreen />;
   }
 
   if (!user || !token) {
     return (
-      <JoinRoomOverlay
-        message="Please join anonymously to view chatrooms."
-        replaceLoading={
-          <div className="flex space-x-4 mt-4">
-            <button
-              onClick={() =>
-                navigate(
-                  `/login?redirect_to=${encodeURIComponent(
-                    window.location.pathname
-                  )}`
-                )
-              }
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full transition-colors"
-            >
-              Join Anonymously
-            </button>
-          </div>
+      <JoinScreen
+        onNavigateToLogin={() =>
+          navigate(
+            `/login?redirect_to=${encodeURIComponent(window.location.pathname)}`
+          )
         }
       />
     );
@@ -328,37 +270,12 @@ const ChatroomPage: React.FC = () => {
     !error.toLowerCase().includes("locked")
   ) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-full bg-gray-50 p-6 text-center">
-        <div className="bg-white p-8 rounded-2xl shadow-sm max-w-md w-full border border-gray-100">
-          <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Lock className="w-8 h-8" />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Connection Error
-          </h2>
-          <p className="text-gray-500 mb-6">{error}</p>
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={() => reconnect()}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors"
-            >
-              Retry Connection
-            </button>
-            <button
-              onClick={() => navigate("/")}
-              className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors"
-            >
-              Back to Home
-            </button>
-            <button
-              onClick={() => logout()}
-              className="text-sm text-gray-400 hover:text-gray-600 underline mt-2"
-            >
-              Sign in as different user
-            </button>
-          </div>
-        </div>
-      </div>
+      <ErrorScreen
+        error={error}
+        onReconnect={reconnect}
+        onNavigateHome={() => navigate("/")}
+        onLogout={logout}
+      />
     );
   }
 
@@ -367,288 +284,61 @@ const ChatroomPage: React.FC = () => {
   }
 
   if (!isConnected && (!displayDetail || !displayDetail.isLocked)) {
-    return <JoinRoomOverlay message="Connecting to chat service..." />;
+    return <ConnectingScreen />;
   }
 
   if (!isJoined) {
-    const isLocked = displayDetail?.isLocked;
-    const isConnecting = isLocked && !isConnected && isSubmitting;
-
-    // show skeleton with overlay prompting the user to join
     return (
-      <ProtectedRoute>
-        <div className="flex flex-col h-[100dvh] bg-gray-50 relative overflow-hidden">
-          {/* Background Image with Opacity */}
-          <div
-            className="absolute inset-0 z-0 pointer-events-none opacity-[0.07]"
-            style={{
-              backgroundImage: "url(/chatroom-bg.jpg)",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }}
-          />
-          {/* Header */}
-
-          <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
-            {isMobile && <Logo showText size={32} className="py-2" />}
-            <div className="w-full flex justify-between items-center bg-neutral-200/50 px-4 py-3">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => {
-                    onBack();
-                    navigate("/");
-                  }}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <ChevronDown className="w-5 h-5 rotate-90" />
-                </button>
-                <div>
-                  <h1 className="font-bold text-gray-900 leading-tight">
-                    {displayDetail?.roomname || "Loading..."}
-                  </h1>
-                  <p className="text-xs text-gray-500">
-                    {displayDetail?.participantCount !== undefined
-                      ? `${displayDetail.participantCount} participants • ${
-                          isConnected ? "connected" : "ready"
-                        }`
-                      : isConnected
-                      ? "connected"
-                      : "ready"}
-                  </p>
-                </div>
-              </div>
-
-              <ChatroomMenu
-                onLeaveRoom={handleLeaveRoom}
-                onRemoveParticipant={() => {}}
-                onDeleteRoom={handleDeleteRoom}
-                onEditRoom={() => setIsEditModalOpen(true)}
-                isHost={isHost}
-              />
-            </div>
-          </header>
-
-          {/* Messages Area - No skeleton for locked rooms until connecting */}
-          <div className="flex-1 overflow-y-hidden p-4 space-y-4 relative z-10 flex flex-col">
-            {!isLocked || isConnecting ? (
-              <ChatroomSkeleton />
-            ) : (
-              <div className="flex-1 flex items-center justify-center">
-                {/* Empty space or decorative element for locked state */}
-                <div className="opacity-10">
-                  <Logo size={120} />
-                </div>
-              </div>
-            )}
-
-            {/* Join Overlay - Now contained within the messages area */}
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-20">
-              <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full mx-4 text-center">
-                <h2 className="text-lg font-semibold mb-2">
-                  {displayDetail?.roomname || "Chatroom"}
-                </h2>
-                <p className="text-sm text-gray-600 mb-4">
-                  {displayDetail?.description ||
-                    "Join the room to see messages and participate."}
-                </p>
-
-                {isLocked ||
-                (passwordError &&
-                  (passwordError.toLowerCase().includes("password") ||
-                    passwordError.toLowerCase().includes("locked"))) ? (
-                  <div className="mb-4">
-                    <div className="flex items-center justify-center gap-2 text-amber-600 mb-2">
-                      <Lock size={16} />
-                      <span className="text-sm font-medium">
-                        This room is password protected
-                      </span>
-                    </div>
-                    <div className="relative">
-                      <input
-                        type={showJoinPassword ? "text" : "password"}
-                        value={joinPassword}
-                        onChange={(e) => setJoinPassword(e.target.value)}
-                        placeholder="Enter room password"
-                        disabled={isConnecting}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 pr-10 disabled:bg-gray-50 disabled:text-gray-400"
-                        onKeyDown={(e) =>
-                          e.key === "Enter" && handleJoinChatroom()
-                        }
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowJoinPassword(!showJoinPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 -mt-1 text-gray-400 hover:text-gray-600 transition-colors"
-                        aria-label={
-                          showJoinPassword ? "Hide password" : "Show password"
-                        }
-                      >
-                        {showJoinPassword ? (
-                          <EyeOff size={18} />
-                        ) : (
-                          <Eye size={18} />
-                        )}
-                      </button>
-                    </div>
-                    {passwordError && (
-                      <p className="text-xs text-red-500 mb-2">
-                        {passwordError}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-center space-x-3 mt-4">
-                      <button
-                        onClick={handleJoinChatroom}
-                        disabled={isConnecting}
-                        className={`px-4 py-2 rounded font-medium text-white transition-colors ${
-                          !isConnecting
-                            ? "bg-blue-600 hover:bg-blue-700"
-                            : "bg-blue-400 cursor-not-allowed"
-                        }`}
-                      >
-                        {isConnecting ? (
-                          <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            Connecting...
-                          </div>
-                        ) : (
-                          "Enter Room"
-                        )}
-                      </button>
-                      <button
-                        onClick={() => {
-                          onBack();
-                          navigate("/");
-                        }}
-                        className="bg-gray-100 px-4 py-2 rounded hover:bg-gray-200 text-gray-700 font-medium transition-colors"
-                      >
-                        Back
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-                    <p className="text-sm text-gray-500">
-                      {isConnected
-                        ? "Joining room..."
-                        : "Connecting to service..."}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </ProtectedRoute>
+      <JoinRoomScreen
+        isMobile={isMobile}
+        displayDetail={displayDetail}
+        isConnected={isConnected}
+        isSubmitting={isSubmitting}
+        isHost={isHost}
+        joinPassword={joinPassword}
+        showJoinPassword={showJoinPassword}
+        passwordError={passwordError}
+        onBack={onBack}
+        onNavigateHome={() => navigate("/")}
+        onLeaveRoom={handleLeaveRoom}
+        onDeleteRoom={handleDeleteRoom}
+        onEditRoom={() => setIsEditModalOpen(true)}
+        onSetJoinPassword={setJoinPassword}
+        onToggleShowJoinPassword={() => setShowJoinPassword(!showJoinPassword)}
+        onJoinChatroom={handleJoinChatroom}
+      />
     );
   }
 
   return (
-    <ProtectedRoute>
-      <div className="flex flex-col h-[100dvh] bg-gray-50 relative overflow-hidden">
-        {/* Background Image with Opacity */}
-        <div
-          className="absolute inset-0 z-0 pointer-events-none opacity-[0.07]"
-          style={{
-            backgroundImage: "url(/chatroom-bg.jpg)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        />
-
-        {/* Header */}
-        <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
-          {isMobile && <Logo showText size={32} className="py-2" />}
-          <div className="w-full flex justify-between items-center bg-neutral-200/50 px-4 py-3">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => {
-                  onBack();
-                  navigate("/");
-                }}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <ChevronDown className="w-5 h-5 rotate-90" />
-              </button>
-              <div>
-                <h1 className="font-bold text-gray-900 leading-tight">
-                  {displayDetail?.roomname || "Loading..."}
-                </h1>
-                <p className="text-xs text-gray-500">
-                  {displayDetail?.participantCount !== undefined
-                    ? `${displayDetail.participantCount} participants • ${
-                        isConnected ? "online" : "connecting..."
-                      }`
-                    : isConnected
-                    ? "online"
-                    : "connecting..."}
-                </p>
-              </div>
-            </div>
-
-            <ChatroomMenu
-              onLeaveRoom={handleLeaveRoom}
-              onRemoveParticipant={() => {}}
-              onDeleteRoom={handleDeleteRoom}
-              onEditRoom={() => setIsEditModalOpen(true)}
-              isHost={isHost}
-            />
-          </div>
-        </header>
-
-        {/* Messages Area */}
-        <div
-          ref={messagesContainerRef}
-          onScroll={handleScroll}
-          className="flex-1 overflow-y-auto p-4 space-y-4 relative z-10"
-        >
-          {messages.map((msg) => (
-            <MessageDisplay
-              key={msg.id}
-              message={msg}
-              onReply={setReplyingTo}
-              onEdit={(id, content) => setEditingMessage({ messageId: id, content })}
-              onDelete={deleteMessage}
-              onReact={sendReaction}
-            />
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Scroll to Bottom Button */}
-        {showScrollButton && (
-          <button
-            onClick={scrollToBottom}
-            className="absolute bottom-24 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all z-20 animate-in fade-in zoom-in duration-200"
-            aria-label="Scroll to bottom"
-          >
-            <ChevronDown className="w-6 h-6" />
-          </button>
-        )}
-
-        {/* Input Area */}
-        <MessageInput
-          onSendMessage={handleSendMessage}
-          onEditMessage={handleEditMessage}
-          isDisabled={!isConnected}
-          replyingTo={replyingTo}
-          onCancelReply={() => setReplyingTo(null)}
-          editingMessage={editingMessage}
-          onCancelEdit={() => setEditingMessage(null)}
-        />
-
-        <EditChatroomModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          chatroomId={displayDetail?.roomId || ""}
-          initialRoomname={displayDetail?.roomname || ""}
-          initialDescription={displayDetail?.description || ""}
-          onSuccess={handleEditSuccess}
-        />
-      </div>
-    </ProtectedRoute>
+    <ChatScreen
+      isMobile={isMobile}
+      displayDetail={displayDetail}
+      isConnected={isConnected}
+      isHost={isHost}
+      messages={messages}
+      replyingTo={replyingTo}
+      editingMessage={editingMessage}
+      showScrollButton={showScrollButton}
+      isEditModalOpen={isEditModalOpen}
+      messagesContainerRef={messagesContainerRef}
+      messagesEndRef={messagesEndRef}
+      onBack={onBack}
+      onNavigateHome={() => navigate("/")}
+      onLeaveRoom={handleLeaveRoom}
+      onDeleteRoom={handleDeleteRoom}
+      onOpenEditModal={() => setIsEditModalOpen(true)}
+      onCloseEditModal={() => setIsEditModalOpen(false)}
+      onScroll={handleScroll}
+      onScrollToBottom={scrollToBottom}
+      onSendMessage={handleSendMessage}
+      onEditMessage={handleEditMessage}
+      onSetReplyingTo={setReplyingTo}
+      onSetEditingMessage={setEditingMessage}
+      onDeleteMessage={deleteMessage}
+      onSendReaction={sendReaction}
+      onEditSuccess={handleEditSuccess}
+    />
   );
 };
 

@@ -9,8 +9,8 @@ interface MessageRowProps {
   bubbleColors: { primary: string; text: string };
   isReplyToMe: boolean;
   scrollToRepliedMessage: (id: string) => void;
-  isFocused: boolean;
-  showReactions: boolean;
+  isFocused?: boolean;
+  showReactions?: boolean;
   swipeOffset?: number;
   onDoubleClick?: () => void;
   bubbleRef?: React.RefObject<HTMLDivElement | null>;
@@ -24,8 +24,8 @@ export const MessageRow: React.FC<MessageRowProps> = ({
   bubbleColors,
   isReplyToMe,
   scrollToRepliedMessage,
-  isFocused,
-  showReactions,
+  isFocused=false,
+  showReactions=false,
   swipeOffset = 0,
   onDoubleClick,
   bubbleRef,
@@ -33,7 +33,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
 }) => {
   return (
     <div
-      className={`flex items-end gap-2 ${
+      className={`w-full flex items-end gap-2 ${
         isCurrentUser ? "flex-row-reverse" : "flex-row"
       } ${isPreview ? "" : "w-full"}`}
     >

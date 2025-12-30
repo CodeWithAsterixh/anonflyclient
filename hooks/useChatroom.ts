@@ -33,6 +33,7 @@ interface Message {
     messageId: string;
     senderUsername: string;
     content: string;
+    userAid?: string;
   };
 }
 
@@ -50,7 +51,7 @@ interface UseChatroomReturn {
   messages: Message[];
   participants: Map<string, Participant>;
   chatroomDetail: ChatroomDetail | null;
-  sendMessage: (content: string, replyTo?: { messageId: string; senderUsername: string; content: string }) => void;
+  sendMessage: (content: string, replyTo?: { messageId: string; senderUsername: string; content: string; senderAid: string }) => void;
   joinChatroom: (chatroomId: string, password?: string) => void;
   leaveChatroom: () => void;
   reconnect: () => void;
@@ -462,7 +463,12 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
               timestamp: message.timestamp || new Date().toISOString(),
               type: "message",
               isEncrypted: isMsgEncrypted,
-              replyTo: message.replyTo,
+              replyTo: message.replyTo ? {
+                messageId: message.replyTo.messageId,
+                senderUsername: message.replyTo.senderUsername || message.replyTo.username,
+                content: message.replyTo.content,
+                userAid: message.replyTo.userAid
+              } : undefined,
             },
           ]);
           break;
@@ -593,7 +599,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
   }, [connect, deferConnection]);
 
   const sendMessage = useCallback(
-    async (content: string, replyTo?: { messageId: string; senderUsername: string; content: string }) => {
+    async (content: string, replyTo?: { messageId: string; senderUsername: string; content: string; senderAid: string }) => {
       if (
         ws.current?.readyState === WebSocket.OPEN &&
         currentChatroomId &&
@@ -621,7 +627,12 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
               content: finalContent,
               signature,
               userAid: identity.aid,
-              replyTo,
+              replyTo: replyTo ? {
+                messageId: replyTo.messageId,
+                username: replyTo.senderUsername,
+                content: replyTo.content,
+                userAid: replyTo.senderAid
+              } : undefined,
             })
           );
         } catch (err: any) {

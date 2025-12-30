@@ -16,12 +16,13 @@ interface Message {
     messageId: string;
     senderUsername: string;
     content: string;
+    userAid?: string;
   };
 }
 
 interface MessageDisplayProps {
   message: Message;
-  onReply?: (replyInfo: { messageId: string; senderUsername: string; content: string }) => void;
+  onReply?: (replyInfo: { messageId: string; senderUsername: string; content: string; senderAid: string }) => void;
 }
 
 /**
@@ -42,7 +43,33 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message, onReply }) => 
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [swipeOffset, setSwipeOffset] = useState(0);
+  const [highlight, setHighlight] = useState(false);
   const bubbleRef = useRef<HTMLDivElement>(null);
+
+  // Effect to handle highlighting
+  React.useEffect(() => {
+    const handleHighlight = (e: CustomEvent<{ messageId: string }>) => {
+      if (message.id === e.detail.messageId) {
+        setHighlight(true);
+        setTimeout(() => setHighlight(false), 2000);
+      }
+    };
+
+    window.addEventListener('highlight-message' as any, handleHighlight);
+    return () => window.removeEventListener('highlight-message' as any, handleHighlight);
+  }, [message.id]);
+
+  const scrollToRepliedMessage = (messageId: string) => {
+    const element = document.getElementById(`message-${messageId}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Dispatch event to highlight the message
+      window.dispatchEvent(new CustomEvent('highlight-message', { detail: { messageId } }));
+    }
+  };
+
+  const isReplyToMe = message.replyTo?.userAid === user?.userId || 
+                    (message.replyTo?.senderUsername === user?.username && !message.replyTo?.userAid);
 
   // Minimum swipe distance to trigger reply
   const minSwipeDistance = 50;
@@ -96,6 +123,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message, onReply }) => 
         messageId: message.id,
         senderUsername: message.senderUsername,
         content: message.content,
+        senderAid: message.senderAid,
       });
     }
   };
@@ -129,7 +157,8 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message, onReply }) => 
 
   return (
     <div 
-      className={`flex items-end gap-2 mb-4 relative transition-transform duration-200 ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'}`}
+      id={`message-${message.id}`}
+      className={`flex items-end gap-2 overflow-x-0 mb-4 relative transition-all duration-300 ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} ${highlight ? 'bg-blue-300/50 rounded-lg p-1' : ''}`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={() => {
@@ -163,7 +192,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message, onReply }) => 
           color: bubbleColors.text,
           transform: `translateX(${swipeOffset}px)`
         }}
-        className={`max-w-[75%] lg:max-w-md px-4 py-2 rounded-2xl shadow-sm relative ${
+        className={`min-w-[2rem] max-w-[70%] md:max-w-[50%] px-2 py-2 rounded-2xl shadow-sm relative ${
           isCurrentUser
             ? 'rounded-br-none'
             : 'rounded-bl-none'
@@ -171,14 +200,22 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message, onReply }) => 
       >
         {/* Reply Preview in Bubble */}
         {message.replyTo && (
-          <div className="mb-2 p-2 rounded-lg bg-black/5 border-l-4 border-black/20 text-xs">
-            <p className="font-bold opacity-70 truncate">{message.replyTo.senderUsername}</p>
+          <div 
+            onClick={(e) => {
+              e.stopPropagation();
+              scrollToRepliedMessage(message.replyTo!.messageId);
+            }}
+            className="mb-2 p-2 rounded-lg bg-black/5 border-l-4 border-black/20 text-xs cursor-pointer hover:bg-black/10 transition-colors"
+          >
+            <p className="font-bold opacity-70 truncate">
+              {isReplyToMe ? 'You' : (message.replyTo.senderUsername || 'Anonymous')}
+            </p>
             <p className="opacity-60 line-clamp-2 italic">{message.replyTo.content}</p>
           </div>
         )}
 
         {!isCurrentUser && (
-          <div className="flex items-center justify-between mb-1 gap-2">
+          <div className="flex items-center justify-between mb-1 gap-2 px-2">
             <p className="font-bold text-xs truncate" style={{ color: bubbleColors.text }}>
               {message.senderUsername}
             </p>
@@ -189,13 +226,12 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message, onReply }) => 
         )}
         
 
-        <p className="break-words text-sm md:text-base whitespace-pre-wrap">{message.content}</p>
+        <p className="break-words text-sm md:text-base whitespace-pre-wrap px-2">{message.content}</p>
         
-        <div className="flex items-center justify-between mt-1 gap-3">
+        <div className="flex items-center justify-end mt-1 gap-3 px-2">
           <span className="text-[10px] opacity-60 font-medium">
             {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
-          
         </div>
       </div>
     </div>

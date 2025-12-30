@@ -1,30 +1,18 @@
+import NoChatSelectedFallback from "components/NoChatSelectedFallback";
 import { getAPIBaseURL } from "lib/constants/api";
-import React, { useEffect, useState, useRef } from "react";
-import { useNavigate, useParams, useOutletContext } from "react-router";
+import { ChevronDown, Eye, EyeOff, Lock } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useOutletContext, useParams } from "react-router";
 import ChatroomMenu from "../../components/ChatroomMenu";
+import ChatroomSkeleton from "../../components/ChatroomSkeleton";
+import EditChatroomModal from "../../components/EditChatroomModal";
 import JoinRoomOverlay from "../../components/JoinRoomOverlay";
+import Logo from "../../components/Logo";
 import MessageDisplay from "../../components/MessageDisplay";
 import MessageInput from "../../components/MessageInput";
 import ProtectedRoute from "../../components/ProtectedRoute";
-import ChatroomSkeleton from "../../components/ChatroomSkeleton";
 import { useAuth } from "../../hooks/useAuth";
 import { useChatroom, type ChatroomDetail } from "../../hooks/useChatroom";
-import {
-  ChevronLeft,
-  ChevronDown,
-  Lock,
-  Shield,
-  Info,
-  MoreVertical,
-  LogOut,
-  Trash2,
-  Edit,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import Logo from "../../components/Logo";
-import EditChatroomModal from "../../components/EditChatroomModal";
-import NoChatSelectedFallback from "components/NoChatSelectedFallback";
 
 interface OutletContext {
   onBack: () => void;
@@ -58,6 +46,7 @@ const ChatroomPage: React.FC = () => {
     messageId: string;
     senderUsername: string;
     content: string;
+    senderAid: string;
   } | null>(null);
 
   useEffect(() => {
@@ -128,7 +117,15 @@ const ChatroomPage: React.FC = () => {
         joinChatroom(chatroomId, joinPassword);
       }
     }
-  }, [isConnected, chatroomId, displayDetail, isJoined, joinChatroom, joinPassword, isSubmitting]);
+  }, [
+    isConnected,
+    chatroomId,
+    displayDetail,
+    isJoined,
+    joinChatroom,
+    joinPassword,
+    isSubmitting,
+  ]);
 
   useEffect(() => {
     if (
@@ -444,14 +441,14 @@ const ChatroomPage: React.FC = () => {
           </header>
 
           {/* Messages Area - No skeleton for locked rooms until connecting */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 relative z-10 flex flex-col">
+          <div className="flex-1 overflow-y-hidden p-4 space-y-4 relative z-10 flex flex-col">
             {!isLocked || isConnecting ? (
               <ChatroomSkeleton />
             ) : (
               <div className="flex-1 flex items-center justify-center">
                 {/* Empty space or decorative element for locked state */}
                 <div className="opacity-10">
-                   <Logo size={120} />
+                  <Logo size={120} />
                 </div>
               </div>
             )}
@@ -552,11 +549,6 @@ const ChatroomPage: React.FC = () => {
                 )}
               </div>
             </div>
-          </div>
-
-          {/* Message Input placeholder (disabled) */}
-          <div className="p-4 border-t border-gray-200">
-            <div className="h-10 bg-gray-100 rounded" />
           </div>
         </div>
       </ProtectedRoute>

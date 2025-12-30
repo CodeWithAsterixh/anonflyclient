@@ -4,6 +4,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 
 interface MessageInputProps {
   onSendMessage: (content: string) => void;
+  onEditMessage?: (content: string) => void;
   isDisabled: boolean;
   replyingTo?: {
     messageId: string;
@@ -11,6 +12,11 @@ interface MessageInputProps {
     content: string;
   } | null;
   onCancelReply?: () => void;
+  editingMessage?: {
+    messageId: string;
+    content: string;
+  } | null;
+  onCancelEdit?: () => void;
 }
 
 /**
@@ -19,13 +25,28 @@ interface MessageInputProps {
  */
 const MessageInput: React.FC<MessageInputProps> = ({ 
   onSendMessage, 
+  onEditMessage,
   isDisabled, 
   replyingTo,
-  onCancelReply 
+  onCancelReply,
+  editingMessage,
+  onCancelEdit
 }) => {
   const [messageInput, setMessageInput] = useState<string>('');
   const isMobileDevice = useIsMobile();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Sync input with editingMessage content
+  useEffect(() => {
+    if (editingMessage) {
+      setMessageInput(editingMessage.content);
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+      }
+    } else {
+      setMessageInput('');
+    }
+  }, [editingMessage]);
 
   // Auto-adjust height based on content
   useEffect(() => {
@@ -49,7 +70,11 @@ const MessageInput: React.FC<MessageInputProps> = ({
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (messageInput.trim()) {
-      onSendMessage(messageInput);
+      if (editingMessage) {
+        onEditMessage?.(messageInput);
+      } else {
+        onSendMessage(messageInput);
+      }
       setMessageInput('');
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
@@ -71,6 +96,27 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
   return (
     <div className="bg-white/80 sticky bottom-0 left-0 backdrop-blur-sm p-3 border-t border-gray-200 flex flex-col gap-2 z-10">
+      {/* Editing Preview */}
+      {editingMessage && (
+        <div className="flex items-center gap-2 bg-blue-50 border-l-4 border-blue-600 p-2 rounded-r-lg animate-in slide-in-from-bottom-2 duration-200">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-blue-700">
+              Editing Message
+            </p>
+            <p className="text-xs text-gray-500 truncate line-clamp-1">
+              {editingMessage.content}
+            </p>
+          </div>
+          <button 
+            onClick={onCancelEdit}
+            className="p-1 hover:bg-blue-100 rounded-full transition-colors"
+            aria-label="Cancel edit"
+          >
+            <X className="w-4 h-4 text-blue-600" />
+          </button>
+        </div>
+      )}
+
       {/* Reply Preview */}
       {replyingTo && (
         <div className="flex items-center gap-2 bg-gray-50 border-l-4 border-blue-500 p-2 rounded-r-lg animate-in slide-in-from-bottom-2 duration-200">
@@ -99,7 +145,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type a message"
+            placeholder={editingMessage ? "Edit your message..." : "Type a message"}
             rows={1}
             className="w-full text-black p-3 focus:outline-none resize-none bg-transparent block max-h-[200px] overflow-y-auto"
             disabled={isDisabled}

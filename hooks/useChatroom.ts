@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "./useAuth";
 import { getChatWSURL, getAPIBaseURL } from "../lib/constants/api";
 import { getIdentity, saveRoomKey, getRoomKey } from "../lib/helpers/identityManager";
+import { type Emoji } from "../lib/assets/emojis";
 import {
   encryptMessage,
   signBlob,
@@ -29,6 +30,14 @@ interface Message {
   timestamp: string;
   type?: "message" | "system";
   isEncrypted?: boolean;
+  isEdited?: boolean;
+  reactions?: {
+    userAid: string;
+    username: string;
+    emojiId: string;
+    emojiValue: string;
+    emojiType: string;
+  }[];
   replyTo?: {
     messageId: string;
     senderUsername: string;
@@ -52,6 +61,9 @@ interface UseChatroomReturn {
   participants: Map<string, Participant>;
   chatroomDetail: ChatroomDetail | null;
   sendMessage: (content: string, replyTo?: { messageId: string; senderUsername: string; content: string; senderAid: string }) => void;
+  editMessage: (messageId: string, newContent: string) => void;
+  deleteMessage: (messageId: string) => void;
+  sendReaction: (messageId: string, emoji: Emoji) => void;
   joinChatroom: (chatroomId: string, password?: string) => void;
   leaveChatroom: () => void;
   reconnect: () => void;
@@ -463,6 +475,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
               timestamp: message.timestamp || new Date().toISOString(),
               type: "message",
               isEncrypted: isMsgEncrypted,
+              reactions: message.reactions || [],
               replyTo: message.replyTo ? {
                 messageId: message.replyTo.messageId,
                 senderUsername: message.replyTo.senderUsername || message.replyTo.username,
@@ -540,7 +553,31 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
 
         case "messageDeleted":
           setMessages((prevMessages) =>
-            prevMessages.filter((msg) => msg.id !== message.messageId)
+            prevMessages.map((msg) =>
+              msg.id === message.messageId
+                ? { ...msg, content: "This message was deleted", type: "system" as const }
+                : msg
+            )
+          );
+          break;
+
+        case "messageEdited":
+          setMessages((prevMessages) =>
+            prevMessages.map((msg) =>
+              msg.id === message.messageId
+                ? { ...msg, content: message.newContent, isEdited: true }
+                : msg
+            )
+          );
+          break;
+
+        case "reactionUpdate":
+          setMessages((prevMessages) =>
+            prevMessages.map((msg) =>
+              msg.id === message.messageId
+                ? { ...msg, reactions: message.reactions }
+                : msg
+            )
           );
           break;
 
@@ -645,6 +682,79 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     [currentChatroomId, user]
   );
 
+  const editMessage = useCallback(
+    async (messageId: string, newContent: string) => {
+      if (
+        ws.current?.readyState === WebSocket.OPEN &&
+        currentChatroomId &&
+        user
+      ) {
+        try {
+          let finalContent = newContent;
+          if (roomKeyRef.current) {
+            const encrypted = await encryptMessage(newContent, roomKeyRef.current);
+            finalContent = JSON.stringify(encrypted);
+          }
+
+          ws.current.send(
+            JSON.stringify({
+              type: "editMessage",
+              chatroomId: currentChatroomId,
+              messageId,
+              newContent: finalContent,
+            })
+          );
+        } catch (err: any) {
+          setError("Failed to secure edited message");
+        }
+      }
+    },
+    [currentChatroomId, user]
+  );
+
+  const deleteMessage = useCallback(
+    (messageId: string) => {
+      if (
+        ws.current?.readyState === WebSocket.OPEN &&
+        currentChatroomId &&
+        user
+      ) {
+        ws.current.send(
+          JSON.stringify({
+            type: "deleteMessage",
+            chatroomId: currentChatroomId,
+            messageId,
+          })
+        );
+      }
+    },
+    [currentChatroomId, user]
+  );
+
+  const sendReaction = useCallback(
+    (messageId: string, emoji: Emoji) => {
+      if (
+        ws.current?.readyState === WebSocket.OPEN &&
+        currentChatroomId &&
+        user
+      ) {
+        ws.current.send(
+          JSON.stringify({
+            type: "reaction",
+            chatroomId: currentChatroomId,
+            messageId,
+            emojiId: emoji.id,
+            emojiValue: emoji.value,
+            emojiType: emoji.type,
+            userAid: user.userId,
+            username: user.username,
+          })
+        );
+      }
+    },
+    [currentChatroomId, user]
+  );
+
   const leaveChatroom = useCallback(() => {
     if (ws.current?.readyState === WebSocket.OPEN && currentChatroomId) {
       ws.current.send(
@@ -682,6 +792,9 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     participants,
     chatroomDetail,
     sendMessage,
+    editMessage,
+    deleteMessage,
+    sendReaction,
     joinChatroom,
     leaveChatroom,
     reconnect,

@@ -49,6 +49,11 @@ const ChatroomPage: React.FC = () => {
     senderAid: string;
   } | null>(null);
 
+  const [editingMessage, setEditingMessage] = useState<{
+    messageId: string;
+    content: string;
+  } | null>(null);
+
   useEffect(() => {
     const fetchChatroomDetails = async () => {
       if (!chatroomId || !token || !user) return;
@@ -86,6 +91,9 @@ const ChatroomPage: React.FC = () => {
     participants,
     chatroomDetail: sseChatroomDetail,
     sendMessage,
+    editMessage,
+    deleteMessage,
+    sendReaction,
     joinChatroom,
     leaveChatroom,
     isConnected,
@@ -169,6 +177,13 @@ const ChatroomPage: React.FC = () => {
   const handleSendMessage = (content: string) => {
     sendMessage(content, replyingTo || undefined);
     setReplyingTo(null);
+  };
+
+  const handleEditMessage = (newContent: string) => {
+    if (editingMessage) {
+      editMessage(editingMessage.messageId, newContent);
+      setEditingMessage(null);
+    }
   };
 
   const handleLeaveRoom = () => {
@@ -608,13 +623,16 @@ const ChatroomPage: React.FC = () => {
         <div
           ref={messagesContainerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto p-4 space-y-4 relative z-[1]"
+          className="flex-1 overflow-y-auto p-4 space-y-4 relative z-[1] overflow-x-hidden"
         >
           {messages.map((msg, index) => (
             <MessageDisplay
               key={msg.id || index}
               message={msg}
               onReply={(replyInfo) => setReplyingTo(replyInfo)}
+              onReact={sendReaction}
+              onEdit={(messageId, content) => setEditingMessage({ messageId, content })}
+              onDelete={deleteMessage}
             />
           ))}
           <div ref={messagesEndRef} />
@@ -634,9 +652,12 @@ const ChatroomPage: React.FC = () => {
         {/* Message Input */}
         <MessageInput
           onSendMessage={handleSendMessage}
+          onEditMessage={handleEditMessage}
           isDisabled={!isConnected || !hasRoomKey}
           replyingTo={replyingTo}
           onCancelReply={() => setReplyingTo(null)}
+          editingMessage={editingMessage}
+          onCancelEdit={() => setEditingMessage(null)}
         />
       </div>
       <EditChatroomModal

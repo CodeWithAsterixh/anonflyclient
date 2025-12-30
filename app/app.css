@@ -11,5 +11,5 @@ body {
   @apply bg-gray-100 text-gray-950;
 }
 *{
-  @apply box-border;
+  @apply box-border select-none;
 }

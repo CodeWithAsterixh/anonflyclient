@@ -414,8 +414,10 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
               content: chatContent,
               signature: message.signature,
               timestamp: message.timestamp || new Date().toISOString(),
-              type: "message",
+              type: message.isDeleted ? "system" : "message",
               isEncrypted: isMsgEncrypted,
+              isEdited: message.isEdited || false,
+              isDeleted: message.isDeleted || false,
               reactions: message.reactions || [],
               replyTo: message.replyTo ? {
                 messageId: message.replyTo.messageId,
@@ -492,19 +494,19 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
           setParticipants(new Map());
           break;
 
-        // case "messageDeleted":
-        //   setMessages((prevMessages) =>
-        //     prevMessages.map((msg) => {
-        //       if (msg.id === message.messageId) {
-        //         return { ...msg, content: "[This message was deleted]", type: "system" as const, isDeleted: true };
-        //       }
-        //       if (msg.replyTo && msg.replyTo.messageId === message.messageId) {
-        //         return { ...msg, replyTo: { ...msg.replyTo, content: "[This message was deleted]" } };
-        //       }
-        //       return msg;
-        //     })
-        //   );
-        //   break;
+        case "messageDeleted":
+          setMessages((prevMessages) =>
+            prevMessages.map((msg) => {
+              if (msg.id === message.messageId) {
+                return { ...msg, content: "[This message was deleted]", type: "system" as const, isDeleted: true };
+              }
+              if (msg.replyTo && msg.replyTo.messageId === message.messageId) {
+                return { ...msg, replyTo: { ...msg.replyTo, content: "[This message was deleted]" } };
+              }
+              return msg;
+            })
+          );
+          break;
 
         case "messageEdited":
           const updatedMessages = await Promise.all(

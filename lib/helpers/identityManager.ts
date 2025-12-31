@@ -1,6 +1,7 @@
 export interface Identity {
   aid: string;
   username: string;
+  createdAt?: string; // ISO timestamp
   identityKeyPair: {
     publicKey: string; // Base64 DER
     privateKey: string; // Base64 DER
@@ -236,6 +237,7 @@ export async function generateIdentity(username: string): Promise<Identity> {
   const identity: Identity = {
     aid,
     username,
+    createdAt: new Date().toISOString(),
     identityKeyPair: {
       publicKey: idPubKeyBase64,
       privateKey: idPrivKeyBase64,

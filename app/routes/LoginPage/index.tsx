@@ -9,13 +9,15 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "../../../hooks/useAuth/index";
 import { validateUsername } from "../../../lib/helpers/validation";
-import { Loader2 } from "lucide-react";
+import { Loader2, Users } from "lucide-react";
 import Logo from "../../../components/logo";
+import AccountSelectionModal from "./components/AccountSelectionModal";
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState<string>("");
   const [usernameError, setUsernameError] = useState<string | null>(null);
-  const { joinAnonymously, isLoading, error } = useAuth();
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const { joinAnonymously, switchAccount, isLoading, isInitialCheck, error, identities } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const redirectPath =
@@ -43,6 +45,22 @@ const LoginPage: React.FC = () => {
       // Join failed error is handled by useAuth and displayed in the UI
     }
   };
+
+  if (isInitialCheck) {
+    return (
+      <div className="min-h-[100dvh] bg-gray-50 dark:bg-gray-950 flex items-center justify-center px-4">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-blue-100 dark:border-blue-900/30 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-8 h-8 bg-blue-600 dark:bg-blue-500 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+          <p className="text-gray-500 dark:text-gray-400 font-medium animate-pulse">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4 transition-colors duration-300">
@@ -87,7 +105,7 @@ const LoginPage: React.FC = () => {
                 setUsername(e.target.value);
                 setUsernameError(null);
               }}
-              disabled={isLoading}
+              disabled={isLoading || isInitialCheck}
               aria-invalid={!!usernameError}
               aria-describedby={usernameError ? "username-error" : undefined}
             />
@@ -101,7 +119,7 @@ const LoginPage: React.FC = () => {
             <button
               type="submit"
               className="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-blue-200 dark:shadow-blue-900/20"
-              disabled={isLoading || !username}
+              disabled={isLoading || isInitialCheck || !username}
             >
               {isLoading ? (
                 <>
@@ -119,6 +137,27 @@ const LoginPage: React.FC = () => {
             {error}
           </div>
         )}
+
+        {identities.length > 0 && (
+          <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
+            <button
+              type="button"
+              onClick={() => setIsAccountModalOpen(true)}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+            >
+              <Users size={18} />
+              Sign in to other accounts
+            </button>
+          </div>
+        )}
+
+        <AccountSelectionModal 
+          isOpen={isAccountModalOpen} 
+          onClose={() => setIsAccountModalOpen(false)} 
+          identities={identities} 
+          onSelect={switchAccount} 
+          isLoading={isLoading} 
+        />
       </div>
     </div>
   );

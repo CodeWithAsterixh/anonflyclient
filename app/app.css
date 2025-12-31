@@ -13,3 +13,6 @@ body {
 *{
   @apply box-border select-none;
 }
+button:not([disabled]), a[href]{
+  @apply cursor-pointer;
+}

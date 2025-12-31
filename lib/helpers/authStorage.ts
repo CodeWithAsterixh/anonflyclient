@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie';
 import type { User } from '../../types/User';
 
 const SESSION_KEY = 'anonfly_session_user';
@@ -11,7 +12,14 @@ export interface SessionPayload {
 export function setSessionUser(user: User, token: string) {
   try {
     const payload: SessionPayload = { user, token, ts: Date.now() };
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(payload));
+    const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+    
+    // Set cookie with 1 week expiration (7 days)
+    Cookies.set(SESSION_KEY, JSON.stringify(payload), { 
+      expires: 7, 
+      sameSite: 'strict', 
+      secure: isSecure 
+    });
   } catch (e) {
     // Silently fail
   }
@@ -19,7 +27,7 @@ export function setSessionUser(user: User, token: string) {
 
 export function getSessionUser(): { user: User; token: string } | null {
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
+    const raw = Cookies.get(SESSION_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as SessionPayload;
     return { user: parsed.user, token: parsed.token };
@@ -30,7 +38,7 @@ export function getSessionUser(): { user: User; token: string } | null {
 
 export function clearSessionUser() {
   try {
-    sessionStorage.removeItem(SESSION_KEY);
+    Cookies.remove(SESSION_KEY);
   } catch (e) {
     // Silently fail
   }

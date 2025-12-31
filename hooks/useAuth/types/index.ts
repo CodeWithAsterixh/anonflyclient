@@ -6,6 +6,7 @@ export interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
+  isInitialCheck: boolean;
   error: string | null;
   identities: Identity[];
   retryCountdown: number | null;
@@ -19,6 +20,7 @@ export interface AuthContextType {
   switchAccount: (aid: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+  isInitialCheck: boolean;
   error: string | null;
   retryCountdown: number | null;
 }

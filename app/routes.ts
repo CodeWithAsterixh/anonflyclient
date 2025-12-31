@@ -7,6 +7,7 @@ import {
 export default [
   
    route('/login', 'routes/LoginPage/index.tsx'),
+   route('/settings', 'routes/SettingsPage/index.tsx'),
 
   layout("routes/ChatLayout/index.tsx", [
     {

@@ -1,6 +1,6 @@
 import { getAPIBaseURL } from "lib/constants/api";
 import { getIdentity, type Identity } from "../helpers/identityManager";
-import { setSessionUser } from "../helpers/authStorage";
+import { setSessionUser, clearSessionUser } from "../helpers/authStorage";
 
 export const performHandshake = async (identity: Identity) => {
   try {
@@ -53,7 +53,7 @@ export const performHandshake = async (identity: Identity) => {
 
     const { token, aid, username } = verifyData.data;
 
-    // 4. Store session (ephemeral sessionStorage)
+    // 4. Store session (secure cookie with 1 week expiration)
     setSessionUser({ userId: aid, username }, token);
 
     return verifyData.data;
@@ -63,7 +63,7 @@ export const performHandshake = async (identity: Identity) => {
 };
 
 export const logout = async () => {
-  // Simply clear session storage, backend session will expire on its own
-  sessionStorage.clear();
+  // Clear the auth cookie and session data
+  clearSessionUser();
   window.location.href = '/login';
 };

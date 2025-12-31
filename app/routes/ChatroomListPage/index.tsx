@@ -1,5 +1,6 @@
-import { Plus, Users, ChevronDown, Check, LogOut, Sun, Moon } from "lucide-react";
+import { Plus, Users, ChevronDown, Check, LogOut, Sun, Moon, Settings } from "lucide-react";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ChatListSkeleton from '../../../components/chatListSkeleton';
 import ChatroomCard from "../../../components/chatroomCard";
 import CreateChatroomModal from "../../../components/createChatroomModal";
@@ -13,6 +14,7 @@ import { Fragment } from 'react';
 import type { ChatroomListPageProps } from './types';
 
 const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect }) => {
+  const navigate = useNavigate();
   const { chatrooms, loading, error, retryCountdown } = useChatroomList();
   const { user, identities, switchAccount, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -125,6 +127,23 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({ onChatroomSelect })
                           <span className="font-medium">
                             {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
                           </span>
+                        </button>
+                      )}
+                    </Menu.Item>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button
+                          onClick={() => navigate('/settings')}
+                          className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                            active 
+                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' 
+                              : 'text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                            <Settings size={18} />
+                          </div>
+                          <span className="font-medium">Settings</span>
                         </button>
                       )}
                     </Menu.Item>

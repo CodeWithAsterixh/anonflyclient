@@ -221,7 +221,7 @@ const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-full bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+    <div className="h-full overflow-y-auto bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
         {/* Header */}
         <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-4 py-4">
           <div className="max-w-4xl mx-auto flex items-center justify-between">

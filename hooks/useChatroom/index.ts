@@ -234,6 +234,8 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
             message.participants.forEach((p: Participant) => {
               participantMap.set(p.userAid, p);
             });
+            // Ensure host is in the list even if not in participants array
+            // But only if we have room detail to know who the host is
             setParticipants(participantMap);
             participantsRef.current = participantMap; // Update ref
           }
@@ -434,6 +436,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
         case "userJoined":
           // Add to participants map
           setParticipants((prev) => {
+            if (prev.has(message.userAid)) return prev;
             const next = new Map(prev);
             next.set(message.userAid, {
               userAid: message.userAid,
@@ -447,7 +450,12 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
 
           const joinMsgId = `system-join-${message.userAid}-${message.timestamp || Date.now()}`;
           setMessages((prevMessages) => {
-            if (prevMessages.some(m => m.id === joinMsgId)) return prevMessages;
+            // Check if a message with the same content for this user was recently added
+            const isDuplicate = prevMessages.some(m => 
+              (m.id === joinMsgId) || 
+              (m.type === "system" && m.senderAid === "system" && m.content === `${message.username} just joined`)
+            );
+            if (isDuplicate) return prevMessages;
             
             const newMessage: Message = {
               id: joinMsgId,
@@ -464,6 +472,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
         case "userLeft":
           // Remove from participants map
           setParticipants((prev) => {
+            if (!prev.has(message.userAid)) return prev;
             const next = new Map(prev);
             next.delete(message.userAid);
             participantsRef.current = next; // Update ref
@@ -472,7 +481,12 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
 
           const leftMsgId = `system-leave-${message.userAid}-${message.timestamp || Date.now()}`;
           setMessages((prevMessages) => {
-            if (prevMessages.some(m => m.id === leftMsgId)) return prevMessages;
+            // Check if a message with the same content for this user was recently added
+            const isDuplicate = prevMessages.some(m => 
+              (m.id === leftMsgId) || 
+              (m.type === "system" && m.senderAid === "system" && m.content === `${message.username} left the chat`)
+            );
+            if (isDuplicate) return prevMessages;
 
             const newMessage: Message = {
               id: leftMsgId,

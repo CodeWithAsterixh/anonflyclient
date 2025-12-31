@@ -18,7 +18,7 @@ export const TextareaInput = forwardRef<HTMLTextAreaElement, TextareaProps>(
           disabled:opacity-50 disabled:cursor-not-allowed
           transition-all duration-200
           min-h-[100px]
-          resize-y
+          resize-none
           ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500/20 dark:border-red-500" : ""}
           ${className}
         `}

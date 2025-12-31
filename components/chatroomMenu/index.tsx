@@ -67,8 +67,8 @@ const ChatroomMenu: React.FC<ChatroomMenuProps> = ({
                       active ? 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'
                     }`}
                   >
-                    <UserMinus size={18} />
-                    <span>Manage Users</span>
+                    <Settings size={18} />
+                    <span>Manage Room</span>
                   </button>
                 )}
               </Menu.Item>

@@ -140,15 +140,19 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                 <h1 className="font-bold text-gray-900 dark:text-gray-100 leading-tight">
                   {displayDetail?.roomname || "Loading..."}
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {displayDetail?.participantCount !== undefined
-                    ? `${displayDetail.participantCount} participants • ${
-                        isConnected ? "online" : "connecting..."
-                      }`
-                    : isConnected
-                    ? "online"
-                    : "connecting..."}
-                </p>
+                <button 
+                  onClick={() => setIsManageUsersOpen(true)}
+                  className="text-xs text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors text-left"
+                >
+                  {participants.length} participant{participants.length !== 1 ? "s" : ""} •{" "}
+                  {isConnected ? (
+                    <span className="text-green-500 dark:text-green-400 font-medium">
+                      connected
+                    </span>
+                  ) : (
+                    "connecting..."
+                  )}
+                </button>
               </div>
             </div>
 
@@ -248,6 +252,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
           participants={participants}
           chatroomId={displayDetail?.roomId || ""}
           isHost={isHost}
+          hostAid={displayDetail?.hostAid}
           onRemoveParticipant={onRemoveParticipant}
         />
       </div>

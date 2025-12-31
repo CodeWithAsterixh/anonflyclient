@@ -41,7 +41,7 @@ interface ChatScreenProps {
   onSendReaction: (id: string, emoji: any) => void;
   onEditSuccess: () => void;
   onTyping: (isTyping: boolean) => void;
-  onRemoveParticipant: (userAid: string, token: string) => Promise<void>;
+  onRemoveParticipant: (userAid: string) => Promise<void>;
 }
 
 const ChatScreen: React.FC<ChatScreenProps> = ({

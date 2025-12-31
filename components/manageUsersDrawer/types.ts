@@ -8,5 +8,5 @@ export interface ManageUsersDrawerProps {
   isHost: boolean;
   hostAid?: string;
   allowedFeatures?: string[];
-  onRemoveParticipant: (userAid: string, token: string) => Promise<void>;
+  onRemoveParticipant: (userAid: string) => Promise<void>;
 }

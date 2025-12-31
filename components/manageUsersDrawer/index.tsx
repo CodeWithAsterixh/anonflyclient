@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import { UserMinus, ShieldCheck, Key, Lock } from "lucide-react";
+import { UserMinus, ShieldCheck, Lock } from "lucide-react";
 import Drawer from "../ui/drawer";
-import Input from "../ui/input";
 import type { ManageUsersDrawerProps } from "./types";
 import { FEATURES } from "../../lib/constants/features";
-import { getMyModerationToken } from "../../lib/controllers/chatroomController";
 
 const ManageUsersDrawer: React.FC<ManageUsersDrawerProps> = ({
   isOpen,
@@ -16,44 +14,21 @@ const ManageUsersDrawer: React.FC<ManageUsersDrawerProps> = ({
   onRemoveParticipant,
 }) => {
   const [removingId, setRemovingId] = useState<string | null>(null);
-  const [removalToken, setRemovalToken] = useState("");
-  const [tokenError, setTokenError] = useState<string | null>(null);
-  const [showTokenInput, setShowTokenInput] = useState<string | null>(null);
-  const [myToken, setMyToken] = useState<string | null>(null);
-  const [isFetchingToken, setIsFetchingToken] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const canRemoveUsers = allowedFeatures.includes(FEATURES.REMOVE_USER);
-
-  const handleFetchMyToken = async () => {
-    try {
-      setIsFetchingToken(true);
-      const data = await getMyModerationToken();
-      setMyToken(data.token);
-    } catch (error: any) {
-      setTokenError(error.message || "Failed to fetch your token");
-    } finally {
-      setIsFetchingToken(false);
-    }
-  };
 
   const handleRemove = async (userAid: string) => {
     if (!canRemoveUsers) return;
     if (userAid === hostAid) return; // Cannot remove host
-    
-    if (!removalToken || removalToken.length !== 6) {
-      setTokenError("Please enter a valid 6-digit removal token.");
-      return;
-    }
 
     try {
       setRemovingId(userAid);
-      setTokenError(null);
-      await onRemoveParticipant(userAid, removalToken);
-      setShowTokenInput(null);
-      setRemovalToken("");
+      setError(null);
+      await onRemoveParticipant(userAid);
     } catch (error: any) {
       console.error("Failed to remove participant:", error);
-      setTokenError(error.message || "Failed to remove participant. Invalid token?");
+      setError(error.message || "Failed to remove participant.");
     } finally {
       setRemovingId(null);
     }
@@ -71,27 +46,13 @@ const ManageUsersDrawer: React.FC<ManageUsersDrawerProps> = ({
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {participants.length} user{participants.length !== 1 ? "s" : ""} in this room
           </p>
-          {isHost && (
-            <div className="flex flex-col items-end gap-1">
-              {myToken ? (
-                <div className="flex flex-col items-end">
-                  <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider">Your Removal Token</span>
-                  <span className="text-sm font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
-                    {myToken}
-                  </span>
-                </div>
-              ) : (
-                <button
-                  onClick={handleFetchMyToken}
-                  disabled={isFetchingToken}
-                  className="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold disabled:opacity-50"
-                >
-                  {isFetchingToken ? "Fetching..." : "Show My Removal Token"}
-                </button>
-              )}
-            </div>
-          )}
         </div>
+
+        {error && (
+          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-xl text-xs text-red-600 dark:text-red-400">
+            {error}
+          </div>
+        )}
 
         <div className="space-y-3">
           {participants.map((participant) => (
@@ -123,71 +84,27 @@ const ManageUsersDrawer: React.FC<ManageUsersDrawerProps> = ({
 
                 {isHost && participant.userAid !== hostAid && (
                   <button
-                    onClick={() => {
-                      if (!canRemoveUsers) return;
-                      if (showTokenInput === participant.userAid) {
-                        setShowTokenInput(null);
-                      } else {
-                        setShowTokenInput(participant.userAid);
-                        setTokenError(null);
-                      }
-                    }}
-                    disabled={!canRemoveUsers}
+                    onClick={() => handleRemove(participant.userAid)}
+                    disabled={!canRemoveUsers || removingId === participant.userAid}
                     className={`p-2 rounded-lg transition-all ${
                       !canRemoveUsers
                         ? "text-gray-300 cursor-not-allowed"
-                        : showTokenInput === participant.userAid
-                        ? "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400"
+                        : removingId === participant.userAid
+                        ? "bg-gray-100 text-gray-400 dark:bg-gray-800"
                         : "text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                     }`}
                     title={canRemoveUsers ? "Remove from room" : "Feature locked: Upgrade required"}
                   >
-                    {canRemoveUsers ? <UserMinus size={18} /> : <Lock size={16} />}
+                    {removingId === participant.userAid ? (
+                      <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                    ) : canRemoveUsers ? (
+                      <UserMinus size={18} />
+                    ) : (
+                      <Lock size={16} />
+                    )}
                   </button>
                 )}
               </div>
-
-              {/* Token Input Section */}
-              {showTokenInput === participant.userAid && (
-                <div className="p-4 bg-red-50/50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/30 animate-in slide-in-from-top-2 duration-200">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-2 text-red-600 dark:text-red-400 text-xs font-semibold">
-                      <Key size={14} />
-                      <span>Removal Authorization Required</span>
-                    </div>
-                    <Input
-                      type="text"
-                      placeholder="Enter 6-digit removal token"
-                      value={removalToken}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, "").slice(0, 6);
-                        setRemovalToken(val);
-                      }}
-                      className="text-center tracking-[0.5em] font-mono text-lg"
-                      error={tokenError || undefined}
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleRemove(participant.userAid)}
-                        disabled={removingId === participant.userAid || removalToken.length !== 6}
-                        className="flex-1 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2"
-                      >
-                        {removingId === participant.userAid ? (
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        ) : (
-                          "Confirm Removal"
-                        )}
-                      </button>
-                      <button
-                        onClick={() => setShowTokenInput(null)}
-                        className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-bold transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           ))}
         </div>

@@ -153,15 +153,11 @@ export const deleteMessage = async (chatroomId: string, messageId: string) => {
   }
 };
 
-export const removeParticipant = async (chatroomId: string, userAid: string, token: string) => {
+export const removeParticipant = async (chatroomId: string, userAid: string) => {
   try {
     const response = await fetch(`${getAPIBaseURL()}/chatrooms/${chatroomId}/participants/${userAid}`, {
       method: 'DELETE',
-      headers: {
-        ...getAuthHeaders(),
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ token })
+      headers: getAuthHeaders(),
     });
 
     const data = await response.json();

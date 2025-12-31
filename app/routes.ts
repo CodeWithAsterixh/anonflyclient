@@ -1,16 +1,11 @@
-import {
-  type RouteConfig,
-  layout,
-  route
-} from "@react-router/dev/routes";
 import { authMiddleware } from "./middleware/auth";
-import Home from "./routes/Home";
 import ChatLayout from "./routes/ChatLayout";
-import SettingsPage from "./routes/SettingsPage";
-import LoginPage from "./routes/LoginPage";
 import ChatroomPage from "./routes/ChatroomPage";
+import Home from "./routes/Home";
+import LoginPage from "./routes/LoginPage";
+import SettingsPage from "./routes/SettingsPage";
 
-const routes = [
+export default [
   {
     path: "/login",
     Component: LoginPage,

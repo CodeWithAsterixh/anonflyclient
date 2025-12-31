@@ -9,7 +9,7 @@ import { Background } from "../../../components/background";
 import AlertDialog from "../../../components/alertDialog";
 import type { ChatroomDetail } from "../../../lib/types/chat";
 import type { ReplyingTo, EditingMessage } from "./types";
-import { ChatLayoutContext } from "../ChatLayout";
+import { ChatLayoutContext } from "../../contexts/ChatLayoutContext";
 import {
   ChatScreen,
   ConnectingScreen,

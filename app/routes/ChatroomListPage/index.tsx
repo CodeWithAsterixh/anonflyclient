@@ -14,12 +14,11 @@ import ChatListSkeleton from "../../../components/chatListSkeleton";
 import ChatroomCard from "../../../components/chatroomCard";
 import CreateChatroomModal from "../../../components/createChatroomModal";
 import Logo from "../../../components/logo";
-import { useChatroomList } from "../../../hooks/useChatroomList/index";
 import { useTheme } from "../../../hooks/useTheme/index";
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import type { ChatroomListPageProps } from "./types";
-import { ChatLayoutContext } from "../ChatLayout";
+import { ChatLayoutContext } from "../../contexts/ChatLayoutContext";
 
 const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
   onChatroomSelect,
@@ -31,8 +30,16 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
     throw new Error("ChatroomListPage must be used within ChatLayoutContext");
   }
 
-  const { user, identities, switchAccount, logout } = context;
-  const { chatrooms, loading, error, retryCountdown } = useChatroomList();
+  const { 
+    user, 
+    identities, 
+    chatrooms, 
+    loadingChatrooms: loading, 
+    chatroomError: error, 
+    retryCountdown,
+    switchAccount, 
+    logout 
+  } = context;
   const { theme, toggleTheme } = useTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -45,7 +52,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
   };
 
   return (
-    <div>
+    <>
       <div className="p-4 h-full overflow-y-auto flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
         <div className="flex justify-between items-center mb-4 sticky top-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-20 border-b border-gray-100 dark:border-gray-800 pb-3">
           <Logo showText size={32} />
@@ -268,7 +275,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
         onClose={() => setIsModalOpen(false)}
         onSuccess={handleCreateSuccess}
       />
-    </div>
+    </>
   );
 };
 

@@ -12,6 +12,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
   type = 'alert',
   confirmText = 'Confirm',
   cancelText = 'Cancel',
+  children,
 }) => {
   const getIcon = () => {
     switch (type) {
@@ -26,9 +27,18 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
     }
   };
 
-  const handleConfirm = () => {
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const handleConfirm = async () => {
     if (onConfirm) {
-      onConfirm();
+      setIsLoading(true);
+      try {
+        await onConfirm();
+      } catch (error) {
+        console.error("Error during confirm action:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
     onClose();
   };
@@ -44,18 +54,28 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
           {message}
         </p>
 
+        {children && (
+          <div className="w-full mb-8 text-left">
+            {children}
+          </div>
+        )}
+
         <div className="flex w-full gap-3">
           {type === 'confirm' && (
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              disabled={isLoading}
+              className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {cancelText}
             </button>
           )}
           <button
             onClick={handleConfirm}
-            className={`flex-1 px-4 py-2.5 rounded-xl text-white font-medium transition-all shadow-lg shadow-blue-500/20 ${
+            disabled={isLoading}
+            className={`flex-1 px-4 py-2.5 rounded-xl text-white font-medium transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 ${
+              isLoading ? 'opacity-70 cursor-not-allowed' : ''
+            } ${
               type === 'error' 
                 ? 'bg-red-600 hover:bg-red-700' 
                 : type === 'confirm' 
@@ -63,7 +83,10 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
                   : 'bg-blue-600 hover:bg-blue-700'
             }`}
           >
-            {type === 'confirm' ? confirmText : 'OK'}
+            {isLoading && (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            )}
+            {type === 'confirm' ? (isLoading ? 'Processing...' : confirmText) : 'OK'}
           </button>
         </div>
       </div>

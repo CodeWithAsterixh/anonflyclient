@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
 
 type Theme = 'light' | 'dark';
 
@@ -10,11 +11,17 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ThemeProvider: React.FC<{ children: React.ReactNode; initialTheme?: Theme }> = ({ 
+  children, 
+  initialTheme 
+}) => {
   const [theme, setThemeState] = useState<Theme>(() => {
-    // Check local storage or system preference
+    // 1. Priority: Initial theme from SSR (via cookies)
+    if (initialTheme) return initialTheme;
+
+    // 2. Client-side fallback: Local storage or system preference
     if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme') as Theme;
+      const savedTheme = Cookies.get('theme') as Theme || localStorage.getItem('theme') as Theme;
       if (savedTheme) return savedTheme;
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
@@ -26,11 +33,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const root = window.document.documentElement;
       root.classList.remove('light', 'dark');
       root.classList.add(theme);
-      localStorage.setItem('theme', theme);
       
-      // Also update the body background color to match the theme
-      // this helps with smooth transitions and prevents white flashes
-      document.body.style.backgroundColor = theme === 'dark' ? '#111827' : '#f9fafb';
+      // Persist in both cookie (for SSR) and localStorage (for backup)
+      localStorage.setItem('theme', theme);
+      Cookies.set('theme', theme, { expires: 365, path: '/' });
+      
+      // Update body background to prevent flashes
+      document.body.style.backgroundColor = theme === 'dark' ? '#030712' : '#ffffff';
     }
   }, [theme]);
 

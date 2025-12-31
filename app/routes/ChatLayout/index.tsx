@@ -1,33 +1,38 @@
-import React, { useState, useEffect, createContext } from 'react';
-import { Outlet, useParams, useLoaderData } from 'react-router';
+import React, { useState, useEffect } from 'react';
+import { Outlet, useParams, useLoaderData, useLocation } from 'react-router';
 import ChatroomListPage from '../ChatroomListPage';
 import NoChatSelectedFallback from '../../../components/noChatSelectedFallback';
 import { requireAuth } from '../../middleware/auth';
 import ProtectedRoute from '../../../components/protectedRoute';
 import { useAuth } from '../../../hooks/useAuth/index';
-import type { User } from '../../../types/User';
-import type { Identity } from '../../../lib/helpers/identityManager';
+import { useChatroomList } from '../../../hooks/useChatroomList/index';
+import { ChatLayoutContext } from '../../contexts/ChatLayoutContext';
 
 export async function loader({ request }: { request: Request }) {
   const { user, token } = await requireAuth(request);
   return { user, token };
 }
 
-interface ChatLayoutContextType {
-  user: User | null;
-  token: string | null;
-  identities: Identity[];
-  switchAccount: (aid: string) => Promise<void>;
-  logout: () => void;
-  isMobile: boolean;
-  onBack: () => void;
-}
-
-export const ChatLayoutContext = createContext<ChatLayoutContextType | null>(null);
-
 const ChatLayout: React.FC = () => {
+  const location = useLocation();
+  const isSettingsPage = location.pathname === '/settings';
   const { user: serverUser, token: serverToken } = useLoaderData<typeof loader>();
-  const { user: clientUser, token: clientToken, identities, switchAccount, logout } = useAuth();
+  const { 
+    user: clientUser, 
+    token: clientToken, 
+    identities, 
+    isLoading: authLoading,
+    switchAccount, 
+    deleteAccount,
+    logout 
+  } = useAuth();
+  
+  const { 
+    chatrooms, 
+    loading: loadingChatrooms, 
+    error: chatroomError, 
+    retryCountdown 
+  } = useChatroomList();
   
   // Prefer client-side state for real-time updates, but fallback to server-side for initial render
   const user = clientUser || serverUser;
@@ -35,7 +40,7 @@ const ChatLayout: React.FC = () => {
 
   const { chatroomId } = useParams<{ chatroomId: string }>();
   const [isMobile, setIsMobile] = useState(false);
-  const [showChatList, setShowChatList] = useState(!chatroomId);
+  const [showChatList, setShowChatList] = useState(!chatroomId && !isSettingsPage);
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Only run on client side
@@ -44,7 +49,7 @@ const ChatLayout: React.FC = () => {
     // Set initial mobile state after hydration
     const mobile = window.innerWidth < 768;
     setIsMobile(mobile);
-    setShowChatList(!chatroomId);
+    setShowChatList(!chatroomId && !isSettingsPage);
 
     // Handle window resize to detect mobile/desktop
     const handleResize = () => {
@@ -58,14 +63,14 @@ const ChatLayout: React.FC = () => {
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [chatroomId]);
+  }, [chatroomId, isSettingsPage]);
 
-  // Auto-hide list on mobile when chatroom is selected
+  // Auto-hide list on mobile when chatroom or settings is selected
   useEffect(() => {
-    if (isHydrated && isMobile && chatroomId) {
+    if (isHydrated && isMobile && (chatroomId || isSettingsPage)) {
       setShowChatList(false);
     }
-  }, [chatroomId, isMobile, isHydrated]);
+  }, [chatroomId, isSettingsPage, isMobile, isHydrated]);
 
   const handleSelectChatroom = (chatroomId: string) => {
     setShowChatList(false); // Hide list on mobile after selection
@@ -82,7 +87,13 @@ const ChatLayout: React.FC = () => {
           user, 
           token, 
           identities, 
+          authLoading,
+          chatrooms,
+          loadingChatrooms,
+          chatroomError,
+          retryCountdown,
           switchAccount, 
+          deleteAccount,
           logout, 
           isMobile, 
           onBack: handleBackFromChat 
@@ -100,7 +111,7 @@ const ChatLayout: React.FC = () => {
                   ? 'block'
                   : 'hidden'
                 : 'block md:block'
-            } w-full md:w-80 lg:w-1/4 border-r border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col transition-all duration-300 ease-in-out`}
+            } w-full md:w-80 lg:w-1/4 border-r h-full border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col transition-all duration-300 ease-in-out`}
           >
             <ChatroomListPage onChatroomSelect={handleSelectChatroom} />
           </div>
@@ -118,7 +129,7 @@ const ChatLayout: React.FC = () => {
                 : 'hidden md:flex'
             } flex-1 flex-col overflow-hidden relative isolate w-full md:w-auto bg-gray-50 dark:bg-gray-900 transition-colors duration-300`}
           >
-            {chatroomId ? (
+            {chatroomId || isSettingsPage ? (
               <Outlet context={{ onBack: handleBackFromChat, isMobile }} />
             ) : (
               <NoChatSelectedFallback />

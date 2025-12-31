@@ -9,4 +9,5 @@ export interface AlertDialogProps {
   type?: 'alert' | 'confirm' | 'error' | 'success';
   confirmText?: string;
   cancelText?: string;
+  children?: React.ReactNode;
 }

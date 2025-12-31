@@ -5,6 +5,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "react-router";
 import { useEffect } from "react";
 
@@ -12,6 +13,12 @@ import type { Route } from "./+types/root";
 import { initializeAPI } from "../lib/constants/api";
 import { ThemeProvider } from "../hooks/useTheme/index";
 import "./app.css";
+
+export async function loader({ request }: { request: Request }) {
+  const cookieHeader = request.headers.get("Cookie");
+  const theme = cookieHeader?.includes("theme=dark") ? "dark" : "light";
+  return { theme };
+}
 
 export const meta: Route.MetaFunction = () => [
   { title: "Anonfly | Secure, Anonymous & Free Messaging" },
@@ -51,15 +58,34 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const data = useLoaderData<typeof loader>();
+  const theme = data?.theme || "light";
+
   return (
-    <html lang="en">
+    <html lang="en" className={theme}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        {/* Inline script to prevent theme flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = document.cookie.split('; ').find(row => row.startsWith('theme='))?.split('=')[1] || 
+                              localStorage.getItem('theme') || 
+                              (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                  document.documentElement.classList.add(theme);
+                  document.body.style.backgroundColor = theme === 'dark' ? '#030712' : '#ffffff';
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
       </head>
-      <body>
+      <body className="bg-white dark:bg-gray-950 transition-colors duration-300">
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -69,12 +95,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const { theme } = useLoaderData<typeof loader>();
+
   useEffect(() => {
     initializeAPI();
   }, []);
 
   return (
-    <ThemeProvider>
+    <ThemeProvider initialTheme={theme as "light" | "dark"}>
       <Outlet />
     </ThemeProvider>
   );

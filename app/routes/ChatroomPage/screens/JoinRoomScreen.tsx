@@ -89,17 +89,6 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
 
         {/* Messages Area - No skeleton for locked rooms until connecting */}
         <div className="flex-1 overflow-y-hidden p-4 space-y-4 relative z-10 flex flex-col">
-          {!isLocked || isConnecting ? (
-            <ChatroomSkeleton />
-          ) : (
-            <div className="flex-1 flex items-center justify-center">
-              {/* Empty space or decorative element for locked state */}
-              <div className="opacity-10 dark:opacity-20 grayscale dark:invert">
-                <Logo size={120} />
-              </div>
-            </div>
-          )}
-
           {/* Join Overlay - Now contained within the messages area */}
           <div className="absolute inset-0 flex items-center justify-center bg-gray-50/50 dark:bg-gray-950/50 backdrop-blur-[2px] z-20 transition-colors">
             <div className="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 max-w-sm w-full mx-4 text-center">

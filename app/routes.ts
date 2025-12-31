@@ -11,11 +11,6 @@ export default [
     Component: LoginPage,
   },
   {
-    path: "/settings",
-    file: "./routes/SettingsPage/index.tsx",
-    Component: SettingsPage,
-  },
-  {
     path: "/",
     file: "./routes/ChatLayout/index.tsx",
     Component: ChatLayout,
@@ -24,6 +19,11 @@ export default [
         path: "/",
         file: "./routes/Home/index.tsx",
         Component: Home,
+      },
+      {
+        path: "/settings",
+        file: "./routes/SettingsPage/index.tsx",
+        Component: SettingsPage,
       },
       {
         path: "/:chatroomId",

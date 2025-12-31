@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLoaderData } from 'react-router';
 import { 
   User, 
   Shield, 
@@ -14,13 +14,23 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth/index';
 import { useChatroomList } from '../../../hooks/useChatroomList/index';
-import ProtectedRoute from '../../../components/protectedRoute';
 import Logo from '../../../components/logo';
+import { userContext, tokenContext } from '../../context/auth';
+
+export async function loader({ context }: any) {
+  const user = context.get(userContext);
+  const token = context.get(tokenContext);
+  return { user, token };
+}
 
 const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, identities, isLoading: authLoading } = useAuth();
+  const { user: serverUser } = useLoaderData<typeof loader>();
+  const { user: clientUser, identities, isLoading: authLoading } = useAuth();
   const { chatrooms, loading: roomsLoading } = useChatroomList();
+
+  // Use client user if available (for real-time updates), otherwise fallback to server user
+  const user = clientUser || serverUser;
 
   // Find the full identity object for the current user
   const currentIdentity = useMemo(() => {
@@ -45,8 +55,7 @@ const SettingsPage: React.FC = () => {
   };
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-[100dvh] bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+    <div className="min-h-[100dvh] bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
         {/* Header */}
         <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-4 py-4">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -204,7 +213,6 @@ const SettingsPage: React.FC = () => {
           </section>
         </main>
       </div>
-    </ProtectedRoute>
   );
 };
 

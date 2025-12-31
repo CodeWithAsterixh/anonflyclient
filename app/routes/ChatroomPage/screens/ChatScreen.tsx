@@ -6,7 +6,6 @@ import Logo from "../../../../components/logo";
 import MessageDisplay from "../../../../components/messageDisplay";
 import MessageInput from "../../../../components/messageInput";
 import { TypingIndicator, type TypingUser } from "../../../../components/typingIndicator";
-import ProtectedRoute from "../../../../components/protectedRoute";
 import type { ChatroomDetail, Message } from "../../../../lib/types/chat";
 import type { ReplyingTo, EditingMessage } from "../types";
 
@@ -74,8 +73,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   const messagePortalRootRef = useRef<HTMLDivElement>(null);
 
   return (
-    <ProtectedRoute>
-      <div className="flex flex-col h-[100dvh] bg-transparent relative overflow-hidden transition-colors duration-300">
+    <div className="flex flex-col h-[100dvh] bg-transparent relative overflow-hidden transition-colors duration-300">
         {/* Header */}
         <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
           {isMobile && <Logo showText size={32} className="py-2" />}
@@ -178,7 +176,6 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
           onSuccess={onEditSuccess}
         />
       </div>
-    </ProtectedRoute>
   );
 };
 

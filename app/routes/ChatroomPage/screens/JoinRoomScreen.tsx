@@ -3,7 +3,6 @@ import { ChevronDown, Eye, EyeOff, Lock } from "lucide-react";
 import ChatroomMenu from "../../../../components/chatroomMenu";
 import ChatroomSkeleton from "../../../../components/chatroomSkeleton";
 import Logo from "../../../../components/logo";
-import ProtectedRoute from "../../../../components/protectedRoute";
 import type { ChatroomDetail } from "../../../../lib/types/chat";
 
 interface JoinRoomScreenProps {
@@ -47,8 +46,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
   const isConnecting = isLocked && !isConnected && isSubmitting;
 
   return (
-    <ProtectedRoute>
-      <div className="flex flex-col h-[100dvh] bg-transparent relative overflow-hidden transition-colors duration-300">
+    <div className="flex flex-col h-[100dvh] bg-transparent relative overflow-hidden transition-colors duration-300">
         {/* Header */}
         <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
           {isMobile && <Logo showText size={32} className="py-2" />}
@@ -202,7 +200,6 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
           </div>
         </div>
       </div>
-    </ProtectedRoute>
   );
 };
 

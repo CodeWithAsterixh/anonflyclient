@@ -1,14 +1,14 @@
 import NoChatSelectedFallback from "../../../components/noChatSelectedFallback";
 import { getAPIBaseURL } from "../../../lib/constants/api";
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, useOutletContext, useParams } from "react-router";
-import { useAuth } from "../../../hooks/useAuth/index";
+import React, { useEffect, useRef, useState, useContext } from "react";
+import { useNavigate, useParams } from "react-router";
 import { useChatroom } from "../../../hooks/useChatroom/index";
 import { useTheme } from "../../../hooks/useTheme/index";
 import { useTyping } from "../../../components/typingIndicator";
 import { Background } from "../../../components/background";
 import type { ChatroomDetail } from "../../../lib/types/chat";
-import type { OutletContext, ReplyingTo, EditingMessage } from "./types";
+import type { ReplyingTo, EditingMessage } from "./types";
+import { ChatLayoutContext } from "../ChatLayout";
 import {
   ChatScreen,
   ConnectingScreen,
@@ -25,10 +25,16 @@ import {
  * It integrates with the `useChatroom` hook for WebSocket communication.
  */
 const ChatroomPage: React.FC = () => {
-  const { chatroomId } = useParams<{ chatroomId: string }>();
   const navigate = useNavigate();
-  const { user, isLoading: loading, token, logout } = useAuth();
-  const { onBack, isMobile } = useOutletContext<OutletContext>();
+  const { chatroomId } = useParams<{ chatroomId: string }>();
+  const context = useContext(ChatLayoutContext);
+
+  if (!context) {
+    throw new Error("ChatroomPage must be used within ChatLayoutContext");
+  }
+
+  const { user, token, isMobile, onBack, logout } = context;
+
   const [isHost, setIsHost] = useState(false);
   const [chatroomDetail, setChatroomDetails] = useState<ChatroomDetail | null>(
     null
@@ -253,14 +259,6 @@ const ChatroomPage: React.FC = () => {
           onNavigateHome={() => navigate("/")}
           displayDetail={displayDetail}
         />
-      </Background>
-    );
-  }
-
-  if (loading) {
-    return (
-      <Background mode={theme}>
-        <LoadingScreen />
       </Background>
     );
   }

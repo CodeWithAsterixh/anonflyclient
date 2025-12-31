@@ -3,21 +3,37 @@ import {
   layout,
   route
 } from "@react-router/dev/routes";
+import { authMiddleware } from "./middleware/auth";
+import Home from "./routes/Home";
+import ChatLayout from "./routes/ChatLayout";
+import SettingsPage from "./routes/SettingsPage";
+import LoginPage from "./routes/LoginPage";
+import ChatroomPage from "./routes/ChatroomPage";
 
-export default [
-  
-   route('/login', 'routes/LoginPage/index.tsx'),
-   route('/settings', 'routes/SettingsPage/index.tsx'),
-
-  layout("routes/ChatLayout/index.tsx", [
-    {
-      path: "/",
-      file: "routes/Home/index.tsx",
-    },
-    {
-      path: "/:chatroomId",
-      file: "routes/ChatroomPage/index.tsx",
-    },
-  ]),
-] satisfies RouteConfig;
+const routes = [
+  {
+    path: "/login",
+    Component: LoginPage,
+  },
+  {
+    path: "/settings",
+    middleware: [authMiddleware],
+    Component: SettingsPage,
+  },
+  {
+    path: "/",
+    middleware: [authMiddleware],
+    Component: ChatLayout,
+    children: [
+      {
+        path: "/",
+        Component: Home,
+      },
+      {
+        path: "/:chatroomId",
+        Component: ChatroomPage,
+      },
+    ],
+  },
+];
 

@@ -1,9 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { Outlet, useParams } from 'react-router-dom';
+import React, { useState, useEffect, createContext } from 'react';
+import { Outlet, useParams, useLoaderData } from 'react-router';
 import ChatroomListPage from '../ChatroomListPage';
 import NoChatSelectedFallback from '../../../components/noChatSelectedFallback';
+import { userContext, tokenContext } from '../../context/auth';
+import ProtectedRoute from '../../../components/protectedRoute';
+import { useAuth } from '../../../hooks/useAuth/index';
+import type { User } from '../../../types/User';
+import type { Identity } from '../../../lib/helpers/identityManager';
+
+export async function loader({ context }: any) {
+  const user = context.get(userContext);
+  const token = context.get(tokenContext);
+  return { user, token };
+}
+
+interface ChatLayoutContextType {
+  user: User | null;
+  token: string | null;
+  identities: Identity[];
+  switchAccount: (aid: string) => Promise<void>;
+  logout: () => void;
+  isMobile: boolean;
+  onBack: () => void;
+}
+
+export const ChatLayoutContext = createContext<ChatLayoutContextType | null>(null);
 
 const ChatLayout: React.FC = () => {
+  const { user: serverUser, token: serverToken } = useLoaderData<typeof loader>();
+  const { user: clientUser, token: clientToken, identities, switchAccount, logout } = useAuth();
+  
+  // Prefer client-side state for real-time updates, but fallback to server-side for initial render
+  const user = clientUser || serverUser;
+  const token = clientToken || serverToken;
+
   const { chatroomId } = useParams<{ chatroomId: string }>();
   const [isMobile, setIsMobile] = useState(false);
   const [showChatList, setShowChatList] = useState(!chatroomId);
@@ -47,43 +77,57 @@ const ChatLayout: React.FC = () => {
   };
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden bg-white">
-      {/* Left Column: Chatroom List 
-          - Desktop: Always visible (md:block)
-          - Mobile: Shows based on JavaScript state or Tailwind hidden state
-      */}
-      <div
-        className={`${
-          isHydrated
-            ? showChatList || !isMobile
-              ? 'block'
-              : 'hidden'
-            : 'block md:block'
-        } w-full md:w-80 lg:w-1/4 border-r border-gray-300 overflow-hidden flex flex-col transition-all duration-300 ease-in-out`}
+    <ProtectedRoute>
+      <ChatLayoutContext.Provider 
+        value={{ 
+          user, 
+          token, 
+          identities, 
+          switchAccount, 
+          logout, 
+          isMobile, 
+          onBack: handleBackFromChat 
+        }}
       >
-        <ChatroomListPage onChatroomSelect={handleSelectChatroom} />
-      </div>
+        <div className="flex h-[100dvh] overflow-hidden bg-white dark:bg-gray-950 transition-colors duration-300">
+          {/* Left Column: Chatroom List 
+              - Desktop: Always visible (md:block)
+              - Mobile: Shows based on JavaScript state or Tailwind hidden state
+          */}
+          <div
+            className={`${
+              isHydrated
+                ? showChatList || !isMobile
+                  ? 'block'
+                  : 'hidden'
+                : 'block md:block'
+            } w-full md:w-80 lg:w-1/4 border-r border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col transition-all duration-300 ease-in-out`}
+          >
+            <ChatroomListPage onChatroomSelect={handleSelectChatroom} />
+          </div>
 
-      {/* Right Column: Chatroom View or Fallback 
-          - Desktop: Always visible (md:flex)
-          - Mobile: Shows based on JavaScript state or Tailwind hidden state
-      */}
-      <div
-        className={`${
-          isHydrated
-            ? showChatList && isMobile
-              ? 'hidden'
-              : 'flex'
-            : 'hidden md:flex'
-        } flex-1 flex-col overflow-hidden relative isolate w-full md:w-auto bg-gray-50`}
-      >
-        {chatroomId ? (
-          <Outlet context={{ onBack: handleBackFromChat, isMobile }} />
-        ) : (
-          <NoChatSelectedFallback />
-        )}
-      </div>
-    </div>
+          {/* Right Column: Chatroom View or Fallback 
+              - Desktop: Always visible (md:flex)
+              - Mobile: Shows based on JavaScript state or Tailwind hidden state
+          */}
+          <div
+            className={`${
+              isHydrated
+                ? showChatList && isMobile
+                  ? 'hidden'
+                  : 'flex'
+                : 'hidden md:flex'
+            } flex-1 flex-col overflow-hidden relative isolate w-full md:w-auto bg-gray-50 dark:bg-gray-900 transition-colors duration-300`}
+          >
+            {chatroomId ? (
+              <Outlet context={{ onBack: handleBackFromChat, isMobile }} />
+            ) : (
+              <NoChatSelectedFallback />
+            )}
+          </div>
+        </div>
+      </ChatLayoutContext.Provider>
+    </ProtectedRoute>
   );
 };
 

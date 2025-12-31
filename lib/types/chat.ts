@@ -40,4 +40,5 @@ export interface ChatroomDetail {
   isLocked: boolean;
   participants: Participant[];
   participantCount?: number;
+  allowedFeatures?: string[];
 }

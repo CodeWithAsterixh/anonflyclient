@@ -297,10 +297,10 @@ const ChatroomPage: React.FC = () => {
     }
   };
 
-  const handleRemoveParticipant = async (userAid: string) => {
+  const handleRemoveParticipant = async (userAid: string, token: string) => {
     if (!chatroomId) return;
     try {
-      await removeParticipant(chatroomId, userAid);
+      await removeParticipant(chatroomId, userAid, token);
       showAlertDialog(
         "Success",
         "Participant removed successfully",

@@ -153,11 +153,15 @@ export const deleteMessage = async (chatroomId: string, messageId: string) => {
   }
 };
 
-export const removeParticipant = async (chatroomId: string, userAid: string) => {
+export const removeParticipant = async (chatroomId: string, userAid: string, token: string) => {
   try {
     const response = await fetch(`${getAPIBaseURL()}/chatrooms/${chatroomId}/participants/${userAid}`, {
       method: 'DELETE',
-      headers: getAuthHeaders(),
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ token })
     });
 
     const data = await response.json();
@@ -167,6 +171,25 @@ export const removeParticipant = async (chatroomId: string, userAid: string) => 
     }
 
     return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getMyModerationToken = async () => {
+  try {
+    const response = await fetch(`${getAPIBaseURL()}/user/moderation-token`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch moderation token');
+    }
+
+    return data.data;
   } catch (error) {
     throw error;
   }

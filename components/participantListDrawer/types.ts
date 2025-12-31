@@ -1,12 +1,10 @@
 import type { Participant } from "../../lib/types/chat";
 
-export interface ManageUsersDrawerProps {
+export interface ParticipantListDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   participants: Participant[];
-  chatroomId: string;
   isHost: boolean;
   hostAid?: string;
-  allowedFeatures?: string[];
-  onRemoveParticipant: (userAid: string, token: string) => Promise<void>;
+  onOpenManageUsers: () => void;
 }

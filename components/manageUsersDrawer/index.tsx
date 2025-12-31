@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { UserMinus, ShieldCheck, Key } from "lucide-react";
+import { UserMinus, ShieldCheck, Key, Lock } from "lucide-react";
 import Drawer from "../ui/drawer";
 import Input from "../ui/input";
 import type { ManageUsersDrawerProps } from "./types";
+import { FEATURES } from "../../lib/constants/features";
+import { getMyModerationToken } from "../../lib/controllers/chatroomController";
 
 const ManageUsersDrawer: React.FC<ManageUsersDrawerProps> = ({
   isOpen,
@@ -10,14 +12,32 @@ const ManageUsersDrawer: React.FC<ManageUsersDrawerProps> = ({
   participants,
   isHost,
   hostAid,
+  allowedFeatures = [],
   onRemoveParticipant,
 }) => {
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [removalToken, setRemovalToken] = useState("");
   const [tokenError, setTokenError] = useState<string | null>(null);
   const [showTokenInput, setShowTokenInput] = useState<string | null>(null);
+  const [myToken, setMyToken] = useState<string | null>(null);
+  const [isFetchingToken, setIsFetchingToken] = useState(false);
+
+  const canRemoveUsers = allowedFeatures.includes(FEATURES.REMOVE_USER);
+
+  const handleFetchMyToken = async () => {
+    try {
+      setIsFetchingToken(true);
+      const data = await getMyModerationToken();
+      setMyToken(data.token);
+    } catch (error: any) {
+      setTokenError(error.message || "Failed to fetch your token");
+    } finally {
+      setIsFetchingToken(false);
+    }
+  };
 
   const handleRemove = async (userAid: string) => {
+    if (!canRemoveUsers) return;
     if (userAid === hostAid) return; // Cannot remove host
     
     if (!removalToken || removalToken.length !== 6) {
@@ -28,7 +48,7 @@ const ManageUsersDrawer: React.FC<ManageUsersDrawerProps> = ({
     try {
       setRemovingId(userAid);
       setTokenError(null);
-      await onRemoveParticipant(userAid); // We might need to pass token to API later
+      await onRemoveParticipant(userAid, removalToken);
       setShowTokenInput(null);
       setRemovalToken("");
     } catch (error: any) {
@@ -47,9 +67,31 @@ const ManageUsersDrawer: React.FC<ManageUsersDrawerProps> = ({
       title="Room Participants"
     >
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pb-6">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {participants.length} user{participants.length !== 1 ? "s" : ""} in this room
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {participants.length} user{participants.length !== 1 ? "s" : ""} in this room
+          </p>
+          {isHost && (
+            <div className="flex flex-col items-end gap-1">
+              {myToken ? (
+                <div className="flex flex-col items-end">
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider">Your Removal Token</span>
+                  <span className="text-sm font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
+                    {myToken}
+                  </span>
+                </div>
+              ) : (
+                <button
+                  onClick={handleFetchMyToken}
+                  disabled={isFetchingToken}
+                  className="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold disabled:opacity-50"
+                >
+                  {isFetchingToken ? "Fetching..." : "Show My Removal Token"}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
 
         <div className="space-y-3">
           {participants.map((participant) => (
@@ -82,6 +124,7 @@ const ManageUsersDrawer: React.FC<ManageUsersDrawerProps> = ({
                 {isHost && participant.userAid !== hostAid && (
                   <button
                     onClick={() => {
+                      if (!canRemoveUsers) return;
                       if (showTokenInput === participant.userAid) {
                         setShowTokenInput(null);
                       } else {
@@ -89,14 +132,17 @@ const ManageUsersDrawer: React.FC<ManageUsersDrawerProps> = ({
                         setTokenError(null);
                       }
                     }}
+                    disabled={!canRemoveUsers}
                     className={`p-2 rounded-lg transition-all ${
-                      showTokenInput === participant.userAid
+                      !canRemoveUsers
+                        ? "text-gray-300 cursor-not-allowed"
+                        : showTokenInput === participant.userAid
                         ? "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400"
                         : "text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                     }`}
-                    title="Remove from room"
+                    title={canRemoveUsers ? "Remove from room" : "Feature locked: Upgrade required"}
                   >
-                    <UserMinus size={18} />
+                    {canRemoveUsers ? <UserMinus size={18} /> : <Lock size={16} />}
                   </button>
                 )}
               </div>

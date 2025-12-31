@@ -3,6 +3,7 @@ import { ChevronDown, Loader2 } from "lucide-react";
 import ChatroomMenu from "../../../../components/chatroomMenu";
 import EditChatroomModal from "../../../../components/editChatroomModal";
 import ManageUsersDrawer from "../../../../components/manageUsersDrawer";
+import ParticipantListDrawer from "../../../../components/participantListDrawer";
 import Logo from "../../../../components/logo";
 import MessageDisplay from "../../../../components/messageDisplay";
 import MessageInput from "../../../../components/messageInput";
@@ -40,7 +41,7 @@ interface ChatScreenProps {
   onSendReaction: (id: string, emoji: any) => void;
   onEditSuccess: () => void;
   onTyping: (isTyping: boolean) => void;
-  onRemoveParticipant: (userAid: string) => Promise<void>;
+  onRemoveParticipant: (userAid: string, token: string) => Promise<void>;
 }
 
 const ChatScreen: React.FC<ChatScreenProps> = ({
@@ -79,6 +80,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   const [visibleCount, setVisibleCount] = useState(10);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isManageUsersOpen, setIsManageUsersOpen] = useState(false);
+  const [isParticipantListOpen, setIsParticipantListOpen] = useState(false);
   const prevScrollHeightRef = useRef<number>(0);
 
   const visibleMessages = useMemo(() => {
@@ -141,7 +143,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                   {displayDetail?.roomname || "Loading..."}
                 </h1>
                 <button 
-                  onClick={() => setIsManageUsersOpen(true)}
+                  onClick={() => setIsParticipantListOpen(true)}
                   className="text-xs text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors text-left"
                 >
                   {participants.length} participant{participants.length !== 1 ? "s" : ""} •{" "}
@@ -253,7 +255,17 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
           chatroomId={displayDetail?.roomId || ""}
           isHost={isHost}
           hostAid={displayDetail?.hostAid}
+          allowedFeatures={displayDetail?.allowedFeatures}
           onRemoveParticipant={onRemoveParticipant}
+        />
+
+        <ParticipantListDrawer
+          isOpen={isParticipantListOpen}
+          onClose={() => setIsParticipantListOpen(false)}
+          participants={participants}
+          isHost={isHost}
+          hostAid={displayDetail?.hostAid}
+          onOpenManageUsers={() => setIsManageUsersOpen(true)}
         />
       </div>
   );

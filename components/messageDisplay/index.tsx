@@ -113,7 +113,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
     setTimeout(() => {
       const element = document.getElementById(`message-${messageId}`);
       if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        element.scrollIntoView({ behavior: "auto", block: "center" });
         
         // Dispatch highlight event
         window.dispatchEvent(
@@ -123,7 +123,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
         // Fallback: search by data attribute if ID lookup fails
         const fallbackElement = document.querySelector(`[data-message-id="${messageId}"]`);
         if (fallbackElement) {
-          fallbackElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          fallbackElement.scrollIntoView({ behavior: "auto", block: "center" });
           window.dispatchEvent(
             new CustomEvent("highlight-message", { detail: { messageId } })
           );

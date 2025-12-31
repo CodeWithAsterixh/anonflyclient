@@ -722,14 +722,15 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     }
 
     // Optimistic UI update for the sender
+    // comment out message, propagation is not needed for now, can be restored later in the future
     setMessages((prevMessages) =>
       prevMessages.map((msg) =>
         msg.id === messageId
-          ? { ...msg, content: "[This message was deleted]", isDeleted: true, type: "system" as const }
+          ? { ...msg, content: "[message was deleted]", isDeleted: true, type: "system" as const }
           : msg
       ).map((msg) =>
         msg.replyTo && msg.replyTo.messageId === messageId
-          ? { ...msg, replyTo: { ...msg.replyTo, content: "[This message was deleted]" } }
+          ? { ...msg, replyTo: { ...msg.replyTo, content: "[message was deleted]" } }
           : msg
       )
     );

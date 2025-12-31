@@ -1,4 +1,3 @@
-import { authMiddleware } from "./middleware/auth";
 import ChatLayout from "./routes/ChatLayout";
 import ChatroomPage from "./routes/ChatroomPage";
 import Home from "./routes/Home";
@@ -14,13 +13,11 @@ export default [
   {
     path: "/settings",
     file: "./routes/SettingsPage/index.tsx",
-    middleware: [authMiddleware],
     Component: SettingsPage,
   },
   {
     path: "/",
     file: "./routes/ChatLayout/index.tsx",
-    middleware: [authMiddleware],
     Component: ChatLayout,
     children: [
       {

@@ -18,6 +18,7 @@ export interface AuthContextType {
   identities: Identity[];
   joinAnonymously: (username: string) => Promise<void>;
   switchAccount: (aid: string) => Promise<void>;
+  deleteAccount: (aid: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
   isInitialCheck: boolean;

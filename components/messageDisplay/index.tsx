@@ -11,6 +11,7 @@ import {
 import { MessageFullViewer } from "./components/MessageFullViewer";
 import { MessageRow } from "./components/MessageRow";
 import { useSwipe } from "./hooks/useSwipe";
+import AlertDialog from "../alertDialog";
 import type { MessageDisplayProps } from "./types";
 
 /**
@@ -37,6 +38,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
   const [showReactions, setShowReactions] = useState(false);
   const [showAllEmojis, setShowAllEmojis] = useState(false);
   const [isBubbleFocused, setIsBubbleFocused] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const bubbleRef = useRef<HTMLDivElement>(null);
   const reactionsRef = useRef<HTMLDivElement>(null);
@@ -177,11 +179,16 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
 
   const handleDelete = () => {
     if (onDelete && message.id) {
-      if (window.confirm("Are you sure you want to delete this message?")) {
-        onDelete(message.id);
-      }
+      setShowDeleteConfirm(true);
       closeMenus();
     }
+  };
+
+  const confirmDelete = () => {
+    if (onDelete && message.id) {
+      onDelete(message.id);
+    }
+    setShowDeleteConfirm(false);
   };
 
   const handleDoubleClick = () => {
@@ -279,6 +286,15 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
           />,
           portalRoot
         )}
+
+      <AlertDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={confirmDelete}
+        title="Delete Message"
+        message="Are you sure you want to delete this message? This action cannot be undone."
+        type="confirm"
+      />
     </>
   );
 };

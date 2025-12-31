@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { performHandshake } from '../../lib/controllers/authController';
-import { getIdentity, getAllIdentities, switchIdentity as switchLocalIdentity, generateIdentity } from '../../lib/helpers/identityManager';
+import { getIdentity, getAllIdentities, switchIdentity as switchLocalIdentity, generateIdentity, clearIdentity } from '../../lib/helpers/identityManager';
 import type { User } from '../../types/User';
 import { getSessionUser, setSessionUser, clearSessionUser } from '../../lib/helpers/authStorage';
 import type { AuthState } from './types';
@@ -66,6 +66,30 @@ export const useAuth = () => {
       }
     } catch (error) {
       setAuthState(prev => ({ ...prev, loading: false, error: 'Failed to switch account' }));
+    }
+  }, []);
+
+  const deleteAccount = useCallback(async (aid: string) => {
+    setAuthState(prev => ({ ...prev, loading: true }));
+    try {
+      await clearIdentity(aid);
+      
+      // If we deleted the currently active account, we must logout
+      const currentSession = getSessionUser();
+      if (currentSession?.user?.userId === aid) {
+        clearSessionUser();
+        window.location.href = '/login';
+      } else {
+        // Just refresh the identity list
+        const allIdentities = await getAllIdentities();
+        setAuthState(prev => ({ 
+          ...prev, 
+          loading: false, 
+          identities: allIdentities 
+        }));
+      }
+    } catch (error) {
+      setAuthState(prev => ({ ...prev, loading: false, error: 'Failed to delete account' }));
     }
   }, []);
 
@@ -196,6 +220,7 @@ export const useAuth = () => {
     identities: authState.identities,
     joinAnonymously,
     switchAccount,
+    deleteAccount,
     logout,
     isLoading: authState.loading,
     isInitialCheck: authState.isInitialCheck,

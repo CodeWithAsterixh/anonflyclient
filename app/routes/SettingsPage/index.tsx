@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate, useLoaderData } from 'react-router';
 import { 
   User, 
@@ -10,24 +10,64 @@ import {
   Key, 
   ExternalLink,
   Lock,
-  Globe
+  Globe,
+  Users,
+  Trash2,
+  LogOut,
+  PlusCircle,
+  RefreshCw
 } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth/index';
 import { useChatroomList } from '../../../hooks/useChatroomList/index';
 import Logo from '../../../components/logo';
-import { userContext, tokenContext } from '../../context/auth';
+import { requireAuth } from '../../middleware/auth';
+import AlertDialog from '../../../components/alertDialog';
 
-export async function loader({ context }: any) {
-  const user = context.get(userContext);
-  const token = context.get(tokenContext);
+export async function loader({ request }: { request: Request }) {
+  const { user, token } = await requireAuth(request);
   return { user, token };
 }
 
 const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
   const { user: serverUser } = useLoaderData<typeof loader>();
-  const { user: clientUser, identities, isLoading: authLoading } = useAuth();
+  const { 
+    user: clientUser, 
+    identities, 
+    isLoading: authLoading, 
+    switchAccount, 
+    deleteAccount,
+    logout 
+  } = useAuth();
   const { chatrooms, loading: roomsLoading } = useChatroomList();
+
+  const [alertDialog, setAlertDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: "alert" | "confirm" | "error" | "success";
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "alert",
+  });
+
+  const showDialog = (
+    title: string,
+    message: string,
+    type: "alert" | "confirm" | "error" | "success" = "alert",
+    onConfirm?: () => void
+  ) => {
+    setAlertDialog({
+      isOpen: true,
+      title,
+      message,
+      type,
+      onConfirm,
+    });
+  };
 
   // Use client user if available (for real-time updates), otherwise fallback to server user
   const user = clientUser || serverUser;
@@ -36,6 +76,39 @@ const SettingsPage: React.FC = () => {
   const currentIdentity = useMemo(() => {
     return identities.find(id => id.aid === user?.userId);
   }, [identities, user]);
+
+  const handleSwitchAccount = async (aid: string) => {
+    if (aid === user?.userId) return;
+    try {
+      await switchAccount(aid);
+    } catch (error) {
+      showDialog("Error", "Failed to switch account. Please try again.", "error");
+    }
+  };
+
+  const handleDeleteAccount = (aid: string, username: string) => {
+    showDialog(
+      "Delete Account",
+      `Are you sure you want to delete the identity "${username}"? This action cannot be undone and you will lose access to all rooms joined with this identity.`,
+      "confirm",
+      async () => {
+        try {
+          await deleteAccount(aid);
+        } catch (error) {
+          showDialog("Error", "Failed to delete account. Please try again.", "error");
+        }
+      }
+    );
+  };
+
+  const handleLogout = () => {
+    showDialog(
+      "Logout",
+      "Are you sure you want to logout? This will clear your current session, but your identity keys will remain safe on this device.",
+      "confirm",
+      () => logout()
+    );
+  };
 
   // Filter rooms created by the user
   const myRooms = useMemo(() => {
@@ -75,14 +148,23 @@ const SettingsPage: React.FC = () => {
         <main className="max-w-4xl mx-auto p-4 md:p-8 space-y-8">
           {/* User Profile Section */}
           <section className="bg-white dark:bg-gray-900 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-blue-500/20">
-                {user?.username?.[0].toUpperCase() || '?'}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-blue-500/20">
+                  {user?.username?.[0].toUpperCase() || '?'}
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{user?.username}</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-mono mt-1">AID: {user?.userId}</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{user?.username}</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-mono mt-1">AID: {user?.userId}</p>
-              </div>
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+              >
+                <LogOut size={18} />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-gray-50 dark:border-gray-800">
@@ -105,6 +187,77 @@ const SettingsPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </section>
+
+          {/* Accounts Management Section */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between px-2">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <Users size={20} className="text-blue-500" />
+                Linked Identities
+              </h3>
+              <button 
+                onClick={() => navigate('/login')}
+                className="flex items-center gap-1.5 text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                <PlusCircle size={16} />
+                Add Identity
+              </button>
+            </div>
+            <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 divide-y divide-gray-50 dark:divide-gray-800 overflow-hidden">
+              {identities.map((id) => (
+                <div 
+                  key={id.aid} 
+                  className={`p-4 flex items-center justify-between group transition-colors ${
+                    id.aid === user?.userId 
+                      ? 'bg-blue-50/50 dark:bg-blue-900/10' 
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shrink-0 ${
+                      id.aid === user?.userId ? 'bg-blue-600 shadow-md shadow-blue-500/20' : 'bg-gray-400 dark:bg-gray-600'
+                    }`}>
+                      {id.username[0].toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className={`font-bold truncate ${id.aid === user?.userId ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-100'}`}>
+                          {id.username}
+                        </p>
+                        {id.aid === user?.userId && (
+                          <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-[10px] font-black text-blue-600 dark:text-blue-400 rounded-full uppercase tracking-tighter">
+                            Active
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 font-mono truncate">AID: {id.aid}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-1">
+                    {id.aid !== user?.userId && (
+                      <button 
+                        onClick={() => handleSwitchAccount(id.aid)}
+                        disabled={authLoading}
+                        className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all disabled:opacity-50"
+                        title="Switch to this identity"
+                      >
+                        <RefreshCw size={18} className={authLoading ? 'animate-spin' : ''} />
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => handleDeleteAccount(id.aid, id.username)}
+                      disabled={authLoading}
+                      className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all disabled:opacity-50"
+                      title="Delete this identity"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 
@@ -212,6 +365,15 @@ const SettingsPage: React.FC = () => {
             </div>
           </section>
         </main>
+
+        <AlertDialog
+          isOpen={alertDialog.isOpen}
+          onClose={() => setAlertDialog(prev => ({ ...prev, isOpen: false }))}
+          onConfirm={alertDialog.onConfirm}
+          title={alertDialog.title}
+          message={alertDialog.message}
+          type={alertDialog.type}
+        />
       </div>
   );
 };

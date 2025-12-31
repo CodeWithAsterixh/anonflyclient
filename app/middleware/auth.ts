@@ -1,11 +1,10 @@
 import { redirect } from "react-router";
-import { userContext, tokenContext } from "../context/auth";
 
 /**
- * Middleware to handle authentication on the server side.
- * It reads the session cookie and populates the user context.
+ * Helper to handle authentication in loaders.
+ * It reads the session cookie and returns the user and token.
  */
-export async function authMiddleware({ request, context }: any) {
+export async function requireAuth(request: Request) {
   const cookieHeader = request.headers.get("Cookie");
   const cookies = parseCookies(cookieHeader);
   const sessionCookie = cookies["anonfly_session_user"];
@@ -20,9 +19,10 @@ export async function authMiddleware({ request, context }: any) {
     // Decode and parse the session cookie
     const session = JSON.parse(decodeURIComponent(sessionCookie));
     if (session && session.user) {
-      // Set the user and token in the context for loaders to access
-      context.set(userContext, session.user);
-      context.set(tokenContext, session.token || null);
+      return {
+        user: session.user,
+        token: session.token || null,
+      };
     } else {
       throw redirect("/login");
     }

@@ -6,6 +6,7 @@ import { useChatroom } from "../../../hooks/useChatroom/index";
 import { useTheme } from "../../../hooks/useTheme/index";
 import { useTyping } from "../../../components/typingIndicator";
 import { Background } from "../../../components/background";
+import AlertDialog from "../../../components/alertDialog";
 import type { ChatroomDetail } from "../../../lib/types/chat";
 import type { ReplyingTo, EditingMessage } from "./types";
 import { ChatLayoutContext } from "../ChatLayout";
@@ -51,6 +52,34 @@ const ChatroomPage: React.FC = () => {
   const [replyingTo, setReplyingTo] = useState<ReplyingTo | null>(null);
 
   const [editingMessage, setEditingMessage] = useState<EditingMessage | null>(null);
+
+  const [alertDialog, setAlertDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: "alert" | "confirm" | "error" | "success";
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "alert",
+  });
+
+  const showAlertDialog = (
+    title: string,
+    message: string,
+    type: "alert" | "confirm" | "error" | "success" = "alert",
+    onConfirm?: () => void
+  ) => {
+    setAlertDialog({
+      isOpen: true,
+      title,
+      message,
+      type,
+      onConfirm,
+    });
+  };
 
   const fetchChatroomDetails = async () => {
     if (!chatroomId || !token || !user) return;
@@ -196,35 +225,46 @@ const ChatroomPage: React.FC = () => {
   const handleDeleteRoom = async () => {
     if (!chatroomId || !token) return;
 
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this chatroom? This action cannot be undone."
-      )
-    ) {
-      return;
-    }
+    showAlertDialog(
+      "Delete Chatroom",
+      "Are you sure you want to delete this chatroom? This action cannot be undone.",
+      "confirm",
+      async () => {
+        try {
+          const response = await fetch(
+            `${getAPIBaseURL()}/chatrooms/${chatroomId}`,
+            {
+              method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
 
-    try {
-      const response = await fetch(
-        `${getAPIBaseURL()}/chatrooms/${chatroomId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          if (response.ok) {
+            showAlertDialog(
+              "Success",
+              "Chatroom deleted successfully!",
+              "success",
+              () => navigate("/")
+            );
+          } else {
+            const errorData = await response.json();
+            showAlertDialog(
+              "Error",
+              `Failed to delete chatroom: ${errorData.message}`,
+              "error"
+            );
+          }
+        } catch (error) {
+          showAlertDialog(
+            "Error",
+            "An error occurred while deleting the chatroom.",
+            "error"
+          );
         }
-      );
-
-      if (response.ok) {
-        alert("Chatroom deleted successfully!");
-        navigate("/");
-      } else {
-        const errorData = await response.json();
-        alert(`Failed to delete chatroom: ${errorData.message}`);
       }
-    } catch (error) {
-      alert("An error occurred while deleting the chatroom.");
-    }
+    );
   };
 
   const handleEditSuccess = () => {
@@ -366,6 +406,14 @@ const ChatroomPage: React.FC = () => {
         onEditSuccess={handleEditSuccess}
         onTyping={sendTypingStatus}
         typingUsers={typingUsers}
+      />
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        onClose={() => setAlertDialog((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={alertDialog.onConfirm}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        type={alertDialog.type}
       />
     </Background>
   );

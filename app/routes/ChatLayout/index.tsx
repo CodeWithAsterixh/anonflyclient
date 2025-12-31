@@ -2,15 +2,14 @@ import React, { useState, useEffect, createContext } from 'react';
 import { Outlet, useParams, useLoaderData } from 'react-router';
 import ChatroomListPage from '../ChatroomListPage';
 import NoChatSelectedFallback from '../../../components/noChatSelectedFallback';
-import { userContext, tokenContext } from '../../context/auth';
+import { requireAuth } from '../../middleware/auth';
 import ProtectedRoute from '../../../components/protectedRoute';
 import { useAuth } from '../../../hooks/useAuth/index';
 import type { User } from '../../../types/User';
 import type { Identity } from '../../../lib/helpers/identityManager';
 
-export async function loader({ context }: any) {
-  const user = context.get(userContext);
-  const token = context.get(tokenContext);
+export async function loader({ request }: { request: Request }) {
+  const { user, token } = await requireAuth(request);
   return { user, token };
 }
 

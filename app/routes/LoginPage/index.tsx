@@ -17,11 +17,18 @@ const LoginPage: React.FC = () => {
   const [username, setUsername] = useState<string>("");
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
-  const { joinAnonymously, switchAccount, isLoading, isInitialCheck, error, identities } = useAuth();
+  const { joinAnonymously, switchAccount, isLoading, isInitialCheck, isAuthenticated, error, identities } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const redirectPath =
     new URLSearchParams(location.search).get("redirect_to") || "/";
+
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (!isInitialCheck && isAuthenticated) {
+      navigate(redirectPath, { replace: true });
+    }
+  }, [isInitialCheck, isAuthenticated, navigate, redirectPath]);
 
   /**
    * Handles the form submission for anonymous join.
@@ -45,7 +52,7 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  if (isInitialCheck) {
+  if (isInitialCheck || isAuthenticated) {
     return (
       <div className="min-h-[100dvh] bg-gray-50 dark:bg-gray-950 flex items-center justify-center px-4">
         <div className="flex flex-col items-center gap-4">

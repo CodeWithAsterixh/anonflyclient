@@ -147,6 +147,8 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
                 token, // Send token for authentication
                 userAid: identity.aid,
                 username: identity.username,
+                publicKey: identity.publicKey,
+                exchangePublicKey: identity.exchangePublicKey,
                 password,
               })
             );

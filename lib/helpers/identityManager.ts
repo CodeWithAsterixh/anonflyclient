@@ -1,6 +1,8 @@
 export interface Identity {
   aid: string;
   username: string;
+  publicKey: string; // Top-level identity public key
+  exchangePublicKey: string; // Top-level exchange public key
   createdAt?: string; // ISO timestamp
   identityKeyPair: {
     publicKey: string; // Base64 DER
@@ -128,7 +130,15 @@ export async function getIdentity(): Promise<Identity | null> {
     if (activeAid) {
       const request = store.get(activeAid);
       request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve(request.result || null);
+      request.onsuccess = () => {
+        const result = request.result;
+        if (result) {
+          // Backfill top-level keys if missing
+          if (!result.publicKey) result.publicKey = result.identityKeyPair.publicKey;
+          if (!result.exchangePublicKey) result.exchangePublicKey = result.exchangeKeyPair.publicKey;
+        }
+        resolve(result || null);
+      };
     } else {
       // Fallback: Get the first available identity if no active one is set
       const request = store.openCursor();
@@ -136,8 +146,13 @@ export async function getIdentity(): Promise<Identity | null> {
       request.onsuccess = () => {
         const cursor = request.result;
         if (cursor) {
-          localStorage.setItem(ACTIVE_IDENTITY_KEY, cursor.value.aid);
-          resolve(cursor.value);
+          const result = cursor.value;
+          // Backfill top-level keys if missing
+          if (!result.publicKey) result.publicKey = result.identityKeyPair.publicKey;
+          if (!result.exchangePublicKey) result.exchangePublicKey = result.exchangeKeyPair.publicKey;
+          
+          localStorage.setItem(ACTIVE_IDENTITY_KEY, result.aid);
+          resolve(result);
         } else {
           resolve(null);
         }
@@ -153,7 +168,14 @@ export async function getAllIdentities(): Promise<Identity[]> {
     const store = transaction.objectStore(STORE_NAME);
     const request = store.getAll();
     request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result || []);
+    request.onsuccess = () => {
+      const results = (request.result || []) as Identity[];
+      results.forEach(result => {
+        if (!result.publicKey) result.publicKey = result.identityKeyPair.publicKey;
+        if (!result.exchangePublicKey) result.exchangePublicKey = result.exchangeKeyPair.publicKey;
+      });
+      resolve(results);
+    };
   });
 }
 
@@ -165,9 +187,14 @@ export async function switchIdentity(aid: string): Promise<Identity | null> {
     const request = store.get(aid);
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
-      if (request.result) {
+      const result = request.result;
+      if (result) {
+        // Backfill top-level keys if missing
+        if (!result.publicKey) result.publicKey = result.identityKeyPair.publicKey;
+        if (!result.exchangePublicKey) result.exchangePublicKey = result.exchangeKeyPair.publicKey;
+        
         localStorage.setItem(ACTIVE_IDENTITY_KEY, aid);
-        resolve(request.result);
+        resolve(result);
       } else {
         resolve(null);
       }
@@ -237,6 +264,8 @@ export async function generateIdentity(username: string): Promise<Identity> {
   const identity: Identity = {
     aid,
     username,
+    publicKey: idPubKeyBase64,
+    exchangePublicKey: exPubKeyBase64,
     createdAt: new Date().toISOString(),
     identityKeyPair: {
       publicKey: idPubKeyBase64,

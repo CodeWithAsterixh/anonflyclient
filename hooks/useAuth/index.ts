@@ -94,8 +94,13 @@ export const useAuth = () => {
   }, []);
 
   const initializeAuth = useCallback(async () => {
-    // Load all stored identities first
-    const allIdentities = await getAllIdentities();
+    let allIdentities: any[] = [];
+    try {
+      // Load all stored identities first
+      allIdentities = await getAllIdentities();
+    } catch (e) {
+      console.error("[useAuth] Failed to load identities:", e);
+    }
 
     // 1. Check for ephemeral session
     const session = getSessionUser();

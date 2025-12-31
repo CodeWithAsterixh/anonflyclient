@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { editChatroom } from '../../lib/controllers/chatroomController';
+import Input from '../ui/input';
 import type { EditChatroomModalProps } from './types';
 
 const EditChatroomModal: React.FC<EditChatroomModalProps> = ({
@@ -70,35 +71,26 @@ const EditChatroomModal: React.FC<EditChatroomModalProps> = ({
             </div>
           )}
 
-          <div className="space-y-1.5">
-            <label htmlFor="roomname" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Chatroom Name
-            </label>
-            <input
-              id="roomname"
-              type="text"
-              value={roomname}
-              onChange={(e) => setRoomname(e.target.value)}
-              placeholder="Enter chatroom name"
-              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500"
-              disabled={loading}
-            />
-          </div>
+          <Input
+            id="roomname"
+            label="Chatroom Name"
+            value={roomname}
+            onChange={(e) => setRoomname(e.target.value)}
+            placeholder="Enter chatroom name"
+            disabled={loading}
+          />
 
-          <div className="space-y-1.5">
-            <label htmlFor="description" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Description <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter chatroom description"
-              rows={3}
-              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all resize-none placeholder:text-gray-400 dark:placeholder:text-gray-500"
-              disabled={loading}
-            />
-          </div>
+          <Input
+            id="description"
+            label="Description"
+            multiline
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Enter chatroom description"
+            rows={3}
+            disabled={loading}
+            helperText="Optional"
+          />
 
           {/* Buttons */}
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-50 dark:border-gray-700 mt-2">

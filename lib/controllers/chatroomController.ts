@@ -153,6 +153,25 @@ export const deleteMessage = async (chatroomId: string, messageId: string) => {
   }
 };
 
+export const removeParticipant = async (chatroomId: string, userAid: string) => {
+  try {
+    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${chatroomId}/participants/${userAid}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to remove participant');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getChatroomListSSE = (onMessage: (data: any) => void, onError: (event: Event) => void) => {
   const eventSource = new EventSource(`${getAPIBaseURL()}/chatrooms`);
 

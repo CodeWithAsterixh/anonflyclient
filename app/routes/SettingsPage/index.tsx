@@ -21,6 +21,7 @@ import { useLoaderData, useNavigate } from 'react-router';
 import AlertDialog from '../../../components/alertDialog';
 import Logo from '../../../components/logo';
 import { useClipboard } from '../../../hooks/useClipboard/index';
+import Input from '../../../components/ui/input';
 import { requireAuth } from '../../middleware/auth';
 import CopyWrapper from 'components/copyWrapper';
 import { deleteChatroom, leaveChatroom } from '../../../lib/controllers/chatroomController';
@@ -152,7 +153,7 @@ const SettingsPage: React.FC = () => {
           </p>
           <div className="space-y-3">
             <label className={`flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 transition-colors group ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-blue-500'}`}>
-              <input
+              <Input
                 type="radio"
                 name="roomAction"
                 value="transfer"
@@ -167,7 +168,7 @@ const SettingsPage: React.FC = () => {
               </div>
             </label>
             <label className={`flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 transition-colors group ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-red-500'}`}>
-              <input
+              <Input
                 type="radio"
                 name="roomAction"
                 value="delete"

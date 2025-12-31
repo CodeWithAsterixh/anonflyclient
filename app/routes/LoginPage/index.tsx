@@ -12,6 +12,8 @@ import { validateUsername } from "../../../lib/helpers/validation";
 import { Loader2, Users } from "lucide-react";
 import Logo from "../../../components/logo";
 import AccountSelectionModal from "./components/AccountSelectionModal";
+import Input from "../../../components/ui/input";
+import Loader from "../../../components/ui/loader";
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState<string>("");
@@ -53,19 +55,7 @@ const LoginPage: React.FC = () => {
   };
 
   if (isInitialCheck || isAuthenticated) {
-    return (
-      <div className="min-h-[100dvh] bg-gray-50 dark:bg-gray-950 flex items-center justify-center px-4">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="w-16 h-16 border-4 border-blue-100 dark:border-blue-900/30 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-8 h-8 bg-blue-600 dark:bg-blue-500 rounded-full animate-pulse"></div>
-            </div>
-          </div>
-          <p className="text-gray-500 dark:text-gray-400 font-medium animate-pulse">Loading...</p>
-        </div>
-      </div>
-    );
+    return <Loader message="Loading..." />;
   }
 
   return (
@@ -93,33 +83,20 @@ const LoginPage: React.FC = () => {
         </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-6">
-            <label
-              htmlFor="username"
-              className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2"
-            >
-              Username
-            </label>
-            <input
-              type="text"
+            <Input
               id="username"
+              label="Username"
               placeholder="e.g. ghost_rider"
-              className={`w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all ${
-                usernameError ? "border-red-500 ring-red-200 dark:ring-red-900/30" : ""
-              }`}
               value={username}
               onChange={(e) => {
                 setUsername(e.target.value);
                 setUsernameError(null);
               }}
               disabled={isLoading || isInitialCheck}
+              error={usernameError || undefined}
               aria-invalid={!!usernameError}
               aria-describedby={usernameError ? "username-error" : undefined}
             />
-            {usernameError && (
-              <p id="username-error" className="text-red-500 dark:text-red-400 text-xs italic mt-1">
-                {usernameError}
-              </p>
-            )}
           </div>
           <div className="flex items-center justify-center">
             <button

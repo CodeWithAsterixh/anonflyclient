@@ -1,8 +1,8 @@
 import React from "react";
-import { ChevronDown, Eye, EyeOff, Lock } from "lucide-react";
+import { ChevronDown, Lock } from "lucide-react";
 import ChatroomMenu from "../../../../components/chatroomMenu";
-import ChatroomSkeleton from "../../../../components/chatroomSkeleton";
 import Logo from "../../../../components/logo";
+import Input from "../../../../components/ui/input";
 import type { ChatroomDetail } from "../../../../lib/types/chat";
 
 interface JoinRoomScreenProps {
@@ -12,7 +12,6 @@ interface JoinRoomScreenProps {
   isSubmitting: boolean;
   isHost: boolean;
   joinPassword: string;
-  showJoinPassword: boolean;
   passwordError: string | null;
   onBack: () => void;
   onNavigateHome: () => void;
@@ -20,7 +19,6 @@ interface JoinRoomScreenProps {
   onDeleteRoom: () => void;
   onEditRoom: () => void;
   onSetJoinPassword: (password: string) => void;
-  onToggleShowJoinPassword: () => void;
   onJoinChatroom: () => void;
 }
 
@@ -31,7 +29,6 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
   isSubmitting,
   isHost,
   joinPassword,
-  showJoinPassword,
   passwordError,
   onBack,
   onNavigateHome,
@@ -39,7 +36,6 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
   onDeleteRoom,
   onEditRoom,
   onSetJoinPassword,
-  onToggleShowJoinPassword,
   onJoinChatroom,
 }) => {
   const isLocked = displayDetail?.isLocked;
@@ -112,37 +108,18 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
                     </span>
                   </div>
                   <div className="relative">
-                    <input
-                      type={showJoinPassword ? "text" : "password"}
+                    <Input
+                      type="password"
                       value={joinPassword}
                       onChange={(e) => onSetJoinPassword(e.target.value)}
                       placeholder="Enter room password"
                       disabled={isConnecting}
-                      className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all pr-12 disabled:opacity-50"
+                      error={passwordError || undefined}
                       onKeyDown={(e) =>
                         e.key === "Enter" && onJoinChatroom()
                       }
                     />
-                    <button
-                      type="button"
-                      onClick={onToggleShowJoinPassword}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-                      aria-label={
-                        showJoinPassword ? "Hide password" : "Show password"
-                      }
-                    >
-                      {showJoinPassword ? (
-                        <EyeOff size={18} />
-                      ) : (
-                        <Eye size={18} />
-                      )}
-                    </button>
                   </div>
-                  {passwordError && (
-                    <p className="text-xs text-red-500 dark:text-red-400 font-medium">
-                      {passwordError}
-                    </p>
-                  )}
                   <div className="flex flex-col gap-3 mt-6">
                     <button
                       onClick={onJoinChatroom}

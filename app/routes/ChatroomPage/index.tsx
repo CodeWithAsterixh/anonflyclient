@@ -20,6 +20,10 @@ import {
   SecuringRoomScreen,
 } from "./screens";
 
+import {
+  removeParticipant,
+} from "../../../lib/controllers/chatroomController";
+
 /**
  * ChatroomPage component displays the messages within a specific chatroom,
  * allows users to send new messages, and handles joining/leaving the chatroom.
@@ -45,7 +49,6 @@ const ChatroomPage: React.FC = () => {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [joinPassword, setJoinPassword] = useState("");
-  const [showJoinPassword, setShowJoinPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -294,6 +297,24 @@ const ChatroomPage: React.FC = () => {
     }
   };
 
+  const handleRemoveParticipant = async (userAid: string) => {
+    if (!chatroomId) return;
+    try {
+      await removeParticipant(chatroomId, userAid);
+      showAlertDialog(
+        "Success",
+        "Participant removed successfully",
+        "success"
+      );
+    } catch (error: any) {
+      showAlertDialog(
+        "Error",
+        error.message || "Failed to remove participant",
+        "error"
+      );
+    }
+  };
+
   if (isJoined && !hasRoomKey) {
     return (
       <Background mode={theme}>
@@ -364,15 +385,13 @@ const ChatroomPage: React.FC = () => {
           isSubmitting={isSubmitting}
           isHost={isHost}
           joinPassword={joinPassword}
-          showJoinPassword={showJoinPassword}
-          passwordError={passwordError}
+          passwordError={passwordError || (error?.toLowerCase().includes("password") || error?.toLowerCase().includes("locked") ? error : null)}
           onBack={onBack}
           onNavigateHome={() => navigate("/")}
           onLeaveRoom={handleLeaveRoom}
           onDeleteRoom={handleDeleteRoom}
           onEditRoom={() => setIsEditModalOpen(true)}
           onSetJoinPassword={setJoinPassword}
-          onToggleShowJoinPassword={() => setShowJoinPassword(!showJoinPassword)}
           onJoinChatroom={handleJoinChatroom}
         />
       </Background>
@@ -387,6 +406,7 @@ const ChatroomPage: React.FC = () => {
         isConnected={isConnected}
         isHost={isHost}
         messages={messages}
+        participants={Array.from(participants.values())}
         replyingTo={replyingTo}
         editingMessage={editingMessage}
         showScrollButton={showScrollButton}
@@ -410,6 +430,7 @@ const ChatroomPage: React.FC = () => {
         onEditSuccess={handleEditSuccess}
         onTyping={sendTypingStatus}
         typingUsers={typingUsers}
+        onRemoveParticipant={handleRemoveParticipant}
       />
       <AlertDialog
         isOpen={alertDialog.isOpen}

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import Input from '../ui/input';
 import { Send } from 'lucide-react';
 import { useIsMobile } from '../../hooks/useIsMobile/index';
 import { MessagePreview } from './components/MessagePreview';
@@ -140,20 +141,20 @@ const MessageInput: React.FC<MessageInputProps> = ({
       )}
 
       <div className="flex items-end gap-2">
-        <div className="flex-1 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden transition-colors">
-          <textarea
-            ref={textareaRef}
-            value={messageInput}
-            onChange={(e) => setMessageInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={editingMessage ? "Edit your message..." : "Type a message"}
-            rows={1}
-            className="w-full text-black dark:text-white p-3 focus:outline-none resize-none bg-transparent block max-h-[200px] overflow-y-auto placeholder:text-gray-400 dark:placeholder:text-gray-500"
-            disabled={isDisabled}
-            style={{ minHeight: '44px' }}
-            aria-label="Message input"
-          />
-        </div>
+        <Input
+          ref={textareaRef as any}
+          value={messageInput}
+          onChange={(e) => setMessageInput(e.target.value)}
+          onKeyDown={handleKeyDown as any}
+          placeholder={editingMessage ? "Edit your message..." : "Type a message"}
+          multiline
+          rows={1}
+          className="w-full text-black dark:text-white p-3 focus:outline-none resize-none bg-transparent block max-h-[200px] overflow-y-auto placeholder:text-gray-400 dark:placeholder:text-gray-500 border-none ring-0 focus:ring-0"
+          containerClassName="flex-1"
+          disabled={isDisabled}
+          style={{ minHeight: '44px' }}
+          aria-label="Message input"
+        />
         <button
           onClick={() => handleSubmit()}
           className="p-3 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 focus:outline-none disabled:opacity-50 transition-colors flex-shrink-0"

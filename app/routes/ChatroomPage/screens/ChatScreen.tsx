@@ -1,12 +1,13 @@
-import React, { useRef } from "react";
-import { ChevronDown } from "lucide-react";
+import React, { useRef, useState, useMemo, useEffect } from "react";
+import { ChevronDown, Loader2 } from "lucide-react";
 import ChatroomMenu from "../../../../components/chatroomMenu";
 import EditChatroomModal from "../../../../components/editChatroomModal";
+import ManageUsersDrawer from "../../../../components/manageUsersDrawer";
 import Logo from "../../../../components/logo";
 import MessageDisplay from "../../../../components/messageDisplay";
 import MessageInput from "../../../../components/messageInput";
 import { TypingIndicator, type TypingUser } from "../../../../components/typingIndicator";
-import type { ChatroomDetail, Message } from "../../../../lib/types/chat";
+import type { ChatroomDetail, Message, Participant } from "../../../../lib/types/chat";
 import type { ReplyingTo, EditingMessage } from "../types";
 
 interface ChatScreenProps {
@@ -15,6 +16,7 @@ interface ChatScreenProps {
   isConnected: boolean;
   isHost: boolean;
   messages: Message[];
+  participants: Participant[];
   typingUsers: TypingUser[];
   replyingTo: ReplyingTo | null;
   editingMessage: EditingMessage | null;
@@ -38,6 +40,7 @@ interface ChatScreenProps {
   onSendReaction: (id: string, emoji: any) => void;
   onEditSuccess: () => void;
   onTyping: (isTyping: boolean) => void;
+  onRemoveParticipant: (userAid: string) => Promise<void>;
 }
 
 const ChatScreen: React.FC<ChatScreenProps> = ({
@@ -46,6 +49,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   isConnected,
   isHost,
   messages,
+  participants,
   typingUsers,
   replyingTo,
   editingMessage,
@@ -69,8 +73,52 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   onSendReaction,
   onEditSuccess,
   onTyping,
+  onRemoveParticipant,
 }) => {
   const messagePortalRootRef = useRef<HTMLDivElement>(null);
+  const [visibleCount, setVisibleCount] = useState(10);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isManageUsersOpen, setIsManageUsersOpen] = useState(false);
+  const prevScrollHeightRef = useRef<number>(0);
+
+  const visibleMessages = useMemo(() => {
+    // Show the LAST N messages
+    return messages.slice(-visibleCount);
+  }, [messages, visibleCount]);
+
+  const hasMore = messages.length > visibleCount;
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    onScroll();
+    
+    const container = e.currentTarget;
+    if (container.scrollTop === 0 && hasMore && !isLoadingMore) {
+      loadMore();
+    }
+  };
+
+  const loadMore = () => {
+    if (messagesContainerRef.current) {
+      prevScrollHeightRef.current = messagesContainerRef.current.scrollHeight;
+    }
+    
+    setIsLoadingMore(true);
+    // Simulate a small delay for smoother feel or just update immediately
+    setTimeout(() => {
+      setVisibleCount(prev => Math.min(prev + 10, messages.length));
+      setIsLoadingMore(false);
+    }, 500);
+  };
+
+  // Maintain scroll position after loading more messages
+  useEffect(() => {
+    if (messagesContainerRef.current && prevScrollHeightRef.current > 0) {
+      const newScrollHeight = messagesContainerRef.current.scrollHeight;
+      const scrollDiff = newScrollHeight - prevScrollHeightRef.current;
+      messagesContainerRef.current.scrollTop = scrollDiff;
+      prevScrollHeightRef.current = 0;
+    }
+  }, [visibleMessages]);
 
   return (
     <div className="flex flex-col h-[100dvh] bg-transparent relative overflow-hidden transition-colors duration-300">
@@ -106,7 +154,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
 
             <ChatroomMenu
               onLeaveRoom={onLeaveRoom}
-              onRemoveParticipant={() => {}}
+              onRemoveParticipant={() => setIsManageUsersOpen(true)}
               onDeleteRoom={onDeleteRoom}
               onEditRoom={onOpenEditModal}
               isHost={isHost}
@@ -124,10 +172,25 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
         {/* Messages Area */}
         <div
           ref={messagesContainerRef}
-          onScroll={onScroll}
-          className="flex-1 overflow-y-auto p-4 space-y-4 relative z-10"
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto p-4 space-y-4 relative z-10 scroll-smooth"
         >
-          {messages.map((msg) => (
+          {hasMore && (
+            <div className="flex justify-center py-2">
+              {isLoadingMore ? (
+                <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+              ) : (
+                <button 
+                  onClick={loadMore}
+                  className="text-xs text-gray-500 hover:text-blue-500 transition-colors"
+                >
+                  Load older messages
+                </button>
+              )}
+            </div>
+          )}
+
+          {visibleMessages.map((msg) => (
             <MessageDisplay
               key={msg.id}
               message={msg}
@@ -157,7 +220,10 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
 
         {/* Input Area */}
         <MessageInput
-          onSendMessage={onSendMessage}
+          onSendMessage={(content) => {
+            onSendMessage(content);
+            setVisibleCount(prev => prev + 1); // Ensure new message is visible
+          }}
           onEditMessage={onEditMessage}
           isDisabled={!isConnected}
           replyingTo={replyingTo}
@@ -174,6 +240,15 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
           initialRoomname={displayDetail?.roomname || ""}
           initialDescription={displayDetail?.description || ""}
           onSuccess={onEditSuccess}
+        />
+
+        <ManageUsersDrawer
+          isOpen={isManageUsersOpen}
+          onClose={() => setIsManageUsersOpen(false)}
+          participants={participants}
+          chatroomId={displayDetail?.roomId || ""}
+          isHost={isHost}
+          onRemoveParticipant={onRemoveParticipant}
         />
       </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Eye, EyeOff } from 'lucide-react';
+import { X } from 'lucide-react';
 import { createChatroom } from '../../lib/controllers/chatroomController';
+import Input from '../ui/input';
 import type { CreateChatroomModalProps } from './types';
 
 const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
@@ -11,7 +12,6 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
   const [roomname, setRoomname] = useState('');
   const [description, setDescription] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,64 +65,38 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
             </div>
           )}
 
-          <div className="space-y-1.5">
-            <label htmlFor="roomname" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Chatroom Name
-            </label>
-            <input
-              id="roomname"
-              type="text"
-              value={roomname}
-              onChange={(e) => setRoomname(e.target.value)}
-              placeholder="Enter a descriptive name"
-              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500"
-              disabled={loading}
-            />
-          </div>
+          <Input
+            id="roomname"
+            label="Chatroom Name"
+            value={roomname}
+            onChange={(e) => setRoomname(e.target.value)}
+            placeholder="Enter a descriptive name"
+            disabled={loading}
+          />
 
-          <div className="space-y-1.5">
-            <label htmlFor="description" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Description <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="What's this room about?"
-              rows={3}
-              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all resize-none placeholder:text-gray-400 dark:placeholder:text-gray-500"
-              disabled={loading}
-            />
-          </div>
+          <Input
+            id="description"
+            label="Description"
+            multiline
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="What's this room about?"
+            rows={3}
+            disabled={loading}
+            helperText="Optional"
+          />
 
-          <div className="space-y-1.5">
-            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Room Password <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Set a password for privacy"
-                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all pr-12 placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                disabled={loading}
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-            <p className="text-xs text-gray-500 dark:text-gray-500 italic">
-              Leave blank for a public room that anyone can join.
-            </p>
-          </div>
+          <Input
+            id="password"
+            label="Room Password (optional)"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Set a password for privacy"
+            disabled={loading}
+            autoComplete="new-password"
+            helperText="Leave blank for a public room that anyone can join."
+          />
 
           {/* Buttons */}
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-50 dark:border-gray-700 mt-2">

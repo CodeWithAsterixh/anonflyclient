@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { getChatroomAPIURL } from '../../lib/constants/api';
 import { useAuth } from '../useAuth';
+import { getUserRegion } from '../../lib/helpers/location';
 import type { UseChatroomListReturn, Chatroom } from './types';
 
 /**
@@ -40,11 +41,16 @@ export const useChatroomList = (): UseChatroomListReturn => {
     setError(null);
     setRetryCountdown(null);
 
-    // Append token as query parameter since standard EventSource doesn't support custom headers
+    // Append token and region as query parameters since standard EventSource doesn't support custom headers
     const baseUrl = getChatroomAPIURL();
     const url = new URL(baseUrl);
     if (token) {
       url.searchParams.append('token', token);
+    }
+    
+    const region = getUserRegion();
+    if (region) {
+      url.searchParams.append('region', region);
     }
 
     const eventSource = new EventSource(url.toString());

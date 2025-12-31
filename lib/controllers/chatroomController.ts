@@ -1,5 +1,6 @@
 import { getAPIBaseURL } from "lib/constants/api";
 import { getSessionUser } from '../helpers/authStorage';
+import { getUserRegion } from '../helpers/location';
 
 const getAuthHeaders = () => {
   // Get token from sessionStorage
@@ -17,10 +18,11 @@ const getAuthHeaders = () => {
 
 export const createChatroom = async (roomname: string, description?: string, password?: string) => {
   try {
+    const region = getUserRegion();
     const response = await fetch(`${getAPIBaseURL()}/chatrooms`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ roomname, description, password }),
+      body: JSON.stringify({ roomname, description, password, region }),
     });
 
     const data = await response.json();

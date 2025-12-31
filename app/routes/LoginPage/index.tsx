@@ -39,8 +39,7 @@ const LoginPage: React.FC = () => {
     }
 
     try {
-      await joinAnonymously(username);
-      navigate(redirectPath);
+      await joinAnonymously(username, redirectPath);
     } catch (err) {
       // Join failed error is handled by useAuth and displayed in the UI
     }
@@ -155,7 +154,7 @@ const LoginPage: React.FC = () => {
           isOpen={isAccountModalOpen} 
           onClose={() => setIsAccountModalOpen(false)} 
           identities={identities} 
-          onSelect={switchAccount} 
+          onSelect={(aid) => switchAccount(aid, redirectPath)} 
           isLoading={isLoading} 
         />
       </div>

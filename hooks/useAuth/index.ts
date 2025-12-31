@@ -38,7 +38,7 @@ export const useAuth = () => {
     window.location.href = '/login';
   }, []);
 
-  const switchAccount = useCallback(async (aid: string) => {
+  const switchAccount = useCallback(async (aid: string, redirectTo: string = '/') => {
     setAuthState(prev => ({ ...prev, loading: true, retryCountdown: null }));
     try {
       const identity = await switchLocalIdentity(aid);
@@ -52,16 +52,16 @@ export const useAuth = () => {
           const user: User = { userId: sessionData.aid, username: sessionData.username };
           setSessionUser(user, sessionData.token);
           
-          // Force a full page reload to clear all states and reconnect WebSockets
-          window.location.reload();
+          // Force a full page reload to clear all states and redirect
+          window.location.href = redirectTo;
         } catch (handshakeError) {
           // If handshake fails (bad network), we still "switch" but without a token
           // This prevents being locked out
           const user: User = { userId: identity.aid, username: identity.username };
           setSessionUser(user, ""); // Empty token for offline mode
           
-          // Force a full page reload to clear all states and reconnect WebSockets
-          window.location.reload();
+          // Force a full page reload to clear all states and redirect
+          window.location.href = redirectTo;
         }
       }
     } catch (error) {
@@ -191,7 +191,7 @@ export const useAuth = () => {
   /**
    * Joins the app anonymously by generating an identity and performing a handshake.
    */
-  const joinAnonymously = async (username: string) => {
+  const joinAnonymously = async (username: string, redirectTo: string = '/') => {
     setAuthState(prev => ({ ...prev, loading: true, error: null, retryCountdown: null }));
     try {
       const identity = await generateIdentity(username);
@@ -201,8 +201,8 @@ export const useAuth = () => {
       // Store session
       setSessionUser(user, sessionData.token);
       
-      // Force a full page reload to clear all states and redirect to home
-      window.location.href = '/';
+      // Force a full page reload to clear all states and redirect
+      window.location.href = redirectTo;
     } catch (error: any) {
       setAuthState(prev => ({
         ...prev,

@@ -67,6 +67,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
   }, [isRemoved]);
 
   const activeSSERef = useRef<string | null>(null);
+  const retryCountRef = useRef(0);
 
   // SSE for Chatroom Details
   useEffect(() => {
@@ -254,6 +255,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
       setIsConnected(true);
       setError(null);
       setRetryCount(0);
+      retryCountRef.current = 0;
 
       heartbeatInterval = setInterval(() => {
         if (socket.readyState === WebSocket.OPEN) {
@@ -663,9 +665,11 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
       joiningRef.current = null;
       if (heartbeatInterval) clearInterval(heartbeatInterval);
       
+      const currentRetryCount = retryCountRef.current;
+
       if (event.code !== 1000 && !isRemovedRef.current) {
-        if (retryCount < MAX_RETRIES) {
-          setError(`Connection lost. Retrying (${retryCount + 1}/${MAX_RETRIES})...`);
+        if (currentRetryCount < MAX_RETRIES) {
+          setError(`Connection lost. Retrying (${currentRetryCount + 1}/${MAX_RETRIES})...`);
         } else {
           setError("Connection failed after multiple attempts. Please refresh.");
         }
@@ -683,11 +687,12 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
         }
       }
 
-      if (activeRoomId && !isRemovedRef.current && retryCount < MAX_RETRIES) {
+      if (activeRoomId && !isRemovedRef.current && currentRetryCount < MAX_RETRIES) {
         setTimeout(() => {
           // Re-check if we still need to connect to this room
           if (currentChatroomIdRef.current === activeRoomId) {
-            setRetryCount(prev => prev + 1);
+            retryCountRef.current += 1;
+            setRetryCount(retryCountRef.current);
             connect();
           }
         }, 3000);
@@ -700,7 +705,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
       setError("Failed to connect to chat server. Please check your connection.");
     };
 
-  }, [token, user?.userId, loading, isAuthenticated, retryCount, decryptStoredMessages]);
+  }, [token, user?.userId, loading, isAuthenticated, decryptStoredMessages]);
 
 
   useEffect(() => {

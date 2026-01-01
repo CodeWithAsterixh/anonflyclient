@@ -172,39 +172,62 @@ const ChatroomPage: React.FC = () => {
   const displayDetail = sseChatroomDetail || chatroomDetail;
 
   const lastJoinedRoomRef = useRef<string | null>(null);
+  const isJoiningRef = useRef<boolean>(false);
+
+  // Reset joining state when room ID changes
+  useEffect(() => {
+    isJoiningRef.current = false;
+    lastJoinedRoomRef.current = null;
+  }, [chatroomId]);
 
   // Auto-join if room is not locked and we are connected
-  // Or if room IS locked, we are connected, and we have a password ready (from a previous attempt)
   useEffect(() => {
-    if (isConnected && chatroomId && displayDetail && !isJoined && !isRemoved) {
-      // Prevent redundant join calls for the same room if already joined or joining
-      if (lastJoinedRoomRef.current === chatroomId && isJoined) return;
-
-      if (!displayDetail.isLocked) {
-        console.log(`[ChatroomPage] Auto-joining room: ${chatroomId}`);
-        lastJoinedRoomRef.current = chatroomId;
-        joinChatroom(chatroomId);
-      } else if (isSubmitting && joinPassword) {
-        // If it's locked and we just connected after clicking "Enter Room", try to join now
-        console.log(`[ChatroomPage] Joining locked room with password: ${chatroomId}`);
-        lastJoinedRoomRef.current = chatroomId;
-        joinChatroom(chatroomId, joinPassword);
-      }
+    if (!isConnected || !chatroomId || !displayDetail || isJoined || isRemoved) {
+      return;
     }
-    
-    if (!isJoined) {
-      lastJoinedRoomRef.current = null;
+
+    // If we are already in the process of joining this specific room, stop
+    if (isJoiningRef.current || lastJoinedRoomRef.current === chatroomId) {
+      return;
+    }
+
+    const performJoin = async (password?: string) => {
+      try {
+        isJoiningRef.current = true;
+        lastJoinedRoomRef.current = chatroomId;
+        await joinChatroom(chatroomId, password);
+      } catch (err) {
+        console.error("[ChatroomPage] Join failed:", err);
+        isJoiningRef.current = false;
+        lastJoinedRoomRef.current = null;
+      }
+    };
+
+    if (!displayDetail.isLocked) {
+      console.log(`[ChatroomPage] Auto-joining room: ${chatroomId}`);
+      performJoin();
+    } else if (isSubmitting && joinPassword) {
+      console.log(`[ChatroomPage] Joining locked room with password: ${chatroomId}`);
+      performJoin(joinPassword);
     }
   }, [
     isConnected,
     chatroomId,
-    displayDetail?.isLocked, // Only depend on the locked status, not the whole detail object
+    displayDetail?.isLocked,
     isJoined,
     isRemoved,
     joinChatroom,
     joinPassword,
     isSubmitting,
   ]);
+
+  // Reset joining lock on errors so user can try again
+  useEffect(() => {
+    if (error) {
+      isJoiningRef.current = false;
+      lastJoinedRoomRef.current = null;
+    }
+  }, [error]);
 
   useEffect(() => {
     if (
@@ -218,13 +241,21 @@ const ChatroomPage: React.FC = () => {
     }
   }, [error, clearError]);
 
+  // Graceful exit: Only leave if we are actually unmounting or changing to a different room
+  const leaveRoomRef = useRef(leaveChatroom);
   useEffect(() => {
+    leaveRoomRef.current = leaveChatroom;
+  }, [leaveChatroom]);
+
+  useEffect(() => {
+    const currentRoomOnMount = chatroomId;
     return () => {
-      if (currentChatroomId) {
-        leaveChatroom();
+      // Only call leave if we are unmounting or if the URL chatroomId has changed
+      if (currentRoomOnMount) {
+        leaveRoomRef.current();
       }
     };
-  }, [currentChatroomId, leaveChatroom]);
+  }, [chatroomId]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {

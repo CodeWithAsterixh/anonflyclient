@@ -60,7 +60,7 @@ export const Background: React.FC<BackgroundProps> = ({
     <>
       <div
         className={
-          `absolute inset-0 isolate z-0 pointer-events-none`
+          `absolute inset-0 isolate -z-10 pointer-events-none`
         }
         
       >

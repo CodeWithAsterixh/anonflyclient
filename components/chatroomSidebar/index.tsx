@@ -153,7 +153,7 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
                         {participant.username}
                       </p>
                       {participant.userAid === hostAid && (
-                        <span className="text-xs bg-amber-100 flex items-center justify-center gap-1 py-1 px-2 scale-[0.8] rounded-full"><ShieldCheck size={12} className="text-amber-500 shrink-0" /> Host</span>
+                        <span className="text-xs bg-amber-300/30 dark:amber-300/30 text-amber-500 flex items-center justify-center gap-1 py-1 px-2 scale-[0.8] rounded-full"><ShieldCheck size={12} className="text-amber-500 shrink-0" /> Host</span>
                       )}
                     </div>
                   </div>
@@ -186,7 +186,7 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
       </div>
 
       {/* Connection Status */}
-      <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+      <div className="p-4 border-t border-gray-100 rounded-md md:rounded-none dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-amber-500'}`} />
           <span className="text-xs font-medium text-gray-600 dark:text-gray-400">

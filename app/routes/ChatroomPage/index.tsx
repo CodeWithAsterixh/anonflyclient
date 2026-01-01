@@ -149,20 +149,15 @@ const ChatroomPage: React.FC = () => {
         isOpen: true,
         title: "Removed from Room",
         message: "You have been removed from the room by the host.",
-        type: "confirm",
-        confirmText: "Reconnect",
-        cancelText: "Go Home",
+        type: "alert",
+        confirmText: "Go Home",
         onConfirm: () => {
-          setIsRemoved(false);
-          reconnect();
-        },
-        onCancel: () => {
           setIsRemoved(false);
           navigate("/");
         }
       });
     }
-  }, [isRemoved, reconnect, setIsRemoved, navigate]);
+  }, [isRemoved, setIsRemoved, navigate]);
 
   const { typingUsers, sendTypingStatus } = useTyping(chatroomId, ws);
   const { theme } = useTheme();
@@ -179,7 +174,7 @@ const ChatroomPage: React.FC = () => {
   // Auto-join if room is not locked and we are connected
   // Or if room IS locked, we are connected, and we have a password ready (from a previous attempt)
   useEffect(() => {
-    if (isConnected && chatroomId && displayDetail && !isJoined) {
+    if (isConnected && chatroomId && displayDetail && !isJoined && !isRemoved) {
       if (!displayDetail.isLocked) {
         joinChatroom(chatroomId);
       } else if (isSubmitting && joinPassword) {
@@ -192,6 +187,7 @@ const ChatroomPage: React.FC = () => {
     chatroomId,
     displayDetail,
     isJoined,
+    isRemoved,
     joinChatroom,
     joinPassword,
     isSubmitting,

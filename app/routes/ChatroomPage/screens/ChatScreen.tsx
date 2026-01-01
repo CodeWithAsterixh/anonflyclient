@@ -1,15 +1,20 @@
 import React, { useRef, useState, useMemo, useEffect } from "react";
-import { ChevronDown, Loader2 } from "lucide-react";
-import ChatroomMenu from "../../../../components/chatroomMenu";
+import { ChevronDown, Loader2, LogOutIcon, Settings } from "lucide-react";
 import EditChatroomModal from "../../../../components/editChatroomModal";
-import ManageUsersDrawer from "../../../../components/manageUsersDrawer";
-import ParticipantListDrawer from "../../../../components/participantListDrawer";
 import ChatroomSidebar from "../../../../components/chatroomSidebar";
+import Drawer from "../../../../components/ui/drawer/Drawer";
 import Logo from "../../../../components/logo";
 import MessageDisplay from "../../../../components/messageDisplay";
 import MessageInput from "../../../../components/messageInput";
-import { TypingIndicator, type TypingUser } from "../../../../components/typingIndicator";
-import type { ChatroomDetail, Message, Participant } from "../../../../lib/types/chat";
+import {
+  TypingIndicator,
+  type TypingUser,
+} from "../../../../components/typingIndicator";
+import type {
+  ChatroomDetail,
+  Message,
+  Participant,
+} from "../../../../lib/types/chat";
 import type { ReplyingTo, EditingMessage } from "../types";
 
 interface ChatScreenProps {
@@ -80,8 +85,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   const messagePortalRootRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(10);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [isManageUsersOpen, setIsManageUsersOpen] = useState(false);
-  const [isParticipantListOpen, setIsParticipantListOpen] = useState(false);
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const prevScrollHeightRef = useRef<number>(0);
 
   const visibleMessages = useMemo(() => {
@@ -93,7 +97,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     onScroll();
-    
+
     const container = e.currentTarget;
     if (container.scrollTop === 0 && hasMore && !isLoadingMore) {
       loadMore();
@@ -104,11 +108,11 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
     if (messagesContainerRef.current) {
       prevScrollHeightRef.current = messagesContainerRef.current.scrollHeight;
     }
-    
+
     setIsLoadingMore(true);
     // Simulate a small delay for smoother feel or just update immediately
     setTimeout(() => {
-      setVisibleCount(prev => Math.min(prev + 10, messages.length));
+      setVisibleCount((prev) => Math.min(prev + 10, messages.length));
       setIsLoadingMore(false);
     }, 500);
   };
@@ -144,11 +148,12 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                 <h1 className="font-bold text-gray-900 dark:text-gray-100 leading-tight">
                   {displayDetail?.roomname || "Loading..."}
                 </h1>
-                <button 
-                  onClick={() => isMobile && setIsParticipantListOpen(true)}
-                  className={`text-xs text-gray-500 dark:text-gray-400 transition-colors text-left ${isMobile ? 'hover:text-blue-500' : 'cursor-default'}`}
+                <button
+                  onClick={() => setIsOptionsOpen(true)}
+                  className={`text-xs text-gray-500 dark:text-gray-400 transition-colors text-left hover:text-blue-500`}
                 >
-                  {participants.length} participant{participants.length !== 1 ? "s" : ""} •{" "}
+                  {participants.length} participant
+                  {participants.length !== 1 ? "s" : ""} •{" "}
                   {isConnected ? (
                     <span className="text-green-500 dark:text-green-400 font-medium">
                       connected
@@ -160,15 +165,39 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
               </div>
             </div>
 
-            {isMobile && (
-              <ChatroomMenu
-                onLeaveRoom={onLeaveRoom}
-                onRemoveParticipant={() => setIsManageUsersOpen(true)}
-                onDeleteRoom={onDeleteRoom}
-                onEditRoom={onOpenEditModal}
-                isHost={isHost}
-              />
-            )}
+            <div className="w-fit flex gap-2 items-center justify-end">
+              <button
+                onClick={() => setIsOptionsOpen(!isOptionsOpen)}
+                className={`p-2 rounded-full transition-all ${
+                  isOptionsOpen
+                    ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+                    : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}
+                title="Room Options"
+              >
+                <Settings size={20} />
+              </button>
+
+              {isMobile ? (
+                <button
+                  onClick={onLeaveRoom}
+                  className={`p-2 rounded-full transition-all text-red-500 hover:bg-red-100 dark:hover:bg-red-800`}
+                  title="Leave Room"
+                >
+                  <LogOutIcon size={20} />
+                </button>
+              ) : (
+                !isOptionsOpen && (
+                  <button
+                    onClick={onLeaveRoom}
+                    className={`p-2 rounded-full transition-all text-red-500 hover:bg-red-100 dark:hover:bg-red-800`}
+                    title="Leave Room"
+                  >
+                    <LogOutIcon size={20} />
+                  </button>
+                )
+              )}
+            </div>
           </div>
         </header>
 
@@ -190,7 +219,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
               {isLoadingMore ? (
                 <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
               ) : (
-                <button 
+                <button
                   onClick={loadMore}
                   className="text-xs text-gray-500 hover:text-blue-500 transition-colors"
                 >
@@ -232,7 +261,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
         <MessageInput
           onSendMessage={(content) => {
             onSendMessage(content);
-            setVisibleCount(prev => prev + 1); // Ensure new message is visible
+            setVisibleCount((prev) => prev + 1); // Ensure new message is visible
           }}
           onEditMessage={onEditMessage}
           isDisabled={!isConnected}
@@ -245,43 +274,68 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
       </div>
 
       {!isMobile && (
-        <ChatroomSidebar
-          participants={participants}
-          isHost={isHost}
-          hostAid={displayDetail?.hostAid || ""}
-          roomName={displayDetail?.roomname || ""}
-          roomDescription={displayDetail?.description}
-          allowedFeatures={displayDetail?.allowedFeatures}
-          onRemoveParticipant={onRemoveParticipant}
-          onLeaveRoom={onLeaveRoom}
-          onEditRoom={onOpenEditModal}
-          onDeleteRoom={onDeleteRoom}
-          isConnected={isConnected}
-        />
+        <>
+          {/* Backdrop for screens between 768px and 1024px */}
+          <div 
+            className={`fixed inset-0 bg-black/20 backdrop-blur-[1px] z-[40] lg:hidden transition-opacity duration-300 ${
+              isOptionsOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            }`}
+            onClick={() => setIsOptionsOpen(false)}
+          />
+          <div 
+            className={`z-[50] lg:z-auto transition-all duration-300 ease-in-out absolute right-0 top-0 h-full lg:relative lg:h-auto overflow-hidden ${
+              isOptionsOpen 
+                ? "translate-x-0 w-80 opacity-100 shadow-2xl lg:shadow-none" 
+                : "translate-x-full lg:translate-x-0 w-0 lg:w-0 opacity-0"
+            }`}
+          >
+            <div className="w-80 h-full">
+              <ChatroomSidebar
+                participants={participants}
+                isHost={isHost}
+                hostAid={displayDetail?.hostAid || ""}
+                roomName={displayDetail?.roomname || ""}
+                roomDescription={displayDetail?.description}
+                allowedFeatures={displayDetail?.allowedFeatures}
+                onRemoveParticipant={onRemoveParticipant}
+                onLeaveRoom={onLeaveRoom}
+                onEditRoom={onOpenEditModal}
+                onDeleteRoom={onDeleteRoom}
+                isConnected={isConnected}
+              />
+            </div>
+          </div>
+        </>
       )}
 
       {isMobile && (
-        <>
-          <ManageUsersDrawer
-            isOpen={isManageUsersOpen}
-            onClose={() => setIsManageUsersOpen(false)}
-            participants={participants}
-            chatroomId={displayDetail?.roomId || ""}
-            isHost={isHost}
-            hostAid={displayDetail?.hostAid || ""}
-            allowedFeatures={displayDetail?.allowedFeatures}
-            onRemoveParticipant={onRemoveParticipant}
+        <Drawer
+          isOpen={isOptionsOpen}
+          onClose={() => setIsOptionsOpen(false)}
+          side="bottom"
+          height="95dvh"
+        >
+          <Drawer.Header
+            title="Room Options"
+            onClose={() => setIsOptionsOpen(false)}
           />
-
-          <ParticipantListDrawer
-            isOpen={isParticipantListOpen}
-            onClose={() => setIsParticipantListOpen(false)}
-            participants={participants}
-            isHost={isHost}
-            hostAid={displayDetail?.hostAid || ""}
-            onOpenManageUsers={() => setIsManageUsersOpen(true)}
-          />
-        </>
+          <Drawer.Content className="p-0">
+            <ChatroomSidebar
+              participants={participants}
+              isHost={isHost}
+              hostAid={displayDetail?.hostAid || ""}
+              roomName={displayDetail?.roomname || ""}
+              roomDescription={displayDetail?.description}
+              allowedFeatures={displayDetail?.allowedFeatures}
+              onRemoveParticipant={onRemoveParticipant}
+              onLeaveRoom={onLeaveRoom}
+              onEditRoom={onOpenEditModal}
+              onDeleteRoom={onDeleteRoom}
+              isConnected={isConnected}
+              hideHeader={true}
+            />
+          </Drawer.Content>
+        </Drawer>
       )}
 
       <EditChatroomModal

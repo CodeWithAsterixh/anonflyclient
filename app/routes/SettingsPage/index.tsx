@@ -14,7 +14,9 @@ import {
   Trash2,
   Users,
   Copy,
-  Check
+  Check,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import React, { useMemo, useState, useRef, useContext } from 'react';
 import { useLoaderData, useNavigate } from 'react-router';
@@ -31,6 +33,75 @@ export async function loader({ request }: { request: Request }) {
   const { user, token } = await requireAuth(request);
   return { user, token };
 }
+
+const HideableField: React.FC<{ 
+  label?: string; 
+  value: string; 
+  className?: string;
+  labelClassName?: string;
+  mono?: boolean;
+  showLabelOnHidden?: boolean;
+}> = ({ 
+  label, 
+  value, 
+  className = "",
+  labelClassName = "",
+  mono = true,
+  showLabelOnHidden = true
+}) => {
+  const [isVisible, setIsVisible] = useState(false);
+  
+  const labelElement = label ? (
+    <span className={`shrink-0 ${labelClassName}`}>
+      {label}:
+    </span>
+  ) : null;
+
+  if (!isVisible) {
+    return (
+      <div className={`flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 ${mono ? 'font-mono' : ''} ${className}`}>
+        {showLabelOnHidden && labelElement}
+        <span className="truncate tracking-widest opacity-50">••••••••••••••••</span>
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsVisible(true);
+          }}
+          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors text-gray-400 hover:text-blue-500 shrink-0"
+          title="Show"
+        >
+          <Eye size={14} />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`flex items-center gap-2 min-w-0 w-full ${className}`}>
+      <CopyWrapper className="min-w-0 flex-1">
+        <CopyWrapper.Trigger text={value} className={`flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 ${mono ? 'font-mono' : ''} hover:text-blue-500 transition-colors group min-w-0 w-full`}>
+          {labelElement}
+          <span className="truncate text-blue-600 dark:text-blue-400">{value}</span>
+          <CopyWrapper.Content>
+            {(hasCopied) => (
+              hasCopied ? <Check size={12} className="text-green-500 shrink-0" /> : <Copy size={12} className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+            )}
+          </CopyWrapper.Content>
+        </CopyWrapper.Trigger>
+      </CopyWrapper>
+      <button 
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsVisible(false);
+        }}
+        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors text-gray-400 hover:text-blue-500 shrink-0"
+        title="Hide"
+      >
+        <EyeOff size={14} />
+      </button>
+    </div>
+  );
+};
 
 const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -249,16 +320,11 @@ const SettingsPage: React.FC = () => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 truncate whitespace-nowrap">{user?.username}</h2>
-                  <CopyWrapper className="min-w-0 w-full">
-                    <CopyWrapper.Trigger text={user?.userId || ''} className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-mono mt-1 hover:text-blue-500 transition-colors group min-w-0 w-full">
-                      <span className="truncate whitespace-nowrap">AID: {user?.userId}</span>
-                      <CopyWrapper.Content>
-                        {(hasCopied) => (
-                          hasCopied ? <Check size={12} className="text-green-500 shrink-0" /> : <Copy size={12} className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-                        )}
-                      </CopyWrapper.Content>
-                    </CopyWrapper.Trigger>
-                  </CopyWrapper>
+                  <HideableField 
+                    label="AID" 
+                    value={user?.userId || ''} 
+                    className="mt-1"
+                  />
                 </div>
               </div>
               <button 
@@ -335,18 +401,10 @@ const SettingsPage: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <p className="text-xs text-gray-400 dark:text-gray-500 font-mono truncate whitespace-nowrap">AID: {id.aid}</p>
-                        <CopyWrapper>
-                          <CopyWrapper.Trigger text={id.aid} className="text-gray-400 hover:text-blue-500 transition-colors shrink-0">
-                            <CopyWrapper.Content>
-                              {(hasCopied) => (
-                                hasCopied ? <Check size={10} /> : <Copy size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                              )}
-                            </CopyWrapper.Content>
-                          </CopyWrapper.Trigger>
-                        </CopyWrapper>
-                      </div>
+                      <HideableField 
+                        label="AID" 
+                        value={id.aid} 
+                      />
                     </div>
                   </div>
                   
@@ -393,36 +451,24 @@ const SettingsPage: React.FC = () => {
                       Your unique cryptographic keys are stored locally in your browser's IndexedDB.
                     </p>
                     <div className="space-y-3">
-                      <CopyWrapper className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl flex flex-col gap-1.5 group min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500 shrink-0">Public Identity Key (Ed25519)</span>
-                          <CopyWrapper.Trigger text={currentIdentity?.identityKeyPair.publicKey || ''} className="text-gray-400 hover:text-blue-500 transition-colors">
-                            <CopyWrapper.Content>
-                              {(hasCopied) => (
-                                hasCopied ? <Check size={12} className="text-green-500" /> : <Copy size={12} />
-                              )}
-                            </CopyWrapper.Content>
-                          </CopyWrapper.Trigger>
-                        </div>
-                        <span className="text-xs font-mono text-blue-600 dark:text-blue-400 truncate whitespace-nowrap leading-relaxed">
-                          {currentIdentity?.identityKeyPair.publicKey}
-                        </span>
-                      </CopyWrapper>
-                      <CopyWrapper className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl flex flex-col gap-1.5 group min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500 shrink-0">Public Exchange Key (X25519)</span>
-                          <CopyWrapper.Trigger text={currentIdentity?.exchangeKeyPair.publicKey || ''} className="text-gray-400 hover:text-blue-500 transition-colors">
-                            <CopyWrapper.Content>
-                              {(hasCopied) => (
-                                hasCopied ? <Check size={12} className="text-green-500" /> : <Copy size={12} />
-                              )}
-                            </CopyWrapper.Content>
-                          </CopyWrapper.Trigger>
-                        </div>
-                        <span className="text-xs font-mono text-blue-600 dark:text-blue-400 truncate whitespace-nowrap leading-relaxed">
-                          {currentIdentity?.exchangeKeyPair.publicKey}
-                        </span>
-                      </CopyWrapper>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl min-w-0">
+                        <HideableField 
+                          label="Public Identity Key (Ed25519)" 
+                          value={currentIdentity?.identityKeyPair.publicKey || ''} 
+                          className="flex-col !items-start !gap-1.5"
+                          labelClassName="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500"
+                          showLabelOnHidden={true}
+                        />
+                      </div>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl min-w-0">
+                        <HideableField 
+                          label="Public Exchange Key (X25519)" 
+                          value={currentIdentity?.exchangeKeyPair.publicKey || ''} 
+                          className="flex-col !items-start !gap-1.5"
+                          labelClassName="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500"
+                          showLabelOnHidden={true}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

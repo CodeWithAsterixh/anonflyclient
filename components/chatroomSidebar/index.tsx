@@ -24,6 +24,7 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
   onEditRoom,
   onDeleteRoom,
   isConnected,
+  hideHeader = false,
 }) => {
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -47,14 +48,16 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 w-80 shrink-0 overflow-hidden transition-colors duration-300">
+    <div className={`flex flex-col h-full bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 shrink-0 overflow-hidden transition-colors duration-300 ${hideHeader ? 'w-full' : 'w-80 border-l'}`}>
       {/* Sidebar Header */}
-      <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
-        <h2 className="font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-          <Info size={18} className="text-blue-500" />
-          Room Details
-        </h2>
-      </div>
+      {!hideHeader && (
+        <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+          <h2 className="font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+            <Info size={18} className="text-blue-500" />
+            Room Details
+          </h2>
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         {/* Room Info Section */}
@@ -91,7 +94,7 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
           <div className="grid grid-cols-1 gap-2">
             <button
               onClick={onLeaveRoom}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all"
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-800 rounded-xl transition-all"
             >
               <LogOut size={16} />
               <span>Leave Room</span>
@@ -150,12 +153,9 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
                         {participant.username}
                       </p>
                       {participant.userAid === hostAid && (
-                        <ShieldCheck size={12} className="text-amber-500 shrink-0" />
+                        <span className="text-xs bg-amber-100 flex items-center justify-center gap-1 py-1 px-2 scale-[0.8] rounded-full"><ShieldCheck size={12} className="text-amber-500 shrink-0" /> Host</span>
                       )}
                     </div>
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500 font-mono truncate">
-                      {participant.userAid.slice(0, 8)}...
-                    </p>
                   </div>
                 </div>
 

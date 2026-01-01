@@ -12,4 +12,5 @@ export interface ChatroomSidebarProps {
   onEditRoom: () => void;
   onDeleteRoom: () => void;
   isConnected: boolean;
+  hideHeader?: boolean;
 }

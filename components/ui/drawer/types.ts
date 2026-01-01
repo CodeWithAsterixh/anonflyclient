@@ -10,4 +10,5 @@ export interface DrawerProps {
   children: ReactNode;
   className?: string;
   size?: string; // e.g., "max-w-md", "h-1/2", etc.
+  height?: string; // e.g. "95dvh"
 }

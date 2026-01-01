@@ -1,6 +1,7 @@
-import React from "react";
-import { ChevronDown, Lock } from "lucide-react";
-import ChatroomMenu from "../../../../components/chatroomMenu";
+import React, { useState } from "react";
+import { ChevronDown, Lock, Settings } from "lucide-react";
+import ChatroomSidebar from "../../../../components/chatroomSidebar";
+import Drawer from "../../../../components/ui/drawer/Drawer";
 import Logo from "../../../../components/logo";
 import Input from "../../../../components/ui/input";
 import type { ChatroomDetail } from "../../../../lib/types/chat";
@@ -38,11 +39,13 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
   onSetJoinPassword,
   onJoinChatroom,
 }) => {
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const isLocked = displayDetail?.isLocked;
   const isConnecting = isLocked && !isConnected && isSubmitting;
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-transparent relative overflow-hidden transition-colors duration-300">
+    <div className="flex h-[100dvh] bg-transparent relative overflow-hidden transition-colors duration-300 w-full">
+      <div className="flex-1 flex flex-col min-w-0 relative h-full">
         {/* Header */}
         <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
           {isMobile && <Logo showText size={32} className="py-2" />}
@@ -73,13 +76,17 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
               </div>
             </div>
 
-            <ChatroomMenu
-              onLeaveRoom={onLeaveRoom}
-              onRemoveParticipant={() => {}}
-              onDeleteRoom={onDeleteRoom}
-              onEditRoom={onEditRoom}
-              isHost={isHost}
-            />
+            <button
+              onClick={() => setIsOptionsOpen(!isOptionsOpen)}
+              className={`p-2 rounded-full transition-all ${
+                isOptionsOpen 
+                  ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" 
+                  : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+              title="Room Options"
+            >
+              <Settings size={20} />
+            </button>
           </div>
         </header>
 
@@ -166,6 +173,69 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
           </div>
         </div>
       </div>
+
+      {!isMobile && (
+        <>
+          {/* Backdrop for screens between 768px and 1024px */}
+          <div 
+            className={`fixed inset-0 bg-black/20 backdrop-blur-[1px] z-[40] lg:hidden transition-opacity duration-300 ${
+              isOptionsOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            }`}
+            onClick={() => setIsOptionsOpen(false)}
+          />
+          <div 
+            className={`z-[50] lg:z-auto transition-all duration-300 ease-in-out absolute right-0 top-0 h-full lg:relative lg:h-auto overflow-hidden ${
+              isOptionsOpen 
+                ? "translate-x-0 w-80 opacity-100 shadow-2xl lg:shadow-none" 
+                : "translate-x-full lg:translate-x-0 w-0 lg:w-0 opacity-0"
+            }`}
+          >
+            <div className="w-80 h-full">
+              <ChatroomSidebar
+                participants={[]}
+                isHost={isHost}
+                hostAid={displayDetail?.hostAid || ""}
+                roomName={displayDetail?.roomname || ""}
+                roomDescription={displayDetail?.description}
+                allowedFeatures={displayDetail?.allowedFeatures}
+                onRemoveParticipant={async () => {}}
+                onLeaveRoom={onLeaveRoom}
+                onEditRoom={onEditRoom}
+                onDeleteRoom={onDeleteRoom}
+                isConnected={isConnected}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      {isMobile && (
+        <Drawer
+          isOpen={isOptionsOpen}
+          onClose={() => setIsOptionsOpen(false)}
+          side="bottom"
+          height="95dvh"
+        >
+          <Drawer.Header title="Room Options" onClose={() => setIsOptionsOpen(false)} />
+          <Drawer.Content className="p-0">
+            <ChatroomSidebar
+              participants={[]}
+              isHost={isHost}
+              hostAid={displayDetail?.hostAid || ""}
+              roomName={displayDetail?.roomname || ""}
+              roomDescription={displayDetail?.description}
+              allowedFeatures={displayDetail?.allowedFeatures}
+              onRemoveParticipant={async () => {}}
+              onLeaveRoom={onLeaveRoom}
+              onEditRoom={onEditRoom}
+              onDeleteRoom={onDeleteRoom}
+              isConnected={isConnected}
+              hideHeader={true}
+            />
+          </Drawer.Content>
+        </Drawer>
+      )}
+    </div>
   );
 };
 

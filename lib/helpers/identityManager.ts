@@ -52,7 +52,7 @@ async function openDB(): Promise<IDBDatabase> {
   });
 }
 
-export async function saveRoomKey(chatroomId: string, keyBase64: string): Promise<void> {
+export async function saveRoomKey(chatroomId: string, keyBase64: string, expiresAt?: number): Promise<void> {
   if (!chatroomId) {
     console.error("[identityManager] Cannot save room key: chatroomId is missing");
     return;
@@ -61,7 +61,8 @@ export async function saveRoomKey(chatroomId: string, keyBase64: string): Promis
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(ROOM_KEY_STORE, 'readwrite');
     const store = transaction.objectStore(ROOM_KEY_STORE);
-    const request = store.put(keyBase64, chatroomId);
+    const data = expiresAt ? { key: keyBase64, expiresAt } : keyBase64;
+    const request = store.put(data, chatroomId);
     request.onerror = () => reject(request.error);
     request.onsuccess = () => resolve();
   });
@@ -75,7 +76,29 @@ export async function getRoomKey(chatroomId: string): Promise<string | null> {
     const store = transaction.objectStore(ROOM_KEY_STORE);
     const request = store.get(chatroomId);
     request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result || null);
+    request.onsuccess = () => {
+      const result = request.result;
+      if (!result) {
+        resolve(null);
+        return;
+      }
+
+      // Handle both old string format and new object format
+      if (typeof result === 'string') {
+        resolve(result);
+      } else if (typeof result === 'object' && result.key) {
+        // Check expiration
+        if (result.expiresAt && Date.now() > result.expiresAt) {
+          // Key expired, delete it (best effort)
+          resolve(null);
+          // We can't easily delete here because we are in a readonly transaction
+          return;
+        }
+        resolve(result.key);
+      } else {
+        resolve(null);
+      }
+    };
   });
 }
 

@@ -171,21 +171,34 @@ const ChatroomPage: React.FC = () => {
 
   const displayDetail = sseChatroomDetail || chatroomDetail;
 
+  const lastJoinedRoomRef = useRef<string | null>(null);
+
   // Auto-join if room is not locked and we are connected
   // Or if room IS locked, we are connected, and we have a password ready (from a previous attempt)
   useEffect(() => {
     if (isConnected && chatroomId && displayDetail && !isJoined && !isRemoved) {
+      // Prevent redundant join calls for the same room if already joined or joining
+      if (lastJoinedRoomRef.current === chatroomId && isJoined) return;
+
       if (!displayDetail.isLocked) {
+        console.log(`[ChatroomPage] Auto-joining room: ${chatroomId}`);
+        lastJoinedRoomRef.current = chatroomId;
         joinChatroom(chatroomId);
       } else if (isSubmitting && joinPassword) {
         // If it's locked and we just connected after clicking "Enter Room", try to join now
+        console.log(`[ChatroomPage] Joining locked room with password: ${chatroomId}`);
+        lastJoinedRoomRef.current = chatroomId;
         joinChatroom(chatroomId, joinPassword);
       }
+    }
+    
+    if (!isJoined) {
+      lastJoinedRoomRef.current = null;
     }
   }, [
     isConnected,
     chatroomId,
-    displayDetail,
+    displayDetail?.isLocked, // Only depend on the locked status, not the whole detail object
     isJoined,
     isRemoved,
     joinChatroom,

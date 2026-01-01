@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Outlet, useParams, useLoaderData, useLocation } from 'react-router';
 import ChatroomListPage from '../ChatroomListPage';
 import NoChatSelectedFallback from '../../../components/noChatSelectedFallback';
@@ -80,25 +80,39 @@ const ChatLayout: React.FC = () => {
     setShowChatList(true); // Show list again on mobile
   };
 
+  const contextValue = useMemo(() => ({
+    user,
+    token,
+    identities,
+    authLoading,
+    chatrooms,
+    loadingChatrooms,
+    chatroomError,
+    retryCountdown,
+    switchAccount,
+    deleteAccount,
+    logout,
+    isMobile,
+    onBack: handleBackFromChat
+  }), [
+    user,
+    token,
+    identities,
+    authLoading,
+    chatrooms,
+    loadingChatrooms,
+    chatroomError,
+    retryCountdown,
+    switchAccount,
+    deleteAccount,
+    logout,
+    isMobile,
+    handleBackFromChat
+  ]);
+
   return (
     <ProtectedRoute>
-      <ChatLayoutContext.Provider 
-        value={{ 
-          user, 
-          token, 
-          identities, 
-          authLoading,
-          chatrooms,
-          loadingChatrooms,
-          chatroomError,
-          retryCountdown,
-          switchAccount, 
-          deleteAccount,
-          logout, 
-          isMobile, 
-          onBack: handleBackFromChat 
-        }}
-      >
+      <ChatLayoutContext.Provider value={contextValue}>
         <div className="flex h-[100dvh] overflow-hidden bg-white dark:bg-gray-950 transition-colors duration-300">
           {/* Left Column: Chatroom List 
               - Desktop: Always visible (md:block)

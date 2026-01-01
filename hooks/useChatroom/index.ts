@@ -66,18 +66,34 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     isRemovedRef.current = isRemoved;
   }, [isRemoved]);
 
+  const activeSSERef = useRef<string | null>(null);
+
   // SSE for Chatroom Details
   useEffect(() => {
     if (!currentChatroomId || !token) {
-      setChatroomDetail(null);
+      if (chatroomDetail !== null) setChatroomDetail(null);
+      activeSSERef.current = null;
       return;
     }
 
     const sseUrl = `${getAPIBaseURL()}/chatroom/${currentChatroomId}/details/sse?token=${token}`;
+    
+    // Prevent redundant connections
+    if (activeSSERef.current === sseUrl) {
+      return;
+    }
+    
+    console.log(`[useChatroom] [SSE] Connecting to: ${sseUrl.substring(0, 50)}...`);
+    activeSSERef.current = sseUrl;
+    
     const eventSource = new EventSource(sseUrl);
 
+    eventSource.onopen = () => {
+      console.log(`[useChatroom] [SSE] Connection opened for room: ${currentChatroomId}`);
+    };
+
     eventSource.addEventListener("removed", (event: any) => {
-      console.log("User removed from room event received");
+      console.log("[useChatroom] [SSE] User removed event received");
       isRemovedRef.current = true;
       setIsRemoved(true);
       setIsJoined(false);
@@ -96,16 +112,21 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
           ...data,
         }));
       } catch (err) {
-        console.error("Failed to parse SSE data:", err);
+        console.error("[useChatroom] [SSE] Failed to parse data:", err);
       }
     };
 
     eventSource.onerror = (err) => {
-      console.error("SSE Error:", err);
+      console.error("[useChatroom] [SSE] Connection error:", err);
+      activeSSERef.current = null;
       eventSource.close();
     };
 
     return () => {
+      console.log(`[useChatroom] [SSE] Cleaning up connection for room: ${currentChatroomId}`);
+      if (activeSSERef.current === sseUrl) {
+        activeSSERef.current = null;
+      }
       eventSource.close();
     };
   }, [currentChatroomId, token]);
@@ -193,6 +214,11 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     }
   }, [initialChatroomId, currentChatroomId]);
 
+  const chatroomDetailRef = useRef(chatroomDetail);
+  useEffect(() => {
+    chatroomDetailRef.current = chatroomDetail;
+  }, [chatroomDetail]);
+
   const connect = useCallback(() => {
     if (loading || isRemovedRef.current) {
       return;
@@ -221,15 +247,26 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     const socket = new WebSocket(websocketUrl);
     ws.current = socket;
 
+    // Heartbeat to keep connection alive
+    let heartbeatInterval: NodeJS.Timeout;
+
     socket.onopen = () => {
       setIsConnected(true);
       setError(null);
       setRetryCount(0);
+
+      heartbeatInterval = setInterval(() => {
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ type: "ping" }));
+        }
+      }, 30000);
     };
 
     socket.onmessage = async (event) => {
       try {
         const message = JSON.parse(event.data);
+        
+        if (message.type === "pong") return; // Handle heartbeat response
 
         if (message.type === "error") {
           if (message.message === "Unauthorized") {
@@ -624,6 +661,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
       setIsConnected(false);
       setIsJoined(false);
       joiningRef.current = null;
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
       
       if (event.code !== 1000 && !isRemovedRef.current) {
         if (retryCount < MAX_RETRIES) {
@@ -635,7 +673,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
 
       // Set expiration on the room key if not the host when disconnecting
       const activeRoomId = currentChatroomIdRef.current;
-      const isHost = chatroomDetail?.hostAid === user?.userId;
+      const isHost = chatroomDetailRef.current?.hostAid === user?.userId;
       if (activeRoomId && !isHost) {
         const existingKey = await getRoomKey(activeRoomId);
         if (existingKey) {
@@ -658,10 +696,11 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
 
     socket.onerror = (event) => {
       console.error("[useChatroom] WebSocket error:", event);
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
       setError("Failed to connect to chat server. Please check your connection.");
     };
 
-  }, [token, user, loading, joinChatroom, logout, retryCount, chatroomDetail, decryptStoredMessages]);
+  }, [token, user?.userId, loading, isAuthenticated, retryCount, decryptStoredMessages]);
 
 
   useEffect(() => {

@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import type { Route } from "./+types/root";
 import { initializeAPI } from "../lib/constants/api";
 import { ThemeProvider } from "../hooks/useTheme/index";
+import { AuthProvider } from "./contexts/AuthContext";
 import "./app.css";
 
 export async function loader({ request }: { request: Request }) {
@@ -103,7 +104,9 @@ export default function App() {
 
   return (
     <ThemeProvider initialTheme={theme as "light" | "dark"}>
-      <Outlet />
+      <AuthProvider>
+        <Outlet />
+      </AuthProvider>
     </ThemeProvider>
   );
 }

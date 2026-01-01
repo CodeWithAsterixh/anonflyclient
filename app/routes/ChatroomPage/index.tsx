@@ -61,12 +61,17 @@ const ChatroomPage: React.FC = () => {
     title: string;
     message: string;
     type: "alert" | "confirm" | "error" | "success";
+    confirmText?: string;
+    cancelText?: string;
     onConfirm?: () => void;
+    onCancel?: () => void;
   }>({
     isOpen: false,
     title: "",
     message: "",
     type: "alert",
+    confirmText: "Confirm",
+    cancelText: "Cancel",
   });
 
   const showAlertDialog = (
@@ -128,6 +133,8 @@ const ChatroomPage: React.FC = () => {
     leaveChatroom,
     isConnected,
     isJoined,
+    isRemoved,
+    setIsRemoved,
     hasRoomKey,
     error,
     reconnect,
@@ -135,6 +142,27 @@ const ChatroomPage: React.FC = () => {
     currentChatroomId,
     ws
   } = useChatroom(chatroomId, !chatroomDetail || chatroomDetail.isLocked);
+
+  useEffect(() => {
+    if (isRemoved) {
+      setAlertDialog({
+        isOpen: true,
+        title: "Removed from Room",
+        message: "You have been removed from the room by the host.",
+        type: "confirm",
+        confirmText: "Reconnect",
+        cancelText: "Go Home",
+        onConfirm: () => {
+          setIsRemoved(false);
+          reconnect();
+        },
+        onCancel: () => {
+          setIsRemoved(false);
+          navigate("/");
+        }
+      });
+    }
+  }, [isRemoved, reconnect, setIsRemoved, navigate]);
 
   const { typingUsers, sendTypingStatus } = useTyping(chatroomId, ws);
   const { theme } = useTheme();
@@ -434,11 +462,18 @@ const ChatroomPage: React.FC = () => {
       />
       <AlertDialog
         isOpen={alertDialog.isOpen}
-        onClose={() => setAlertDialog((prev) => ({ ...prev, isOpen: false }))}
+        onClose={() => {
+          if (alertDialog.onCancel) {
+            alertDialog.onCancel();
+          }
+          setAlertDialog((prev) => ({ ...prev, isOpen: false }));
+        }}
         onConfirm={alertDialog.onConfirm}
         title={alertDialog.title}
         message={alertDialog.message}
         type={alertDialog.type}
+        confirmText={alertDialog.confirmText}
+        cancelText={alertDialog.cancelText}
       />
     </Background>
   );

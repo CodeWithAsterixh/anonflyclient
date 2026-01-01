@@ -38,6 +38,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
   const [currentChatroomId, setCurrentChatroomId] = useState<string | null>(
     initialChatroomId || null
   );
+  const [isRemoved, setIsRemoved] = useState<boolean>(false);
   const roomKeyRef = useRef<CryptoKey | null>(null);
   const ws = useRef<WebSocket | null>(null);
   const { user, token, isLoading: loading, logout, isAuthenticated } = useAuth();
@@ -67,6 +68,17 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
 
     const sseUrl = `${getAPIBaseURL()}/chatroom/${currentChatroomId}/details/sse?token=${token}`;
     const eventSource = new EventSource(sseUrl);
+
+    eventSource.addEventListener("removed", (event: any) => {
+      console.log("User removed from room event received");
+      setIsRemoved(true);
+      setIsJoined(false);
+      setIsConnected(false);
+      eventSource.close();
+      if (ws.current) {
+        ws.current.close();
+      }
+    });
 
     eventSource.onmessage = (event) => {
       try {
@@ -604,12 +616,12 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
       setIsJoined(false);
       joiningRef.current = null;
       
-      if (event.code !== 1000) {
+      if (event.code !== 1000 && !isRemoved) {
         setError("Connection lost. Retrying in 3 seconds...");
       }
 
       const activeRoomId = currentChatroomIdRef.current;
-      if (activeRoomId) {
+      if (activeRoomId && !isRemoved) {
         setTimeout(() => {
           // Re-check if we still need to connect to this room
           if (currentChatroomIdRef.current === activeRoomId) {
@@ -829,8 +841,10 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     reconnect,
     clearError,
     isConnected,
-    isJoined,
-    hasRoomKey,
+      isJoined,
+      isRemoved,
+      setIsRemoved,
+      hasRoomKey,
     error,
     currentChatroomId,
     ws: ws.current

@@ -15,6 +15,8 @@ export interface UseChatroomReturn {
   clearError: () => void;
   isConnected: boolean;
   isJoined: boolean;
+  isRemoved: boolean;
+  setIsRemoved: (val: boolean) => void;
   hasRoomKey: boolean;
   error: string | null;
   currentChatroomId: string | null;

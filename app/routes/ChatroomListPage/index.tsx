@@ -53,7 +53,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
 
   return (
     <>
-      <div className="p-4 h-full overflow-y-auto flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
+      <div className="isolate p-4 h-full overflow-y-auto flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
         <div className="flex justify-between items-center mb-4 sticky top-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-20 border-b border-gray-100 dark:border-gray-800 pb-3">
           <Logo showText size={32} />
 

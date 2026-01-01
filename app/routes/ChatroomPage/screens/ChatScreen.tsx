@@ -4,6 +4,7 @@ import ChatroomMenu from "../../../../components/chatroomMenu";
 import EditChatroomModal from "../../../../components/editChatroomModal";
 import ManageUsersDrawer from "../../../../components/manageUsersDrawer";
 import ParticipantListDrawer from "../../../../components/participantListDrawer";
+import ChatroomSidebar from "../../../../components/chatroomSidebar";
 import Logo from "../../../../components/logo";
 import MessageDisplay from "../../../../components/messageDisplay";
 import MessageInput from "../../../../components/messageInput";
@@ -123,7 +124,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   }, [visibleMessages]);
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-transparent relative overflow-hidden transition-colors duration-300">
+    <div className="flex h-[100dvh] bg-transparent relative overflow-hidden transition-colors duration-300 w-full">
+      <div className="flex-1 flex flex-col min-w-0 relative h-full">
         {/* Header */}
         <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
           {isMobile && <Logo showText size={32} className="py-2" />}
@@ -143,8 +145,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                   {displayDetail?.roomname || "Loading..."}
                 </h1>
                 <button 
-                  onClick={() => setIsParticipantListOpen(true)}
-                  className="text-xs text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors text-left"
+                  onClick={() => isMobile && setIsParticipantListOpen(true)}
+                  className={`text-xs text-gray-500 dark:text-gray-400 transition-colors text-left ${isMobile ? 'hover:text-blue-500' : 'cursor-default'}`}
                 >
                   {participants.length} participant{participants.length !== 1 ? "s" : ""} •{" "}
                   {isConnected ? (
@@ -158,13 +160,15 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
               </div>
             </div>
 
-            <ChatroomMenu
-              onLeaveRoom={onLeaveRoom}
-              onRemoveParticipant={() => setIsManageUsersOpen(true)}
-              onDeleteRoom={onDeleteRoom}
-              onEditRoom={onOpenEditModal}
-              isHost={isHost}
-            />
+            {isMobile && (
+              <ChatroomMenu
+                onLeaveRoom={onLeaveRoom}
+                onRemoveParticipant={() => setIsManageUsersOpen(true)}
+                onDeleteRoom={onDeleteRoom}
+                onEditRoom={onOpenEditModal}
+                isHost={isHost}
+              />
+            )}
           </div>
         </header>
 
@@ -238,36 +242,57 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
           onCancelEdit={() => onSetEditingMessage(null)}
           onTyping={onTyping}
         />
+      </div>
 
-        <EditChatroomModal
-          isOpen={isEditModalOpen}
-          onClose={onCloseEditModal}
-          chatroomId={displayDetail?.roomId || ""}
-          initialRoomname={displayDetail?.roomname || ""}
-          initialDescription={displayDetail?.description || ""}
-          onSuccess={onEditSuccess}
-        />
-
-        <ManageUsersDrawer
-          isOpen={isManageUsersOpen}
-          onClose={() => setIsManageUsersOpen(false)}
+      {!isMobile && (
+        <ChatroomSidebar
           participants={participants}
-          chatroomId={displayDetail?.roomId || ""}
           isHost={isHost}
-          hostAid={displayDetail?.hostAid}
+          hostAid={displayDetail?.hostAid || ""}
+          roomName={displayDetail?.roomname || ""}
+          roomDescription={displayDetail?.description}
           allowedFeatures={displayDetail?.allowedFeatures}
           onRemoveParticipant={onRemoveParticipant}
+          onLeaveRoom={onLeaveRoom}
+          onEditRoom={onOpenEditModal}
+          onDeleteRoom={onDeleteRoom}
+          isConnected={isConnected}
         />
+      )}
 
-        <ParticipantListDrawer
-          isOpen={isParticipantListOpen}
-          onClose={() => setIsParticipantListOpen(false)}
-          participants={participants}
-          isHost={isHost}
-          hostAid={displayDetail?.hostAid}
-          onOpenManageUsers={() => setIsManageUsersOpen(true)}
-        />
-      </div>
+      {isMobile && (
+        <>
+          <ManageUsersDrawer
+            isOpen={isManageUsersOpen}
+            onClose={() => setIsManageUsersOpen(false)}
+            participants={participants}
+            chatroomId={displayDetail?.roomId || ""}
+            isHost={isHost}
+            hostAid={displayDetail?.hostAid || ""}
+            allowedFeatures={displayDetail?.allowedFeatures}
+            onRemoveParticipant={onRemoveParticipant}
+          />
+
+          <ParticipantListDrawer
+            isOpen={isParticipantListOpen}
+            onClose={() => setIsParticipantListOpen(false)}
+            participants={participants}
+            isHost={isHost}
+            hostAid={displayDetail?.hostAid || ""}
+            onOpenManageUsers={() => setIsManageUsersOpen(true)}
+          />
+        </>
+      )}
+
+      <EditChatroomModal
+        isOpen={isEditModalOpen}
+        onClose={onCloseEditModal}
+        chatroomId={displayDetail?.roomId || ""}
+        initialRoomname={displayDetail?.roomname || ""}
+        initialDescription={displayDetail?.description || ""}
+        onSuccess={onEditSuccess}
+      />
+    </div>
   );
 };
 

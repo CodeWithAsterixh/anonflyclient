@@ -30,19 +30,8 @@ export const useAuthInternal = () => {
 
     try {
       const data = await fetchPremiumStatus(authState.token);
-      setAuthState(prev => ({
-        ...prev,
-        allowedFeatures: data.allowedFeatures,
-        user: prev.user ? { ...prev.user, allowedFeatures: data.allowedFeatures } : null,
-      }));
       
-      // Update session storage as well
-      const session = getSessionUser();
-      if (session && session.user) {
-        setSessionUser({ ...session.user, allowedFeatures: data.allowedFeatures }, session.token);
-      }
-
-      // Update IndexDB storage
+      // Update IndexDB storage FIRST
       try {
         const identity = await getIdentity();
         if (identity) {
@@ -53,6 +42,22 @@ export const useAuthInternal = () => {
         }
       } catch (dbError) {
         console.error("[useAuthInternal] Failed to save premium status to IndexDB:", dbError);
+      }
+
+      // Update identities list from IndexedDB to ensure we have the latest
+      const allIdentities = await getAllIdentities();
+
+      setAuthState(prev => ({
+        ...prev,
+        allowedFeatures: data.allowedFeatures,
+        user: prev.user ? { ...prev.user, allowedFeatures: data.allowedFeatures } : null,
+        identities: allIdentities,
+      }));
+      
+      // Update session storage as well
+      const session = getSessionUser();
+      if (session && session.user) {
+        setSessionUser({ ...session.user, allowedFeatures: data.allowedFeatures }, session.token);
       }
     } catch (error: any) {
       console.error("[useAuthInternal] Failed to fetch premium status:", error);

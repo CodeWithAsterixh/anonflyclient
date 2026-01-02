@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { performHandshake, fetchPremiumStatus } from '../../lib/controllers/authController';
-import { getIdentity, getAllIdentities, switchIdentity as switchLocalIdentity, generateIdentity, clearIdentity } from '../../lib/helpers/identityManager';
+import { getIdentity, getAllIdentities, switchIdentity as switchLocalIdentity, generateIdentity, clearIdentity, saveIdentity } from '../../lib/helpers/identityManager';
 import type { User } from '../../types/User';
 import { getSessionUser, setSessionUser, clearSessionUser } from '../../lib/helpers/authStorage';
 import type { AuthState } from './types';
@@ -23,6 +23,7 @@ export const useAuthInternal = () => {
   });
 
   const [retryKey, setRetryKey] = useState(0);
+  const [needsPremiumRefresh, setNeedsPremiumRefresh] = useState(false);
 
   const checkPremiumStatus = useCallback(async () => {
     if (!authState.token) return;
@@ -39,6 +40,19 @@ export const useAuthInternal = () => {
       const session = getSessionUser();
       if (session && session.user) {
         setSessionUser({ ...session.user, allowedFeatures: data.allowedFeatures }, session.token);
+      }
+
+      // Update IndexDB storage
+      try {
+        const identity = await getIdentity();
+        if (identity) {
+          identity.allowedFeatures = data.allowedFeatures;
+          identity.premiumLastChecked = Date.now();
+          await saveIdentity(identity);
+          console.log("[useAuthInternal] Premium status saved to IndexDB");
+        }
+      } catch (dbError) {
+        console.error("[useAuthInternal] Failed to save premium status to IndexDB:", dbError);
       }
     } catch (error: any) {
       console.error("[useAuthInternal] Failed to fetch premium status:", error);
@@ -127,6 +141,20 @@ export const useAuthInternal = () => {
     // 1. Check for ephemeral session
     const session = getSessionUser();
     if (session && session.user) {
+      // Even with a session, check if we need to refresh premium status from IndexDB
+      try {
+        const identity = await getIdentity();
+        if (identity) {
+          const lastChecked = identity.premiumLastChecked || 0;
+          const fiveHours = 5 * 60 * 60 * 1000;
+          if (Date.now() - lastChecked > fiveHours) {
+            setNeedsPremiumRefresh(true);
+          }
+        }
+      } catch (e) {
+        console.error("[useAuthInternal] Failed to check premium refresh status:", e);
+      }
+
       setAuthState({
         user: session.user,
         token: session.token || null,
@@ -145,6 +173,13 @@ export const useAuthInternal = () => {
     try {
       const identity = await getIdentity();
       if (identity) {
+        // Check if we need to refresh premium status later
+        const lastChecked = identity.premiumLastChecked || 0;
+        const fiveHours = 5 * 60 * 60 * 1000;
+        if (Date.now() - lastChecked > fiveHours) {
+          setNeedsPremiumRefresh(true);
+        }
+
         try {
           // If identity exists, perform handshake to get a session
           const sessionData = await performHandshake(identity);
@@ -154,6 +189,18 @@ export const useAuthInternal = () => {
             allowedFeatures: sessionData.allowedFeatures 
           };
           setSessionUser(user, sessionData.token);
+          
+          // Update IndexDB with latest handshake data if it's fresh
+          try {
+            identity.allowedFeatures = sessionData.allowedFeatures;
+            // We don't necessarily update premiumLastChecked here because 
+            // handshake might not be the "dedicated" check the user wants.
+            // But we update features anyway.
+            await saveIdentity(identity);
+          } catch (dbError) {
+            console.error("[useAuthInternal] Failed to update identity features in IndexDB:", dbError);
+          }
+
           setAuthState({
             user,
             token: sessionData.token,
@@ -202,7 +249,16 @@ export const useAuthInternal = () => {
 
   useEffect(() => {
     initializeAuth();
-  }, [initializeAuth]);
+  }, [retryKey, initializeAuth]);
+
+  // Handle premium status refresh if needed (over 5 hours)
+  useEffect(() => {
+    if (needsPremiumRefresh && authState.isAuthenticated && authState.token) {
+      console.log("[useAuthInternal] Triggering scheduled premium status refresh...");
+      checkPremiumStatus();
+      setNeedsPremiumRefresh(false);
+    }
+  }, [needsPremiumRefresh, authState.isAuthenticated, authState.token, checkPremiumStatus]);
 
   useEffect(() => {
     if (authState.isAuthenticated && authState.token && !authState.allowedFeatures) {

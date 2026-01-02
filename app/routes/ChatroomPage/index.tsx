@@ -45,6 +45,7 @@ const ChatroomPage: React.FC = () => {
 
   const [isHost, setIsHost] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
+  const [isAlreadyParticipant, setIsAlreadyParticipant] = useState(false);
   const [chatroomDetail, setChatroomDetails] = useState<ChatroomDetail | null>(
     null
   );
@@ -115,6 +116,8 @@ const ChatroomPage: React.FC = () => {
       if (response.ok && data.data) {
         setChatroomDetails(data.data);
         setIsHost(data.data.hostAid === user.userId);
+        setIsCreator(data.data.creatorAid === user.userId);
+        setIsAlreadyParticipant(data.data.isAlreadyParticipant || false);
       }
     } catch (error) {
       // Silently fail
@@ -213,8 +216,8 @@ const ChatroomPage: React.FC = () => {
       }
     };
 
-    if (!displayDetail.isLocked && !displayDetail.isPrivate) {
-      console.log(`[ChatroomPage] Auto-joining room: ${chatroomId}`);
+    if ((!displayDetail.isLocked && !displayDetail.isPrivate) || isCreator || isAlreadyParticipant) {
+      // console.log(`[ChatroomPage] Auto-joining room: ${chatroomId}`);
       performJoin();
     } else {
       // Check for stored access password or token (from share link)
@@ -222,13 +225,13 @@ const ChatroomPage: React.FC = () => {
       const storedToken = sessionStorage.getItem(`room_token_${chatroomId}`);
       
       if (storedToken || (displayDetail.isLocked && storedPassword)) {
-        console.log(`[ChatroomPage] Auto-joining ${displayDetail.isPrivate ? 'private' : 'locked'} room with stored credentials: ${chatroomId}`);
+        // console.log(`[ChatroomPage] Auto-joining ${displayDetail.isPrivate ? 'private' : 'locked'} room with stored credentials: ${chatroomId}`);
         performJoin(storedPassword || undefined, storedToken || undefined);
         // Clear them so they are only used once for auto-join
         sessionStorage.removeItem(`room_access_${chatroomId}`);
         sessionStorage.removeItem(`room_token_${chatroomId}`);
       } else if (isSubmitting && joinPassword) {
-        console.log(`[ChatroomPage] Joining locked room with manual password: ${chatroomId}`);
+        // console.log(`[ChatroomPage] Joining locked room with manual password: ${chatroomId}`);
         performJoin(joinPassword);
       }
     }
@@ -236,11 +239,14 @@ const ChatroomPage: React.FC = () => {
     isConnected,
     chatroomId,
     displayDetail?.isLocked,
+    displayDetail?.isPrivate,
     isJoined,
     isRemoved,
     joinChatroom,
     joinPassword,
     isSubmitting,
+    isCreator,
+    isAlreadyParticipant,
   ]);
 
   // Reset joining lock on errors so user can try again
@@ -530,6 +536,7 @@ const ChatroomPage: React.FC = () => {
           isSubmitting={isSubmitting}
           isHost={isHost}
           isCreator={isCreator}
+          isAlreadyParticipant={isAlreadyParticipant}
           joinPassword={joinPassword}
           passwordError={passwordError || (error?.toLowerCase().includes("password") || error?.toLowerCase().includes("locked") ? error : null)}
           onBack={onBack}

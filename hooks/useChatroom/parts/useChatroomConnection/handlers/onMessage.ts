@@ -107,7 +107,7 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
           break;
           
         case "forceDisconnect":
-          console.log(`[useChatroom] [WS] Force disconnect received: ${message.reason}`);
+          // console.log(`[useChatroom] [WS] Force disconnect received: ${message.reason}`);
           setIsRemoved(message.reason || true);
           ws.current?.close();
           break;

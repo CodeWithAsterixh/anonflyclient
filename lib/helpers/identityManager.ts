@@ -4,6 +4,8 @@ export interface Identity {
   publicKey: string; // Top-level identity public key
   exchangePublicKey: string; // Top-level exchange public key
   createdAt?: string; // ISO timestamp
+  allowedFeatures?: string[]; // Premium status
+  premiumLastChecked?: number; // Last checked timestamp
   identityKeyPair: {
     publicKey: string; // Base64 DER
     privateKey: string; // Base64 DER

@@ -54,13 +54,15 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
       setPassword('');
       setIsPrivate(false);
       
-      onSuccess();
-      onClose();
-
       // Redirect to the newly created room
       if (response && response.data && response.data.id) {
-        navigate(`/chatroom/${response.data.id}`);
+        const { id, isPrivate, token } = response.data;
+        const redirectPath = isPrivate && token ? `/join/${token}` : `/${id}`;
+        navigate(redirectPath);
       }
+      
+      onSuccess();
+      onClose();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create chatroom';
       setError(errorMessage);

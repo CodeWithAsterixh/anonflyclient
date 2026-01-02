@@ -13,6 +13,7 @@ export interface ChatroomSidebarProps {
   onLeaveRoom: () => void;
   onEditRoom: () => void;
   onDeleteRoom: () => void;
+  onGenerateShareLink: () => Promise<void>;
   isConnected: boolean;
   hideHeader?: boolean;
 }

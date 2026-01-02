@@ -20,6 +20,7 @@ interface JoinRoomScreenProps {
   onLeaveRoom: () => void;
   onDeleteRoom: () => void;
   onEditRoom: () => void;
+  onGenerateShareLink: () => Promise<void>;
   onSetJoinPassword: (password: string) => void;
   onJoinChatroom: () => void;
 }
@@ -38,6 +39,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
   onLeaveRoom,
   onDeleteRoom,
   onEditRoom,
+  onGenerateShareLink,
   onSetJoinPassword,
   onJoinChatroom,
 }) => {
@@ -205,6 +207,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
                 onLeaveRoom={onLeaveRoom}
                 onEditRoom={onEditRoom}
                 onDeleteRoom={onDeleteRoom}
+                onGenerateShareLink={onGenerateShareLink}
                 isConnected={isConnected}
               />
             </div>
@@ -236,6 +239,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
               onLeaveRoom={onLeaveRoom}
               onEditRoom={onEditRoom}
               onDeleteRoom={onDeleteRoom}
+              onGenerateShareLink={onGenerateShareLink}
               isConnected={isConnected}
               hideHeader={true}
             />

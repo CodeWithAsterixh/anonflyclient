@@ -21,6 +21,7 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
   onLeaveRoom,
   onEditRoom,
   onDeleteRoom,
+  onGenerateShareLink,
   isConnected,
   hideHeader = false,
 }) => {
@@ -67,6 +68,7 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
           onLeaveRoom={onLeaveRoom}
           onEditRoom={onEditRoom}
           onDeleteRoom={onDeleteRoom}
+          onGenerateShareLink={onGenerateShareLink}
         />
 
         <div className="h-px bg-gray-100 dark:bg-gray-800 mx-4" />

@@ -22,6 +22,7 @@ import {
 
 import {
   removeParticipant,
+  generateShareLink,
 } from "../../../lib/controllers/chatroomController";
 
 /**
@@ -210,9 +211,18 @@ const ChatroomPage: React.FC = () => {
     if (!displayDetail.isLocked) {
       console.log(`[ChatroomPage] Auto-joining room: ${chatroomId}`);
       performJoin();
-    } else if (isSubmitting && joinPassword) {
-      console.log(`[ChatroomPage] Joining locked room with password: ${chatroomId}`);
-      performJoin(joinPassword);
+    } else {
+      // Check for stored access password (from share link)
+      const storedPassword = sessionStorage.getItem(`room_access_${chatroomId}`);
+      if (storedPassword) {
+        console.log(`[ChatroomPage] Auto-joining locked room with stored token password: ${chatroomId}`);
+        performJoin(storedPassword);
+        // Clear it so it's only used once for auto-join
+        sessionStorage.removeItem(`room_access_${chatroomId}`);
+      } else if (isSubmitting && joinPassword) {
+        console.log(`[ChatroomPage] Joining locked room with manual password: ${chatroomId}`);
+        performJoin(joinPassword);
+      }
     }
   }, [
     isConnected,
@@ -299,6 +309,25 @@ const ChatroomPage: React.FC = () => {
   const handleLeaveRoom = () => {
     leaveChatroom();
     navigate("/");
+  };
+
+  const handleGenerateShareLink = async () => {
+    if (!chatroomId) return;
+    try {
+      const response = await generateShareLink(chatroomId);
+      if (response.success && response.data.token) {
+        const shareUrl = `${window.location.origin}/join/${response.data.token}`;
+        await navigator.clipboard.writeText(shareUrl);
+        // We could show a toast here, but the sidebar button handles the "Copied!" state
+      }
+    } catch (err) {
+      console.error("Failed to generate share link:", err);
+      showAlertDialog("Error", "Failed to generate share link. Please try again.", "error");
+    }
+  };
+
+  const handleEditRoom = () => {
+    setIsEditModalOpen(true);
   };
 
   const handleDeleteRoom = async () => {
@@ -463,7 +492,8 @@ const ChatroomPage: React.FC = () => {
           onNavigateHome={() => navigate("/")}
           onLeaveRoom={handleLeaveRoom}
           onDeleteRoom={handleDeleteRoom}
-          onEditRoom={() => setIsEditModalOpen(true)}
+          onEditRoom={handleEditRoom}
+          onGenerateShareLink={handleGenerateShareLink}
           onSetJoinPassword={setJoinPassword}
           onJoinChatroom={handleJoinChatroom}
         />
@@ -492,6 +522,7 @@ const ChatroomPage: React.FC = () => {
         onNavigateHome={() => navigate("/")}
         onLeaveRoom={handleLeaveRoom}
         onDeleteRoom={handleDeleteRoom}
+        onGenerateShareLink={handleGenerateShareLink}
         onOpenEditModal={() => setIsEditModalOpen(true)}
         onCloseEditModal={() => setIsEditModalOpen(false)}
         onScroll={handleScroll}

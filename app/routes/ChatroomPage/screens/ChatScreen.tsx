@@ -50,6 +50,7 @@ interface ChatScreenProps {
   onEditSuccess: () => void;
   onTyping: (isTyping: boolean) => void;
   onRemoveParticipant: (userAid: string) => Promise<void>;
+  onGenerateShareLink: () => Promise<void>;
 }
 
 const ChatScreen: React.FC<ChatScreenProps> = ({
@@ -85,6 +86,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   onEditSuccess,
   onTyping,
   onRemoveParticipant,
+  onGenerateShareLink,
 }) => {
   const messagePortalRootRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(10);
@@ -315,6 +317,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                 onLeaveRoom={onLeaveRoom}
                 onEditRoom={onOpenEditModal}
                 onDeleteRoom={onDeleteRoom}
+                onGenerateShareLink={onGenerateShareLink}
                 isConnected={isConnected}
               />
             </div>
@@ -347,6 +350,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
               onLeaveRoom={onLeaveRoom}
               onEditRoom={onOpenEditModal}
               onDeleteRoom={onDeleteRoom}
+              onGenerateShareLink={onGenerateShareLink}
               isConnected={isConnected}
               hideHeader={true}
             />

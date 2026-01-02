@@ -2,6 +2,7 @@ import ChatLayout from "./routes/ChatLayout";
 import ChatroomPage from "./routes/ChatroomPage";
 import Home from "./routes/Home";
 import LoginPage from "./routes/LoginPage";
+import JoinLinkPage from "./routes/JoinLinkPage";
 import SettingsPage from "./routes/SettingsPage";
 
 export default [
@@ -9,6 +10,11 @@ export default [
     path: "/login",
     file: "./routes/LoginPage/index.tsx",
     Component: LoginPage,
+  },
+  {
+    path: "/join/:token",
+    file: "./routes/JoinLinkPage/index.tsx",
+    Component: JoinLinkPage,
   },
   {
     path: "/",

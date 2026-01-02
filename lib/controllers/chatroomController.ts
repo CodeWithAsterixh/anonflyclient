@@ -19,15 +19,23 @@ const getAuthHeaders = () => {
 export const createChatroom = async (roomname: string, description?: string, password?: string) => {
   try {
     const region = getUserRegion();
+    const body: any = { 
+      roomname: roomname.trim(), 
+      region 
+    };
+
+    if (description && description.trim() !== '') {
+      body.description = description.trim();
+    }
+
+    if (password && password.trim() !== '') {
+      body.password = password;
+    }
+
     const response = await fetch(`${getAPIBaseURL()}/chatrooms`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ 
-        roomname: roomname.trim(), 
-        description: description?.trim(), 
-        password, 
-        region 
-      }),
+      body: JSON.stringify(body),
     });
 
     const data = await response.json();
@@ -73,6 +81,45 @@ export const joinChatroom = async (chatroomId: string, password?: string) => {
 
     if (!response.ok) {
       throw new Error(data.message || 'Failed to join chatroom');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const generateShareLink = async (chatroomId: string) => {
+  try {
+    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/share-link`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to generate share link');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const validateShareLink = async (token: string) => {
+  try {
+    const response = await fetch(`${getAPIBaseURL()}/chatrooms/validate-link`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ token }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to validate share link');
     }
 
     return data;

@@ -263,6 +263,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                   participantCount={room.participantCount}
                   lastMessage={room.lastMessage}
                   isLocked={room.isLocked}
+                  isPrivate={room.isPrivate}
                   onClick={() => handleChatroomClick(room.id)}
                 />
               ))}

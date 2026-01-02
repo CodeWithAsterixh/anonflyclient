@@ -34,6 +34,9 @@ const JoinLinkPage: React.FC = () => {
             sessionStorage.setItem(`room_access_${chatroomId}`, password);
           }
           
+          // Also store the token itself for private room validation
+          sessionStorage.setItem(`room_token_${chatroomId}`, token);
+          
           // Navigate to the chatroom
           navigate(`/${chatroomId}`);
         } else {

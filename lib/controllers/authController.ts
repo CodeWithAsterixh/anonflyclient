@@ -51,10 +51,10 @@ export const performHandshake = async (identity: Identity) => {
     const verifyData = await verifyResponse.json();
     if (!verifyResponse.ok) throw new Error(verifyData.message || 'Verification failed');
 
-    const { token, aid, username } = verifyData.data;
+    const { token, aid, username, allowedFeatures } = verifyData.data;
 
     // 4. Store session (secure cookie with 1 week expiration)
-    setSessionUser({ userId: aid, username }, token);
+    setSessionUser({ userId: aid, username, allowedFeatures }, token);
 
     return verifyData.data;
   } catch (error) {

@@ -5,5 +5,6 @@ export interface ChatroomCardProps {
   participantCount: number;
   lastMessage: string | null;
   isLocked?: boolean;
+  isPrivate?: boolean;
   onClick?: () => void;
 }

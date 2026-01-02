@@ -6,6 +6,7 @@ export interface Chatroom {
   participantCount: number;
   lastMessage: string | null;
   isLocked: boolean;
+  isPrivate?: boolean;
 }
 
 export interface UseChatroomListReturn {

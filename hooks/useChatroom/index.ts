@@ -106,13 +106,13 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
   }, [connect, deferConnection, ws]);
 
   const joinChatroom = useCallback(
-    async (chatroomId: string, password?: string) => {
+    async (chatroomId: string, password?: string, linkToken?: string) => {
       if (!user && !loading) {
         setError("Cannot join chatroom: User not authenticated.");
         return;
       }
 
-      if (joiningRef.current === `${chatroomId}:${password || ''}` && ws.current?.readyState === WebSocket.OPEN) {
+      if (joiningRef.current === `${chatroomId}:${password || ''}:${linkToken || ''}` && ws.current?.readyState === WebSocket.OPEN) {
         return;
       }
 
@@ -123,7 +123,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
         try {
           const identity = await getIdentity();
           if (identity) {
-            joiningRef.current = `${chatroomId}:${password || ''}`;
+            joiningRef.current = `${chatroomId}:${password || ''}:${linkToken || ''}`;
             ws.current.send(
               JSON.stringify({
                 type: "joinChatroom",
@@ -134,6 +134,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
                 publicKey: identity.publicKey,
                 exchangePublicKey: identity.exchangePublicKey,
                 password,
+                linkToken,
               })
             );
           } else {

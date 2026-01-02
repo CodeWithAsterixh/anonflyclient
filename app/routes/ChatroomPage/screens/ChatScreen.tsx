@@ -153,9 +153,16 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                 <ChevronDown className="w-5 h-5 rotate-90 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100" />
               </button>
               <div>
-                <h1 className="font-bold text-gray-900 dark:text-gray-100 leading-tight">
-                  {displayDetail?.roomname || "Loading..."}
-                </h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-bold text-gray-900 dark:text-gray-100 leading-tight">
+                    {displayDetail?.roomname || "Loading..."}
+                  </h1>
+                  {displayDetail?.isPrivate && (
+                    <span className="px-1.5 py-0.5 text-[10px] font-bold bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded uppercase tracking-wider">
+                      Private
+                    </span>
+                  )}
+                </div>
                 <button
                   onClick={() => setIsOptionsOpen(true)}
                   className={`text-xs text-gray-500 dark:text-gray-400 transition-colors text-left hover:text-blue-500`}
@@ -347,10 +354,11 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
               hostAid={displayDetail?.hostAid || ""}
               creatorAid={displayDetail?.creatorAid || ""}
               currentUserId={currentUserId}
-              roomName={displayDetail?.roomname || ""}
-              roomDescription={displayDetail?.description}
-              allowedFeatures={displayDetail?.allowedFeatures}
-              onRemoveParticipant={onRemoveParticipant}
+            roomName={displayDetail?.roomname || ""}
+            roomDescription={displayDetail?.description || ""}
+            isPrivate={displayDetail?.isPrivate}
+            allowedFeatures={displayDetail?.allowedFeatures}
+            onRemoveParticipant={onRemoveParticipant}
               onBanParticipant={onBanParticipant}
               onUnbanParticipant={onUnbanParticipant}
               onLeaveRoom={onLeaveRoom}

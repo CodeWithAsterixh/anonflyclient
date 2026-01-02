@@ -16,12 +16,13 @@ const getAuthHeaders = () => {
   };
 };
 
-export const createChatroom = async (roomname: string, description?: string, password?: string) => {
+export const createChatroom = async (roomname: string, description?: string, password?: string, isPrivate: boolean = false) => {
   try {
     const region = getUserRegion();
     const body: any = { 
       roomname: roomname.trim(), 
-      region 
+      region,
+      isPrivate
     };
 
     if (description && description.trim() !== '') {

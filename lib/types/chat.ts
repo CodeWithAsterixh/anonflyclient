@@ -40,6 +40,7 @@ export interface ChatroomDetail {
   creatorAid: string;
   isCreatorOnline?: boolean;
   isLocked: boolean;
+  isPrivate: boolean;
   participants: Participant[];
   participantCount?: number;
   allowedFeatures?: string[];

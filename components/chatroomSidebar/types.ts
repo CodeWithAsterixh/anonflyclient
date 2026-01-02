@@ -8,6 +8,7 @@ export interface ChatroomSidebarProps {
   currentUserId?: string | null;
   roomName: string;
   roomDescription?: string;
+  isPrivate?: boolean;
   allowedFeatures?: string[];
   onRemoveParticipant: (userAid: string) => Promise<void>;
   onBanParticipant: (userAid: string, reason?: string) => Promise<void>;

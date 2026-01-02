@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { createChatroom } from '../../lib/controllers/chatroomController';
 import { validateRoomname, validateDescription, validateRoomPassword } from '../../lib/helpers/validation';
+import { useAuth } from '../../hooks/useAuth';
+import { FEATURES } from '../../lib/constants/features';
 import Input from '../ui/input';
 import Modal from '../modal';
 import type { CreateChatroomModalProps } from './types';
@@ -10,11 +12,15 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const { user } = useAuth();
   const [roomname, setRoomname] = useState('');
   const [description, setDescription] = useState('');
   const [password, setPassword] = useState('');
+  const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isPremium = user?.allowedFeatures?.includes(FEATURES.CREATE_PRIVATE_ROOM);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,10 +46,11 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
         return;
       }
 
-      await createChatroom(roomname, description, password);
+      await createChatroom(roomname, description, password, isPrivate);
       setRoomname('');
       setDescription('');
       setPassword('');
+      setIsPrivate(false);
       onSuccess();
       onClose();
     } catch (err) {
@@ -98,6 +105,29 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
           autoComplete="new-password"
           helperText="Leave blank for a public room that anyone can join."
         />
+
+        <div className="flex items-center space-x-2 mt-4">
+          <input
+            type="checkbox"
+            id="isPrivate"
+            checked={isPrivate}
+            onChange={(e) => setIsPrivate(e.target.checked)}
+            disabled={loading || !isPremium}
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+          />
+          <label 
+            htmlFor="isPrivate" 
+            className={`text-sm font-medium ${!isPremium ? 'text-gray-400' : 'text-gray-700 dark:text-gray-300'}`}
+          >
+            Private Room (Premium Only)
+            {!isPremium && <span className="ml-2 text-xs text-yellow-500">(Upgrade required)</span>}
+          </label>
+        </div>
+        <div className="mt-2 text-xs text-gray-500">
+          {isPrivate 
+            ? "Private rooms are hidden from search and only accessible via share link. A secure password will be automatically generated if you don't provide one." 
+            : "Public rooms are visible to everyone."}
+        </div>
 
         {/* Buttons */}
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-50 dark:border-gray-700 mt-2">

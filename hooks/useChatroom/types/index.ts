@@ -10,7 +10,7 @@ export interface UseChatroomReturn {
   editMessage: (messageId: string, newContent: string) => void;
   deleteMessage: (messageId: string) => void;
   sendReaction: (messageId: string, emoji: Emoji) => void;
-  joinChatroom: (chatroomId: string, password?: string) => void;
+  joinChatroom: (chatroomId: string, password?: string, linkToken?: string) => void;
   leaveChatroom: () => void;
   reconnect: () => void;
   clearError: () => void;

@@ -16,6 +16,7 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
   currentUserId,
   roomName,
   roomDescription,
+  isPrivate,
   allowedFeatures = [],
   onRemoveParticipant,
   onBanParticipant,
@@ -82,7 +83,7 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
       )}
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <RoomInfo roomName={roomName} roomDescription={roomDescription} />
+        <RoomInfo roomName={roomName} roomDescription={roomDescription} isPrivate={isPrivate} />
 
         <div className="h-px bg-gray-100 dark:bg-gray-800 mx-4" />
 

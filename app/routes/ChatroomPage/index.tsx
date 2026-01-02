@@ -201,11 +201,11 @@ const ChatroomPage: React.FC = () => {
       return;
     }
 
-    const performJoin = async (password?: string) => {
+    const performJoin = async (password?: string, linkToken?: string) => {
       try {
         isJoiningRef.current = true;
         lastJoinedRoomRef.current = chatroomId;
-        await joinChatroom(chatroomId, password);
+        await joinChatroom(chatroomId, password, linkToken);
       } catch (err) {
         console.error("[ChatroomPage] Join failed:", err);
         isJoiningRef.current = false;
@@ -213,17 +213,20 @@ const ChatroomPage: React.FC = () => {
       }
     };
 
-    if (!displayDetail.isLocked) {
+    if (!displayDetail.isLocked && !displayDetail.isPrivate) {
       console.log(`[ChatroomPage] Auto-joining room: ${chatroomId}`);
       performJoin();
     } else {
-      // Check for stored access password (from share link)
+      // Check for stored access password or token (from share link)
       const storedPassword = sessionStorage.getItem(`room_access_${chatroomId}`);
-      if (storedPassword) {
-        console.log(`[ChatroomPage] Auto-joining locked room with stored token password: ${chatroomId}`);
-        performJoin(storedPassword);
-        // Clear it so it's only used once for auto-join
+      const storedToken = sessionStorage.getItem(`room_token_${chatroomId}`);
+      
+      if (storedToken || (displayDetail.isLocked && storedPassword)) {
+        console.log(`[ChatroomPage] Auto-joining ${displayDetail.isPrivate ? 'private' : 'locked'} room with stored credentials: ${chatroomId}`);
+        performJoin(storedPassword || undefined, storedToken || undefined);
+        // Clear them so they are only used once for auto-join
         sessionStorage.removeItem(`room_access_${chatroomId}`);
+        sessionStorage.removeItem(`room_token_${chatroomId}`);
       } else if (isSubmitting && joinPassword) {
         console.log(`[ChatroomPage] Joining locked room with manual password: ${chatroomId}`);
         performJoin(joinPassword);

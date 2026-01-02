@@ -24,28 +24,82 @@ const MessageInput: React.FC<MessageInputProps> = ({
 }) => {
   const [messageInput, setMessageInput] = useState<string>('');
   const [showLivePreview, setShowLivePreview] = useState<boolean>(false);
+  const [selection, setSelection] = useState<{ start: number, end: number } | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number, left: number } | null>(null);
   const isMobileDevice = useIsMobile();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const { clearTypingStatus } = useTypingStatus({ messageInput, onTyping });
   const { resetHeight } = useAutoHeight({ ref: textareaRef, value: messageInput });
 
+  const handleSelect = () => {
+    if (!textareaRef.current) return;
+    const start = textareaRef.current.selectionStart;
+    const end = textareaRef.current.selectionEnd;
+
+    if (start !== end) {
+      setSelection({ start, end });
+      
+      // Calculate position
+      const textarea = textareaRef.current;
+      const { offsetLeft, offsetTop } = textarea;
+      
+      // We'll show it centered above the textarea for now
+      // as getting exact character coordinates in a textarea is very complex
+      setMenuPosition({
+        top: -45, 
+        left: 20 // Default left
+      });
+    } else {
+      setSelection(null);
+      setMenuPosition(null);
+    }
+  };
+
+  const handleBlur = () => {
+    // Small delay to allow clicking the menu buttons
+    setTimeout(() => {
+      setSelection(null);
+      setMenuPosition(null);
+    }, 200);
+  };
+
   const applyFormatting = (prefix: string, suffix: string = prefix) => {
     if (!textareaRef.current) return;
 
-    const start = textareaRef.current.selectionStart;
-    const end = textareaRef.current.selectionEnd;
+    const start = selection?.start ?? textareaRef.current.selectionStart;
+    const end = selection?.end ?? textareaRef.current.selectionEnd;
     const text = textareaRef.current.value;
     const selectedText = text.substring(start, end);
     
-    const newText = text.substring(0, start) + prefix + selectedText + suffix + text.substring(end);
+    // Check if formatting is already applied (simple toggle)
+    const hasPrefix = text.substring(start - prefix.length, start) === prefix;
+    const hasSuffix = text.substring(end, end + suffix.length) === suffix;
+
+    let newText: string;
+    let newCursorPos: number;
+
+    if (hasPrefix && hasSuffix) {
+      // Remove formatting
+      newText = text.substring(0, start - prefix.length) + 
+                selectedText + 
+                text.substring(end + suffix.length);
+      newCursorPos = start - prefix.length + selectedText.length;
+    } else {
+      // Add formatting
+      newText = text.substring(0, start) + prefix + selectedText + suffix + text.substring(end);
+      newCursorPos = start + prefix.length + selectedText.length + suffix.length;
+    }
+
     setMessageInput(newText);
+    setSelection(null);
+    setMenuPosition(null);
     
     // Set focus back and adjust selection
     setTimeout(() => {
       if (textareaRef.current) {
         textareaRef.current.focus();
-        const newCursorPos = start + prefix.length + selectedText.length + suffix.length;
         textareaRef.current.setSelectionRange(newCursorPos, newCursorPos);
       }
     }, 0);
@@ -119,7 +173,63 @@ const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <div className="bg-white/80 dark:bg-gray-900/80 sticky bottom-0 left-0 backdrop-blur-md p-3 border-t border-gray-200 dark:border-gray-800 flex flex-col gap-2 z-10 transition-colors duration-300">
+    <div ref={containerRef} className="bg-white/80 dark:bg-gray-900/80 sticky bottom-0 left-0 backdrop-blur-md p-3 border-t border-gray-200 dark:border-gray-800 flex flex-col gap-2 z-10 transition-colors duration-300">
+      {/* Contextual Formatting Menu */}
+      {selection && menuPosition && (
+        <div 
+          className="absolute z-20 bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-700 rounded-lg p-1 flex items-center gap-0.5 animate-in fade-in zoom-in duration-200"
+          style={{ 
+            top: `${menuPosition.top}px`, 
+            left: '50%',
+            transform: 'translateX(-50%)'
+          }}
+        >
+          <button 
+            onMouseDown={(e) => { e.preventDefault(); applyFormatting('**'); }}
+            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-gray-700 dark:text-gray-300"
+            title="Bold"
+          >
+            <Bold className="w-4 h-4" />
+          </button>
+          <button 
+            onMouseDown={(e) => { e.preventDefault(); applyFormatting('*'); }}
+            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-gray-700 dark:text-gray-300"
+            title="Italic"
+          >
+            <Italic className="w-4 h-4" />
+          </button>
+          <button 
+            onMouseDown={(e) => { e.preventDefault(); applyFormatting('__'); }}
+            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-gray-700 dark:text-gray-300"
+            title="Underline"
+          >
+            <Underline className="w-4 h-4" />
+          </button>
+          <button 
+            onMouseDown={(e) => { e.preventDefault(); applyFormatting('~~'); }}
+            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-gray-700 dark:text-gray-300"
+            title="Strikethrough"
+          >
+            <Strikethrough className="w-4 h-4" />
+          </button>
+          <button 
+            onMouseDown={(e) => { e.preventDefault(); applyFormatting('`'); }}
+            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-gray-700 dark:text-gray-300"
+            title="Code"
+          >
+            <Code className="w-4 h-4" />
+          </button>
+          <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1" />
+          <button 
+            onMouseDown={(e) => { e.preventDefault(); insertLink(); }}
+            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-gray-700 dark:text-gray-300"
+            title="Link"
+          >
+            <LinkIcon className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Editing Preview */}
       {editingMessage && onCancelEdit && (
         <MessagePreview 
@@ -152,42 +262,42 @@ const MessageInput: React.FC<MessageInputProps> = ({
       {/* Formatting Toolbar */}
       <div className="flex items-center gap-1 px-1 mb-1 overflow-x-auto no-scrollbar">
         <button 
-          onClick={() => applyFormatting('**')} 
+          onMouseDown={(e) => { e.preventDefault(); applyFormatting('**'); }} 
           className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors text-gray-600 dark:text-gray-400"
           title="Bold"
         >
           <Bold className="w-4 h-4" />
         </button>
         <button 
-          onClick={() => applyFormatting('*')} 
+          onMouseDown={(e) => { e.preventDefault(); applyFormatting('*'); }} 
           className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors text-gray-600 dark:text-gray-400"
           title="Italic"
         >
           <Italic className="w-4 h-4" />
         </button>
         <button 
-          onClick={() => applyFormatting('__')} 
+          onMouseDown={(e) => { e.preventDefault(); applyFormatting('__'); }} 
           className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors text-gray-600 dark:text-gray-400"
           title="Underline"
         >
           <Underline className="w-4 h-4" />
         </button>
         <button 
-          onClick={() => applyFormatting('~~')} 
+          onMouseDown={(e) => { e.preventDefault(); applyFormatting('~~'); }} 
           className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors text-gray-600 dark:text-gray-400"
           title="Strikethrough"
         >
           <Strikethrough className="w-4 h-4" />
         </button>
         <button 
-          onClick={() => applyFormatting('`')} 
+          onMouseDown={(e) => { e.preventDefault(); applyFormatting('`'); }} 
           className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors text-gray-600 dark:text-gray-400"
           title="Inline Code"
         >
           <Code className="w-4 h-4" />
         </button>
         <button 
-          onClick={insertLink} 
+          onMouseDown={(e) => { e.preventDefault(); insertLink(); }} 
           className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors text-gray-600 dark:text-gray-400"
           title="Link"
         >
@@ -209,6 +319,8 @@ const MessageInput: React.FC<MessageInputProps> = ({
           value={messageInput}
           onChange={(e) => setMessageInput(e.target.value)}
           onKeyDown={handleKeyDown as any}
+          onSelect={handleSelect}
+          onBlur={handleBlur}
           placeholder={editingMessage ? "Edit your message..." : "Type a message"}
           multiline
           rows={1}

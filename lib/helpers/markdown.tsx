@@ -133,3 +133,133 @@ export const formatMessage = (content: string): React.ReactNode[] => {
 
   return parts as React.ReactNode[];
 };
+
+/**
+ * Formats text for inline display in the editor.
+ * Keeps the markdown symbols but styles the text they enclose.
+ * Symbols are styled to be semi-transparent.
+ */
+export const formatInline = (content: string): React.ReactNode[] => {
+  if (!content) return [];
+
+  const rules: {
+    name: string;
+    regex: RegExp;
+    render: (...args: string[]) => React.ReactNode;
+  }[] = [
+    {
+      name: 'bold',
+      regex: /(\*\*)(.*?)(\*\*)/g,
+      render: (s1: string, text: string, s2: string) => (
+        <span key={text} className="font-bold">
+          <span className="opacity-30 font-normal">{s1}</span>
+          {text}
+          <span className="opacity-30 font-normal">{s2}</span>
+        </span>
+      )
+    },
+    {
+      name: 'italic',
+      regex: /(\*)(.*?)(\*)/g,
+      render: (s1: string, text: string, s2: string) => (
+        <span key={text} className="italic">
+          <span className="opacity-30 italic-none font-normal">{s1}</span>
+          {text}
+          <span className="opacity-30 italic-none font-normal">{s2}</span>
+        </span>
+      )
+    },
+    {
+      name: 'underline',
+      regex: /(__)(.*?)(__)/g,
+      render: (s1: string, text: string, s2: string) => (
+        <span key={text} className="underline">
+          <span className="opacity-30 no-underline font-normal">{s1}</span>
+          {text}
+          <span className="opacity-30 no-underline font-normal">{s2}</span>
+        </span>
+      )
+    },
+    {
+      name: 'strikethrough',
+      regex: /(~~)(.*?)(~~)/g,
+      render: (s1: string, text: string, s2: string) => (
+        <span key={text} className="line-through">
+          <span className="opacity-30 no-line-through font-normal">{s1}</span>
+          {text}
+          <span className="opacity-30 no-line-through font-normal">{s2}</span>
+        </span>
+      )
+    },
+    {
+      name: 'code',
+      regex: /(`)(.*?)(`)/g,
+      render: (s1: string, text: string, s2: string) => (
+        <span key={text} className="bg-black/10 dark:bg-white/10 px-0.5 rounded font-mono text-sm">
+          <span className="opacity-30 font-normal">{s1}</span>
+          {text}
+          <span className="opacity-30 font-normal">{s2}</span>
+        </span>
+      )
+    },
+    {
+      name: 'link',
+      regex: /(\[)(.*?)(\])(\()(.*?)(\))/g,
+      render: (s1: string, text: string, s2: string, s3: string, url: string, s4: string) => (
+        <span key={url} className="text-blue-500">
+          <span className="opacity-30 text-gray-500">{s1}</span>
+          {text}
+          <span className="opacity-30 text-gray-500">{s2}{s3}{url}{s4}</span>
+        </span>
+      )
+    },
+    {
+      name: 'autolink',
+      regex: /(https?:\/\/[^\s]+)/g,
+      render: (url: string) => (
+        <span key={url} className="text-blue-500 underline">
+          {url}
+        </span>
+      )
+    }
+  ];
+
+  let parts: (string | React.ReactNode)[] = [content];
+
+  rules.forEach(rule => {
+    const newParts: (string | React.ReactNode)[] = [];
+    parts.forEach(part => {
+      if (typeof part !== 'string') {
+        newParts.push(part);
+        return;
+      }
+
+      let lastIndex = 0;
+      let match;
+      rule.regex.lastIndex = 0;
+      
+      while ((match = rule.regex.exec(part)) !== null) {
+        if (match.index > lastIndex) {
+          newParts.push(part.substring(lastIndex, match.index));
+        }
+
+        if (rule.name === 'link') {
+          newParts.push(rule.render(match[1], match[2], match[3], match[4], match[5], match[6]));
+        } else if (rule.name === 'autolink') {
+          newParts.push(rule.render(match[1]));
+        } else {
+          newParts.push(rule.render(match[1], match[2], match[3]));
+        }
+
+        lastIndex = rule.regex.lastIndex;
+      }
+
+      if (lastIndex < part.length) {
+        newParts.push(part.substring(lastIndex));
+      }
+    });
+    parts = newParts;
+  });
+
+  return parts as React.ReactNode[];
+};

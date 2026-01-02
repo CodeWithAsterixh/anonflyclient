@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { editChatroom } from '../../lib/controllers/chatroomController';
+import { validateRoomname, validateDescription } from '../../lib/helpers/validation';
 import Input from '../ui/input';
 import type { EditChatroomModalProps } from './types';
 
@@ -30,8 +31,14 @@ const EditChatroomModal: React.FC<EditChatroomModalProps> = ({
     setLoading(true);
 
     try {
-      if (!roomname.trim()) {
-        setError('Chatroom name is required');
+      if (!validateRoomname(roomname)) {
+        setError('Chatroom name must be between 3 and 50 characters');
+        setLoading(false);
+        return;
+      }
+
+      if (!validateDescription(description)) {
+        setError('Description must be 200 characters or less');
         setLoading(false);
         return;
       }

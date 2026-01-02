@@ -42,7 +42,7 @@ const LoginPage: React.FC = () => {
 
     if (!usernameValidation) {
       setUsernameError(
-        "Username must be at least 3 characters long and contain only letters and numbers."
+        "Username must be between 3 and 30 characters and contain only letters, numbers, and underscores."
       );
       return;
     }

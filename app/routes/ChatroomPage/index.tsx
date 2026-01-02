@@ -94,7 +94,7 @@ const ChatroomPage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${getAPIBaseURL()}/chatroom/${chatroomId}/details`,
+        `${getAPIBaseURL()}/chatroom/${encodeURIComponent(chatroomId)}/details`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

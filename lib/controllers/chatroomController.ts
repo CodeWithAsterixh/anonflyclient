@@ -22,7 +22,12 @@ export const createChatroom = async (roomname: string, description?: string, pas
     const response = await fetch(`${getAPIBaseURL()}/chatrooms`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ roomname, description, password, region }),
+      body: JSON.stringify({ 
+        roomname: roomname.trim(), 
+        description: description?.trim(), 
+        password, 
+        region 
+      }),
     });
 
     const data = await response.json();
@@ -39,7 +44,7 @@ export const createChatroom = async (roomname: string, description?: string, pas
 
 export const getChatroomMessages = async (chatroomId: string) => {
   try {
-    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${chatroomId}/messages`, {
+    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/messages`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -58,7 +63,7 @@ export const getChatroomMessages = async (chatroomId: string) => {
 
 export const joinChatroom = async (chatroomId: string, password?: string) => {
   try {
-    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${chatroomId}/join`, {
+    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/join`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ password }),
@@ -78,7 +83,7 @@ export const joinChatroom = async (chatroomId: string, password?: string) => {
 
 export const leaveChatroom = async (chatroomId: string) => {
   try {
-    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${chatroomId}/leave`, {
+    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/leave`, {
       method: 'POST',
       headers: getAuthHeaders(),
     });
@@ -97,7 +102,7 @@ export const leaveChatroom = async (chatroomId: string) => {
 
 export const deleteChatroom = async (chatroomId: string) => {
   try {
-    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${chatroomId}`, {
+    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });
@@ -116,10 +121,13 @@ export const deleteChatroom = async (chatroomId: string) => {
 
 export const editChatroom = async (chatroomId: string, roomname: string, description?: string) => {
   try {
-    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${chatroomId}`, {
+    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}`, {
       method: 'PATCH',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ roomname, description }),
+      body: JSON.stringify({ 
+        roomname: roomname.trim(), 
+        description: description?.trim() 
+      }),
     });
 
     const data = await response.json();
@@ -136,7 +144,7 @@ export const editChatroom = async (chatroomId: string, roomname: string, descrip
 
 export const deleteMessage = async (chatroomId: string, messageId: string) => {
   try {
-    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${chatroomId}/messages/${messageId}`, {
+    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/messages/${encodeURIComponent(messageId)}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });
@@ -155,7 +163,7 @@ export const deleteMessage = async (chatroomId: string, messageId: string) => {
 
 export const removeParticipant = async (chatroomId: string, userAid: string) => {
   try {
-    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${chatroomId}/participants/${userAid}`, {
+    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/participants/${encodeURIComponent(userAid)}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });

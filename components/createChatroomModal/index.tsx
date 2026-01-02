@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { createChatroom } from '../../lib/controllers/chatroomController';
+import { validateRoomname, validateDescription, validateRoomPassword } from '../../lib/helpers/validation';
 import Input from '../ui/input';
 import type { CreateChatroomModalProps } from './types';
 
@@ -21,8 +22,20 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
     setLoading(true);
 
     try {
-      if (!roomname.trim()) {
-        setError('Chatroom name is required');
+      if (!validateRoomname(roomname)) {
+        setError('Chatroom name must be between 3 and 50 characters');
+        setLoading(false);
+        return;
+      }
+
+      if (!validateDescription(description)) {
+        setError('Description must be 200 characters or less');
+        setLoading(false);
+        return;
+      }
+
+      if (password && !validateRoomPassword(password)) {
+        setError('Password must be between 4 and 50 characters');
         setLoading(false);
         return;
       }

@@ -61,6 +61,12 @@ const ChatroomPage: React.FC = () => {
 
   const [editingMessage, setEditingMessage] = useState<EditingMessage | null>(null);
 
+  const storedPassword = chatroomId ? sessionStorage.getItem(`room_access_${chatroomId}`) : null;
+  const storedToken = chatroomId ? sessionStorage.getItem(`room_token_${chatroomId}`) : null;
+  const hasStoredCredentials = !!(storedToken || (chatroomDetail?.isLocked && storedPassword));
+
+  const shouldDeferConnection = !chatroomDetail || (chatroomDetail.isLocked && !isCreator && !isAlreadyParticipant && !hasStoredCredentials);
+
   const [alertDialog, setAlertDialog] = useState<{
     isOpen: boolean;
     title: string;
@@ -148,7 +154,7 @@ const ChatroomPage: React.FC = () => {
     clearError,
     currentChatroomId,
     ws
-  } = useChatroom(chatroomId, !chatroomDetail || chatroomDetail.isLocked);
+  } = useChatroom(chatroomId, shouldDeferConnection);
 
   useEffect(() => {
     if (isRemoved) {

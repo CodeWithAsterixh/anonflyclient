@@ -178,7 +178,7 @@ export const validateShareLink = async (token: string) => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to validate share link');
+      throw new Error(data.message || data.error || 'Failed to validate share link');
     }
 
     return data;

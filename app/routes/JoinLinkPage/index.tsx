@@ -17,6 +17,12 @@ const JoinLinkPage: React.FC = () => {
   const hasValidated = useRef(false);
 
   useEffect(() => {
+    if (!token) {
+      setError('No share link token provided');
+      setLoading(false);
+      return;
+    }
+
     const validateToken = async () => {
       if (hasValidated.current) return;
       hasValidated.current = true;
@@ -54,11 +60,15 @@ const JoinLinkPage: React.FC = () => {
     };
 
     if (!authLoading) {
-      if (user) {
+      if (user && authToken) {
         validateToken();
-      } else {
+      } else if (!user) {
         // If not logged in, redirect to login with this URL as redirect
         navigate(`/login?redirect_to=${encodeURIComponent(window.location.pathname)}`, { replace: true });
+      } else if (user && !authToken) {
+        // We have a user but no token (handshake failed or in progress)
+        setError('Connection issue: Please wait while we reconnect or try refreshing the page.');
+        setLoading(false);
       }
     }
   }, [token, user, authToken, authLoading, navigate]);

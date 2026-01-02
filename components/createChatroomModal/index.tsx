@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { createChatroom } from '../../lib/controllers/chatroomController';
 import { validateRoomname, validateDescription, validateRoomPassword } from '../../lib/helpers/validation';
 import { useAuth } from '../../hooks/useAuth';
@@ -12,6 +13,7 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [roomname, setRoomname] = useState('');
   const [description, setDescription] = useState('');
@@ -46,13 +48,19 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
         return;
       }
 
-      await createChatroom(roomname, description, password, isPrivate);
+      const response = await createChatroom(roomname, description, password, isPrivate);
       setRoomname('');
       setDescription('');
       setPassword('');
       setIsPrivate(false);
+      
       onSuccess();
       onClose();
+
+      // Redirect to the newly created room
+      if (response && response.data && response.data.id) {
+        navigate(`/chatroom/${response.data.id}`);
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create chatroom';
       setError(errorMessage);

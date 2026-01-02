@@ -5,6 +5,8 @@ interface InlineFormattedInputProps {
   value: string;
   onChange: (value: string) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onSelect?: (e: React.SyntheticEvent<HTMLTextAreaElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -17,7 +19,7 @@ interface InlineFormattedInputProps {
  * Uses the mirroring technique: a transparent textarea over a formatted div.
  */
 export const InlineFormattedInput = React.forwardRef<HTMLTextAreaElement, InlineFormattedInputProps>(
-  ({ value, onChange, onKeyDown, placeholder, disabled, className, autoFocus, maxHeight = 200 }, ref) => {
+  ({ value, onChange, onKeyDown, onSelect, onBlur, placeholder, disabled, className, autoFocus, maxHeight = 200 }, ref) => {
     const internalRef = useRef<HTMLTextAreaElement>(null);
     const mirrorRef = useRef<HTMLDivElement>(null);
     const [isFocused, setIsFocused] = useState(false);
@@ -94,9 +96,13 @@ export const InlineFormattedInput = React.forwardRef<HTMLTextAreaElement, Inline
           value={value}
           onChange={handleChange}
           onKeyDown={onKeyDown}
+          onSelect={onSelect}
           onScroll={handleScroll}
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onBlur={(e) => {
+            setIsFocused(false);
+            onBlur?.(e);
+          }}
           disabled={disabled}
           placeholder="" // Placeholder is handled by mirror div
           style={{

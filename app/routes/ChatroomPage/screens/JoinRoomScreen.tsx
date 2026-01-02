@@ -14,6 +14,7 @@ interface JoinRoomScreenProps {
   isHost: boolean;
   isCreator: boolean;
   isAlreadyParticipant: boolean;
+  hasStoredCredentials?: boolean;
   joinPassword: string;
   passwordError: string | null;
   onBack: () => void;
@@ -37,6 +38,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
   isHost,
   isCreator,
   isAlreadyParticipant,
+  hasStoredCredentials,
   joinPassword,
   passwordError,
   onBack,
@@ -115,7 +117,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
                   "Join the room to see messages and participate."}
               </p>
 
-              {((isLocked && !isCreator && !isAlreadyParticipant)) ||
+              {((isLocked && !isCreator && !isAlreadyParticipant && !hasStoredCredentials)) ||
                 (passwordError &&
                 (passwordError.toLowerCase().includes("password") ||
                   passwordError.toLowerCase().includes("locked"))) ? (

@@ -15,6 +15,7 @@ export interface ChatLayoutContextType {
   switchAccount: (aid: string) => Promise<void>;
   deleteAccount: (aid: string) => Promise<void>;
   logout: () => void;
+  refreshUserInfo: () => Promise<void>;
   isMobile: boolean;
   onBack: () => void;
 }

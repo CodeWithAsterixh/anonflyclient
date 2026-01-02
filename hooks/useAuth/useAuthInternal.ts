@@ -329,6 +329,7 @@ export const useAuthInternal = () => {
     retryCountdown: authState.retryCountdown,
     allowedFeatures: authState.allowedFeatures,
     checkPremiumStatus,
+    refreshUserInfo: checkPremiumStatus,
   }), [
     authState,
     joinAnonymously,

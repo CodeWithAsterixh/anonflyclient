@@ -46,6 +46,7 @@ const SettingsPage: React.FC = () => {
     switchAccount,
     deleteAccount,
     logout,
+    refreshUserInfo,
     onBack
   } = context;
 
@@ -83,6 +84,20 @@ const SettingsPage: React.FC = () => {
   };
 
   const isPremium = user?.allowedFeatures?.includes('CREATE_PRIVATE_ROOM');
+
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
+
+  const handleRefresh = async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    try {
+      await refreshUserInfo();
+    } catch (error) {
+      console.error("Failed to refresh user info:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   return (
     <div className="h-full overflow-y-auto bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
@@ -138,6 +153,17 @@ const SettingsPage: React.FC = () => {
               >
                 <LogOut size={18} />
                 <span className="hidden sm:inline">Logout</span>
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mb-6">
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-xl transition-all disabled:opacity-50"
+              >
+                <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
+                <span>{isRefreshing ? 'Refreshing...' : 'Refresh Info'}</span>
               </button>
             </div>
 

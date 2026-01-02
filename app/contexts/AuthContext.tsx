@@ -16,6 +16,7 @@ export interface AuthContextType {
   switchAccount: (aid: string, redirectTo?: string) => Promise<void>;
   deleteAccount: (aid: string) => Promise<void>;
   logout: () => void;
+  refreshUserInfo: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);

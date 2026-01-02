@@ -24,7 +24,8 @@ const ChatLayout: React.FC = () => {
     isLoading: authLoading,
     switchAccount, 
     deleteAccount,
-    logout 
+    logout,
+    refreshUserInfo 
   } = useAuth();
   
   const { 
@@ -92,6 +93,7 @@ const ChatLayout: React.FC = () => {
     switchAccount,
     deleteAccount,
     logout,
+    refreshUserInfo,
     isMobile,
     onBack: handleBackFromChat
   }), [
@@ -106,6 +108,7 @@ const ChatLayout: React.FC = () => {
     switchAccount,
     deleteAccount,
     logout,
+    refreshUserInfo,
     isMobile,
     handleBackFromChat
   ]);

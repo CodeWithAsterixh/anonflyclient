@@ -479,6 +479,7 @@ const ChatroomPage: React.FC = () => {
         isConnected={isConnected}
         isHost={isHost}
         isCreator={isCreator}
+        currentUserId={user?.userId}
         messages={messages}
         participants={Array.from(participants.values())}
         replyingTo={replyingTo}

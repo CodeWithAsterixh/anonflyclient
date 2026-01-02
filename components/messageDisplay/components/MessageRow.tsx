@@ -1,6 +1,7 @@
 import React from "react";
 import { type Message } from "../../../lib/types/chat";
 import { MessageBubble } from "./MessageBubble";
+import Avatar from "../../ui/avatar";
 
 interface MessageRowProps {
   message: Message;
@@ -43,10 +44,11 @@ export const MessageRow: React.FC<MessageRowProps> = ({
           showReactions && !isPreview ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
-        <img
-          src={avatarUrl}
-          alt={message.senderUsername}
-          className="w-8 h-8 rounded-full shadow-sm border border-gray-100 dark:border-gray-800"
+        <Avatar 
+          name={message.senderUsername} 
+          userAid={message.senderAid} 
+          size="sm" 
+          className="shadow-sm border border-gray-100 dark:border-gray-800"
         />
       </div>
 

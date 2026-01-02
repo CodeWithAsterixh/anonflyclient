@@ -4,6 +4,8 @@ import { Send } from 'lucide-react';
 import { useIsMobile } from '../../hooks/useIsMobile/index';
 import { MessagePreview } from './components/MessagePreview';
 import type { MessageInputProps } from './types';
+import { useTypingStatus } from './hooks/useTypingStatus';
+import { useAutoHeight } from './hooks/useAutoHeight';
 
 /**
  * MessageInput component provides an auto-expanding textarea and a send button for chat messages.
@@ -22,36 +24,9 @@ const MessageInput: React.FC<MessageInputProps> = ({
   const [messageInput, setMessageInput] = useState<string>('');
   const isMobileDevice = useIsMobile();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isTypingRef = useRef<boolean>(false);
 
-  // Handle typing status
-  useEffect(() => {
-    if (messageInput.trim() && !isTypingRef.current) {
-      isTypingRef.current = true;
-      onTyping?.(true);
-    } else if (!messageInput.trim() && isTypingRef.current) {
-      isTypingRef.current = false;
-      onTyping?.(false);
-    }
-
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
-
-    if (messageInput.trim()) {
-      typingTimeoutRef.current = setTimeout(() => {
-        isTypingRef.current = false;
-        onTyping?.(false);
-      }, 3000);
-    }
-
-    return () => {
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-    };
-  }, [messageInput, onTyping]);
+  const { clearTypingStatus } = useTypingStatus({ messageInput, onTyping });
+  const { resetHeight } = useAutoHeight({ ref: textareaRef, value: messageInput });
 
   // Sync input with editingMessage content
   useEffect(() => {
@@ -64,18 +39,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
       setMessageInput('');
     }
   }, [editingMessage]);
-
-  // Auto-adjust height based on content
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      const scrollHeight = textareaRef.current.scrollHeight;
-      textareaRef.current.style.height = `${Math.min(scrollHeight, 200)}px`;
-      
-      // Auto-scroll to bottom when typing
-      textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
-    }
-  }, [messageInput]);
 
   // Focus input when replyingTo changes
   useEffect(() => {
@@ -94,16 +57,8 @@ const MessageInput: React.FC<MessageInputProps> = ({
       }
       setMessageInput('');
       
-      // Clear typing status immediately on send
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-      isTypingRef.current = false;
-      onTyping?.(false);
-
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
-      }
+      clearTypingStatus();
+      resetHeight();
     }
   };
 

@@ -23,6 +23,7 @@ interface ChatScreenProps {
   isConnected: boolean;
   isHost: boolean;
   isCreator: boolean;
+  currentUserId?: string | null;
   messages: Message[];
   participants: Participant[];
   typingUsers: TypingUser[];
@@ -57,6 +58,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   isConnected,
   isHost,
   isCreator,
+  currentUserId,
   messages,
   participants,
   typingUsers,
@@ -305,6 +307,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                 isHost={isHost}
                 creatorAid={displayDetail?.creatorAid || ""}
                 hostAid={displayDetail?.hostAid || ""}
+                currentUserId={currentUserId}
                 roomName={displayDetail?.roomname || ""}
                 roomDescription={displayDetail?.description}
                 allowedFeatures={displayDetail?.allowedFeatures}
@@ -336,6 +339,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
               isHost={isHost}
               hostAid={displayDetail?.hostAid || ""}
               creatorAid={displayDetail?.creatorAid || ""}
+              currentUserId={currentUserId}
               roomName={displayDetail?.roomname || ""}
               roomDescription={displayDetail?.description}
               allowedFeatures={displayDetail?.allowedFeatures}

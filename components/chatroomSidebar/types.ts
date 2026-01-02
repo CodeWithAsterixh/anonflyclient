@@ -5,6 +5,7 @@ export interface ChatroomSidebarProps {
   isHost: boolean;
   hostAid: string;
   creatorAid: string;
+  currentUserId?: string | null;
   roomName: string;
   roomDescription?: string;
   allowedFeatures?: string[];

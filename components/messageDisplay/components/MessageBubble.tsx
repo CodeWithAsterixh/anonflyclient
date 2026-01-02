@@ -2,6 +2,7 @@ import React from "react";
 import { ShieldCheck } from "lucide-react";
 import { type Message } from "../../../lib/types/chat";
 import ReactionList from "./ReactionList";
+import { formatMessage } from "../../../lib/helpers/markdown";
 
 interface MessageBubbleProps {
   message: Message;
@@ -34,7 +35,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           <p className="font-bold opacity-70 truncate">
             {isReplyToMe ? "You" : message.replyTo.senderUsername || "Anonymous"}
           </p>
-          <p className="opacity-60 line-clamp-2 italic">{message.replyTo.content}</p>
+          <div className="opacity-60 line-clamp-2 italic">{formatMessage(message.replyTo.content)}</div>
         </div>
       )}
 
@@ -47,9 +48,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         </div>
       )}
 
-      <p className="break-words text-[15px] leading-relaxed whitespace-pre-wrap px-2">
-        {message.content}
-      </p>
+      <div className="break-words text-[15px] leading-relaxed whitespace-pre-wrap px-2">
+        {formatMessage(message.content)}
+      </div>
 
       <div className="flex items-center justify-end mt-1 gap-3 px-2">
         {message.isEdited && <span className="text-[9px] opacity-40 italic">edited</span>}

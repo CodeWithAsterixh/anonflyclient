@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatMessage } from '../../../lib/helpers/markdown';
 
 interface SystemMessageProps {
   id: string;
@@ -16,7 +17,7 @@ const SystemMessage: React.FC<SystemMessageProps> = ({ id, content, highlight })
       }`}
     >
       <div className="bg-gray-100/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 px-4 py-2 rounded-full text-sm italic backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
-        {content}
+        {formatMessage(content)}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { formatMessage } from '../../../lib/helpers/markdown';
 
 interface PreviewProps {
   content: string;
@@ -14,9 +15,9 @@ export const MessagePreview: React.FC<PreviewProps> = ({ content, title, onCance
       <p className={`text-xs font-bold ${isEdit ? 'text-blue-700 dark:text-blue-300' : 'text-blue-600 dark:text-blue-400'} truncate`}>
         {title}
       </p>
-      <p className="text-xs text-gray-500 dark:text-gray-400 truncate line-clamp-2 whitespace-pre-wrap">
-        {content}
-      </p>
+      <div className="text-xs text-gray-500 dark:text-gray-400 truncate line-clamp-2 whitespace-pre-wrap">
+        {formatMessage(content)}
+      </div>
     </div>
     <button 
       onClick={onCancel}

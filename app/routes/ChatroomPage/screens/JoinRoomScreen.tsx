@@ -23,6 +23,9 @@ interface JoinRoomScreenProps {
   onGenerateShareLink: () => Promise<void>;
   onSetJoinPassword: (password: string) => void;
   onJoinChatroom: () => void;
+  onRemoveParticipant: (aid: string) => Promise<void>;
+  onBanParticipant: (aid: string) => Promise<void>;
+  onUnbanParticipant: (aid: string) => Promise<void>;
 }
 
 const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
@@ -31,7 +34,6 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
   isConnected,
   isSubmitting,
   isHost,
-  isCreator,
   joinPassword,
   passwordError,
   onBack,
@@ -42,6 +44,9 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
   onGenerateShareLink,
   onSetJoinPassword,
   onJoinChatroom,
+  onRemoveParticipant,
+  onBanParticipant,
+  onUnbanParticipant,
 }) => {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const isLocked = displayDetail?.isLocked;
@@ -203,7 +208,9 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
                 roomName={displayDetail?.roomname || ""}
                 roomDescription={displayDetail?.description}
                 allowedFeatures={displayDetail?.allowedFeatures}
-                onRemoveParticipant={async () => {}}
+                onRemoveParticipant={onRemoveParticipant}
+                onBanParticipant={onBanParticipant}
+                onUnbanParticipant={onUnbanParticipant}
                 onLeaveRoom={onLeaveRoom}
                 onEditRoom={onEditRoom}
                 onDeleteRoom={onDeleteRoom}
@@ -235,7 +242,9 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
               roomName={displayDetail?.roomname || ""}
               roomDescription={displayDetail?.description}
               allowedFeatures={displayDetail?.allowedFeatures}
-              onRemoveParticipant={async () => {}}
+              onRemoveParticipant={onRemoveParticipant}
+              onBanParticipant={onBanParticipant}
+              onUnbanParticipant={onUnbanParticipant}
               onLeaveRoom={onLeaveRoom}
               onEditRoom={onEditRoom}
               onDeleteRoom={onDeleteRoom}

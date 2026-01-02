@@ -10,6 +10,8 @@ export interface ChatroomSidebarProps {
   roomDescription?: string;
   allowedFeatures?: string[];
   onRemoveParticipant: (userAid: string) => Promise<void>;
+  onBanParticipant: (userAid: string, reason?: string) => Promise<void>;
+  onUnbanParticipant: (userAid: string) => Promise<void>;
   onLeaveRoom: () => void;
   onEditRoom: () => void;
   onDeleteRoom: () => void;

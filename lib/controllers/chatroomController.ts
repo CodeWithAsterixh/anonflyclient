@@ -89,6 +89,64 @@ export const joinChatroom = async (chatroomId: string, password?: string) => {
   }
 };
 
+export const removeParticipant = async (chatroomId: string, userAid: string) => {
+  try {
+    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/participants/${encodeURIComponent(userAid)}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to remove participant');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const banParticipant = async (chatroomId: string, userAid: string, reason?: string) => {
+  try {
+    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/participants/${encodeURIComponent(userAid)}/ban`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ reason }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to ban participant');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const unbanParticipant = async (chatroomId: string, userAid: string) => {
+  try {
+    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/participants/${encodeURIComponent(userAid)}/unban`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to unban participant');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const generateShareLink = async (chatroomId: string) => {
   try {
     const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/share-link`, {
@@ -200,25 +258,6 @@ export const deleteMessage = async (chatroomId: string, messageId: string) => {
 
     if (!response.ok) {
       throw new Error(data.message || 'Failed to delete message');
-    }
-
-    return data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const removeParticipant = async (chatroomId: string, userAid: string) => {
-  try {
-    const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/participants/${encodeURIComponent(userAid)}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to remove participant');
     }
 
     return data;

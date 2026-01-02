@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import type { TypingUser } from './types';
 import { getUserAvatar } from '../../lib/controllers/colorsProcessors/userAvatar';
 
@@ -6,7 +6,7 @@ import { getUserAvatar } from '../../lib/controllers/colorsProcessors/userAvatar
  * Hook to manage typing indicator state.
  * Handles incoming typing events and provides a function to send typing status.
  */
-export const useTyping = (chatroomId: string | undefined, ws: WebSocket | null) => {
+export const useTyping = (chatroomId: string | undefined, wsRef: React.RefObject<WebSocket | null>) => {
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const typingTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
@@ -48,6 +48,7 @@ export const useTyping = (chatroomId: string | undefined, ws: WebSocket | null) 
   }, [chatroomId]);
 
   const sendTypingStatus = useCallback((isTyping: boolean) => {
+    const ws = wsRef.current;
     if (ws && ws.readyState === WebSocket.OPEN && chatroomId) {
       ws.send(JSON.stringify({
         type: 'typing',
@@ -55,7 +56,7 @@ export const useTyping = (chatroomId: string | undefined, ws: WebSocket | null) 
         isTyping
       }));
     }
-  }, [ws, chatroomId]);
+  }, [wsRef, chatroomId]);
 
   // Listen for typing events from useChatroom
   useEffect(() => {

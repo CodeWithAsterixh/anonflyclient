@@ -9,8 +9,8 @@ export const useChatroomSSE = (currentChatroomId: string | null, token: string |
   useEffect(() => {
     chatroomDetailRef.current = chatroomDetail;
   }, [chatroomDetail]);
-  const [isRemoved, setIsRemoved] = useState<boolean>(false);
-  const isRemovedRef = useRef<boolean>(false);
+  const [isRemoved, setIsRemoved] = useState<boolean | 'removed' | 'banned'>(false);
+  const isRemovedRef = useRef<boolean | 'removed' | 'banned'>(false);
   const activeSSERef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -35,10 +35,11 @@ export const useChatroomSSE = (currentChatroomId: string | null, token: string |
       console.log(`[useChatroom] [SSE] Connection opened for room: ${currentChatroomId}`);
     };
 
-    eventSource.addEventListener("removed", () => {
-      console.log("[useChatroom] [SSE] User removed event received");
-      isRemovedRef.current = true;
-      setIsRemoved(true);
+    eventSource.addEventListener("removed", (event: any) => {
+      console.log("[useChatroom] [SSE] User removed event received", event.data);
+      const reason = event.data || 'removed';
+      isRemovedRef.current = reason as any;
+      setIsRemoved(reason as any);
       eventSource.close();
     });
 

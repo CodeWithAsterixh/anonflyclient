@@ -22,7 +22,6 @@ interface ChatScreenProps {
   displayDetail: ChatroomDetail | null;
   isConnected: boolean;
   isHost: boolean;
-  isCreator: boolean;
   currentUserId?: string | null;
   messages: Message[];
   participants: Participant[];
@@ -50,6 +49,8 @@ interface ChatScreenProps {
   onEditSuccess: () => void;
   onTyping: (isTyping: boolean) => void;
   onRemoveParticipant: (userAid: string) => Promise<void>;
+  onBanParticipant: (userAid: string, reason?: string) => Promise<void>;
+  onUnbanParticipant: (userAid: string) => Promise<void>;
   onGenerateShareLink: () => Promise<void>;
 }
 
@@ -58,7 +59,6 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   displayDetail,
   isConnected,
   isHost,
-  isCreator,
   currentUserId,
   messages,
   participants,
@@ -86,6 +86,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   onEditSuccess,
   onTyping,
   onRemoveParticipant,
+  onBanParticipant,
+  onUnbanParticipant,
   onGenerateShareLink,
 }) => {
   const messagePortalRootRef = useRef<HTMLDivElement>(null);
@@ -314,6 +316,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                 roomDescription={displayDetail?.description}
                 allowedFeatures={displayDetail?.allowedFeatures}
                 onRemoveParticipant={onRemoveParticipant}
+                onBanParticipant={onBanParticipant}
+                onUnbanParticipant={onUnbanParticipant}
                 onLeaveRoom={onLeaveRoom}
                 onEditRoom={onOpenEditModal}
                 onDeleteRoom={onDeleteRoom}
@@ -347,6 +351,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
               roomDescription={displayDetail?.description}
               allowedFeatures={displayDetail?.allowedFeatures}
               onRemoveParticipant={onRemoveParticipant}
+              onBanParticipant={onBanParticipant}
+              onUnbanParticipant={onUnbanParticipant}
               onLeaveRoom={onLeaveRoom}
               onEditRoom={onOpenEditModal}
               onDeleteRoom={onDeleteRoom}

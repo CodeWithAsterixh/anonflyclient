@@ -22,6 +22,8 @@ import {
 
 import {
   removeParticipant,
+  banParticipant,
+  unbanParticipant,
   generateShareLink,
 } from "../../../lib/controllers/chatroomController";
 
@@ -147,10 +149,13 @@ const ChatroomPage: React.FC = () => {
 
   useEffect(() => {
     if (isRemoved) {
+      const isBanned = isRemoved === 'banned';
       setAlertDialog({
         isOpen: true,
-        title: "Removed from Room",
-        message: "You have been removed from the room by the host.",
+        title: isBanned ? "Banned from Room" : "Removed from Room",
+        message: isBanned 
+          ? "You have been permanently banned from this room by the creator."
+          : "You have been removed from the room by the host.",
         type: "alert",
         confirmText: "Go Home",
         onConfirm: () => {
@@ -416,6 +421,42 @@ const ChatroomPage: React.FC = () => {
     }
   };
 
+  const handleBanParticipant = async (userAid: string, reason?: string) => {
+    if (!chatroomId) return;
+    try {
+      await banParticipant(chatroomId, userAid, reason);
+      showAlertDialog(
+        "Success",
+        "Participant banned successfully",
+        "success"
+      );
+    } catch (error: any) {
+      showAlertDialog(
+        "Error",
+        error.message || "Failed to ban participant",
+        "error"
+      );
+    }
+  };
+
+  const handleUnbanParticipant = async (userAid: string) => {
+    if (!chatroomId) return;
+    try {
+      await unbanParticipant(chatroomId, userAid);
+      showAlertDialog(
+        "Success",
+        "Participant unbanned successfully",
+        "success"
+      );
+    } catch (error: any) {
+      showAlertDialog(
+        "Error",
+        error.message || "Failed to unban participant",
+        "error"
+      );
+    }
+  };
+
   if (isJoined && !hasRoomKey) {
     return (
       <Background mode={theme}>
@@ -496,6 +537,9 @@ const ChatroomPage: React.FC = () => {
           onGenerateShareLink={handleGenerateShareLink}
           onSetJoinPassword={setJoinPassword}
           onJoinChatroom={handleJoinChatroom}
+          onRemoveParticipant={handleRemoveParticipant}
+          onBanParticipant={handleBanParticipant}
+          onUnbanParticipant={handleUnbanParticipant}
         />
       </Background>
     );
@@ -508,7 +552,6 @@ const ChatroomPage: React.FC = () => {
         displayDetail={displayDetail}
         isConnected={isConnected}
         isHost={isHost}
-        isCreator={isCreator}
         currentUserId={user?.userId}
         messages={messages}
         participants={Array.from(participants.values())}
@@ -537,6 +580,8 @@ const ChatroomPage: React.FC = () => {
         onTyping={sendTypingStatus}
         typingUsers={typingUsers}
         onRemoveParticipant={handleRemoveParticipant}
+        onBanParticipant={handleBanParticipant}
+        onUnbanParticipant={handleUnbanParticipant}
       />
       <AlertDialog
         isOpen={alertDialog.isOpen}

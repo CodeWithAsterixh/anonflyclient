@@ -1,3 +1,4 @@
+import React from "react";
 import { type Emoji } from "../../../lib/assets/emojis";
 import { type Message, type Participant, type ChatroomDetail } from "../../../lib/types/chat";
 
@@ -15,10 +16,10 @@ export interface UseChatroomReturn {
   clearError: () => void;
   isConnected: boolean;
   isJoined: boolean;
-  isRemoved: boolean;
-  setIsRemoved: (val: boolean) => void;
+  isRemoved: boolean | 'removed' | 'banned';
+  setIsRemoved: (val: boolean | 'removed' | 'banned') => void;
   hasRoomKey: boolean;
   error: string | null;
   currentChatroomId: string | null;
-  ws: WebSocket | null;
+  ws: React.RefObject<WebSocket | null>;
 }

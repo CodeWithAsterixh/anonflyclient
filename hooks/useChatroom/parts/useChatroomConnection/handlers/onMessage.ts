@@ -28,6 +28,7 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
     joiningRef,
     ws,
     setIsJoined,
+    setIsRemoved,
     setChatroomDetail,
   } = ctx;
 
@@ -103,6 +104,12 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
               chatroomId: message.chatroomId,
             }));
           }
+          break;
+          
+        case "forceDisconnect":
+          console.log(`[useChatroom] [WS] Force disconnect received: ${message.reason}`);
+          setIsRemoved(message.reason || true);
+          ws.current?.close();
           break;
 
         case "roomKeyRequest":

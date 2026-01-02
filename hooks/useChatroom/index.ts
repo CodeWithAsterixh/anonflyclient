@@ -81,6 +81,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     currentChatroomId,
     setCurrentChatroomId,
     isRemovedRef,
+    setIsRemoved,
     chatroomDetailRef,
     participantsRef,
     messagesRef,
@@ -98,8 +99,8 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
       connect();
     }
     return () => {
-      if (ws) {
-        ws.close();
+      if (ws.current) {
+        ws.current.close();
       }
     };
   }, [connect, deferConnection, ws]);
@@ -111,19 +112,19 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
         return;
       }
 
-      if (joiningRef.current === `${chatroomId}:${password || ''}` && ws?.readyState === WebSocket.OPEN) {
+      if (joiningRef.current === `${chatroomId}:${password || ''}` && ws.current?.readyState === WebSocket.OPEN) {
         return;
       }
 
       setError(null);
       setCurrentChatroomId(chatroomId);
 
-      if (ws?.readyState === WebSocket.OPEN && user) {
+      if (ws.current?.readyState === WebSocket.OPEN && user) {
         try {
           const identity = await getIdentity();
           if (identity) {
             joiningRef.current = `${chatroomId}:${password || ''}`;
-            ws.send(
+            ws.current.send(
               JSON.stringify({
                 type: "joinChatroom",
                 chatroomId,
@@ -149,7 +150,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
   const sendMessage = useCallback(
     async (content: string, replyTo?: any) => {
       try {
-        await sendMessageAction(ws, content, roomKeyRef.current, replyTo);
+        await sendMessageAction(ws.current, content, roomKeyRef.current, replyTo);
       } catch (err) {
         setError("Failed to secure message");
       }
@@ -160,7 +161,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
   const editMessage = useCallback(
     async (messageId: string, newContent: string) => {
       try {
-        await editMessageAction(ws, messageId, newContent, roomKeyRef.current);
+        await editMessageAction(ws.current, messageId, newContent, roomKeyRef.current);
       } catch (err) {
         setError("Failed to secure edited message");
       }
@@ -171,7 +172,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
   const deleteMessage = useCallback(
     async (messageId: string) => {
       try {
-        await deleteMessageAction(ws, messageId);
+        await deleteMessageAction(ws.current, messageId);
       } catch (err) {
         setError("Failed to delete message");
       }
@@ -181,14 +182,14 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
 
   const sendReaction = useCallback(
     (messageId: string, emoji: Emoji) => {
-      sendReactionAction(ws, messageId, emoji);
+      sendReactionAction(ws.current, messageId, emoji);
     },
     [ws, sendReactionAction]
   );
 
   const leaveChatroom = useCallback(async () => {
-    if (ws?.readyState === WebSocket.OPEN && currentChatroomId) {
-      ws.send(JSON.stringify({ type: "leaveChatroom", chatroomId: currentChatroomId }));
+    if (ws.current?.readyState === WebSocket.OPEN && currentChatroomId) {
+      ws.current.send(JSON.stringify({ type: "leaveChatroom", chatroomId: currentChatroomId }));
     }
 
     setCurrentChatroomId(null);

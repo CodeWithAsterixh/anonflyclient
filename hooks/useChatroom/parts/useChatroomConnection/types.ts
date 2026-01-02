@@ -8,7 +8,8 @@ export interface UseChatroomConnectionProps {
   logout: () => void;
   currentChatroomId: string | null;
   setCurrentChatroomId: (id: string | null) => void;
-  isRemovedRef: React.RefObject<boolean>;
+  isRemovedRef: React.RefObject<boolean | 'removed' | 'banned'>;
+  setIsRemoved: (val: boolean | 'removed' | 'banned') => void;
   chatroomDetailRef: React.RefObject<any>;
   participantsRef: React.RefObject<Map<string, Participant>>;
   messagesRef: React.RefObject<Message[]>;
@@ -44,5 +45,6 @@ export interface MessageHandlerContext {
   joiningRef: React.RefObject<string | null>;
   ws: React.RefObject<WebSocket | null>;
   setIsJoined: (val: boolean) => void;
+  setIsRemoved: (val: boolean | 'removed' | 'banned') => void;
   setChatroomDetail: React.Dispatch<React.SetStateAction<any>>;
 }

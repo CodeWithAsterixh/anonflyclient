@@ -18,6 +18,8 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
   roomDescription,
   allowedFeatures = [],
   onRemoveParticipant,
+  onBanParticipant,
+  onUnbanParticipant,
   onLeaveRoom,
   onEditRoom,
   onDeleteRoom,
@@ -26,13 +28,15 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
   hideHeader = false,
 }) => {
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [banningId, setBanningId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const canRemoveUsers = allowedFeatures.includes(FEATURES.REMOVE_USER);
+  const isCreator = currentUserId === creatorAid;
+  const canRemoveUsers = true; // Now free for host/creator
+  const canBanUsers = allowedFeatures.includes(FEATURES.BAN_USER);
 
   const handleRemove = async (userAid: string) => {
-    if (!canRemoveUsers) return;
-    if (userAid === hostAid) return;
+    if (userAid === creatorAid) return;
 
     try {
       setRemovingId(userAid);
@@ -43,6 +47,25 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
       setError(error.message || "Failed to remove participant.");
     } finally {
       setRemovingId(null);
+    }
+  };
+
+  const handleBan = async (userAid: string) => {
+    if (!canBanUsers) {
+      setError("Ban feature is premium only. Upgrade to use.");
+      return;
+    }
+    if (userAid === creatorAid) return;
+
+    try {
+      setBanningId(userAid);
+      setError(null);
+      await onBanParticipant(userAid);
+    } catch (error: any) {
+      console.error("Failed to ban participant:", error);
+      setError(error.message || "Failed to ban participant.");
+    } finally {
+      setBanningId(null);
     }
   };
 
@@ -93,12 +116,16 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
                 key={participant.userAid}
                 participant={participant}
                 isHost={isHost}
+                isCreator={isCreator}
                 hostAid={hostAid}
                 creatorAid={creatorAid}
                 currentUserId={currentUserId}
                 canRemoveUsers={canRemoveUsers}
+                canBanUsers={canBanUsers}
                 removingId={removingId}
+                banningId={banningId}
                 onRemove={handleRemove}
+                onBan={handleBan}
               />
             ))}
           </div>

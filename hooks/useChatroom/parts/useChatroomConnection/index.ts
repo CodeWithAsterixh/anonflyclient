@@ -13,6 +13,7 @@ export const useChatroomConnection = ({
   currentChatroomId,
   setCurrentChatroomId,
   isRemovedRef,
+  setIsRemoved,
   chatroomDetailRef,
   participantsRef,
   messagesRef,
@@ -64,9 +65,9 @@ export const useChatroomConnection = ({
       setError,
       setRetryCount,
       retryCountRef,
-      joiningRef,
-      isRemovedRef,
-      currentChatroomIdRef,
+  joiningRef,
+  isRemovedRef: isRemovedRef as React.RefObject<boolean | 'removed' | 'banned'>,
+  currentChatroomIdRef,
       chatroomDetailRef,
       user,
       connect,
@@ -90,6 +91,7 @@ export const useChatroomConnection = ({
       joiningRef,
       ws,
       setIsJoined,
+      setIsRemoved,
       setChatroomDetail,
     });
 
@@ -108,5 +110,5 @@ export const useChatroomConnection = ({
     connect();
   }, [connect, setError]);
 
-  return { isConnected, isJoined, retryCount, ws: ws.current, connect, reconnect, joiningRef };
+  return { isConnected, isJoined, retryCount, ws, connect, reconnect, joiningRef };
 };

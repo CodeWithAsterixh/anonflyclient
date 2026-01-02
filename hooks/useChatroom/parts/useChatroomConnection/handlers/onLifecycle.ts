@@ -7,7 +7,7 @@ interface LifecycleContext {
   setRetryCount: (count: number) => void;
   retryCountRef: React.RefObject<number>;
   joiningRef: React.RefObject<string | null>;
-  isRemovedRef: React.RefObject<boolean>;
+  isRemovedRef: React.RefObject<boolean | 'removed' | 'banned'>;
   currentChatroomIdRef: React.RefObject<string | null>;
   chatroomDetailRef: React.RefObject<any>;
   user: any;

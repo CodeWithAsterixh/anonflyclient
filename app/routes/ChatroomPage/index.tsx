@@ -18,6 +18,7 @@ import {
   JoinScreen,
   LoadingScreen,
   SecuringRoomScreen,
+  AccessDeniedScreen,
 } from "./screens";
 
 import {
@@ -25,6 +26,7 @@ import {
   banParticipant,
   unbanParticipant,
   generateShareLink,
+  checkAccess,
 } from "../../../lib/controllers/chatroomController";
 
 /**
@@ -61,11 +63,18 @@ const ChatroomPage: React.FC = () => {
 
   const [editingMessage, setEditingMessage] = useState<EditingMessage | null>(null);
 
+  const [accessState, setAccessState] = useState<{
+    status: 'checking' | 'granted' | 'denied';
+    message?: string;
+  }>({ status: 'checking' });
+
   const storedPassword = chatroomId ? sessionStorage.getItem(`room_access_${chatroomId}`) : null;
   const storedToken = chatroomId ? sessionStorage.getItem(`room_token_${chatroomId}`) : null;
   const hasStoredCredentials = !!(storedToken || storedPassword);
 
-  const shouldDeferConnection = !hasStoredCredentials && (!chatroomDetail || (chatroomDetail.isLocked && !isCreator && !isAlreadyParticipant));
+  const shouldDeferConnection = 
+    accessState.status !== 'granted' || 
+    (!hasStoredCredentials && (!chatroomDetail || (chatroomDetail.isLocked && !isCreator && !isAlreadyParticipant)));
 
   const [alertDialog, setAlertDialog] = useState<{
     isOpen: boolean;
@@ -130,8 +139,34 @@ const ChatroomPage: React.FC = () => {
     }
   };
 
+  const verifyAccess = async () => {
+    if (!chatroomId || !token || !user) return;
+
+    setAccessState({ status: 'checking' });
+    try {
+      const joinAuthToken = sessionStorage.getItem(`room_join_auth_${chatroomId}`) || undefined;
+      const response = await checkAccess(chatroomId, joinAuthToken);
+      
+      if (response.success && response.data?.accessGranted) {
+        setAccessState({ status: 'granted' });
+        // Only fetch details if access is granted
+        fetchChatroomDetails();
+      } else {
+        setAccessState({ 
+          status: 'denied', 
+          message: response.message || 'Access denied. You need a valid invite link to access this private room.' 
+        });
+      }
+    } catch (error: any) {
+      setAccessState({ 
+        status: 'denied', 
+        message: 'Failed to verify access. Please try again later.' 
+      });
+    }
+  };
+
   useEffect(() => {
-    fetchChatroomDetails();
+    verifyAccess();
   }, [chatroomId, token, user]);
 
   const {
@@ -204,6 +239,7 @@ const ChatroomPage: React.FC = () => {
     if (isJoined && chatroomId) {
       sessionStorage.removeItem(`room_access_${chatroomId}`);
       sessionStorage.removeItem(`room_token_${chatroomId}`);
+      sessionStorage.removeItem(`room_join_auth_${chatroomId}`);
     }
   }, [isJoined, chatroomId]);
 
@@ -491,6 +527,27 @@ const ChatroomPage: React.FC = () => {
       );
     }
   };
+
+  if (accessState.status === 'checking') {
+    return (
+      <Background mode={theme}>
+        <LoadingScreen />
+      </Background>
+    );
+  }
+
+  if (accessState.status === 'denied') {
+    return (
+      <Background mode={theme}>
+        <AccessDeniedScreen 
+          message={accessState.message}
+          onNavigateHome={() => navigate("/")}
+          onNavigateToLogin={() => navigate(`/login?redirect_to=${encodeURIComponent(window.location.pathname)}`)}
+          theme={theme}
+        />
+      </Background>
+    );
+  }
 
   if (isJoined && !hasRoomKey) {
     return (

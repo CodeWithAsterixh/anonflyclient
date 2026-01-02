@@ -37,11 +37,16 @@ const JoinLinkPage: React.FC = () => {
         const response = await validateShareLink(token);
         
         if (response.success && response.data.accessGranted) {
-          const { chatroomId, password } = response.data;
+          const { chatroomId, password, joinAuthToken } = response.data;
           
           // Store the access token/password in sessionStorage so ChatroomPage can pick it up
           if (password) {
             sessionStorage.setItem(`room_access_${chatroomId}`, password);
+          }
+          
+          // Store the join authorization token
+          if (joinAuthToken) {
+            sessionStorage.setItem(`room_join_auth_${chatroomId}`, joinAuthToken);
           }
           
           // Also store the token itself for private room validation

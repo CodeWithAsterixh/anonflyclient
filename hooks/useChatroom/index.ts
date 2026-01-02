@@ -112,7 +112,9 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
         return;
       }
 
-      if (joiningRef.current === `${chatroomId}:${password || ''}:${linkToken || ''}` && ws.current?.readyState === WebSocket.OPEN) {
+      const joinAuthToken = sessionStorage.getItem(`room_join_auth_${chatroomId}`) || undefined;
+
+      if (joiningRef.current === `${chatroomId}:${password || ''}:${linkToken || ''}:${joinAuthToken || ''}` && ws.current?.readyState === WebSocket.OPEN) {
         return;
       }
 
@@ -123,7 +125,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
         try {
           const identity = await getIdentity();
           if (identity) {
-            joiningRef.current = `${chatroomId}:${password || ''}:${linkToken || ''}`;
+            joiningRef.current = `${chatroomId}:${password || ''}:${linkToken || ''}:${joinAuthToken || ''}`;
             ws.current.send(
               JSON.stringify({
                 type: "joinChatroom",
@@ -136,6 +138,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
                 allowedFeatures: user?.allowedFeatures,
                 password,
                 linkToken,
+                joinAuthToken, // Send the token
               })
             );
           } else {

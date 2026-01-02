@@ -5,3 +5,4 @@ export { default as JoinRoomScreen } from "./JoinRoomScreen";
 export { default as JoinScreen } from "./JoinScreen";
 export { default as LoadingScreen } from "./LoadingScreen";
 export { default as SecuringRoomScreen } from "./SecuringRoomScreen";
+export { default as AccessDeniedScreen } from "./AccessDeniedScreen";

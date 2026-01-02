@@ -16,6 +16,34 @@ const getAuthHeaders = () => {
   };
 };
 
+export const checkAccess = async (chatroomId: string, joinAuthToken?: string) => {
+  try {
+    const response = await fetch(`${getAPIBaseURL()}/chatroom/${encodeURIComponent(chatroomId)}/check-access`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ joinAuthToken }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: data.message || 'Access denied',
+        statusCode: response.status
+      };
+    }
+
+    return data;
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || 'Failed to verify access',
+      statusCode: 500
+    };
+  }
+};
+
 export const createChatroom = async (roomname: string, description?: string, password?: string, isPrivate: boolean = false) => {
   try {
     const region = getUserRegion();
@@ -70,12 +98,12 @@ export const getChatroomMessages = async (chatroomId: string) => {
   }
 };
 
-export const joinChatroom = async (chatroomId: string, password?: string) => {
+export const joinChatroom = async (chatroomId: string, password?: string, linkToken?: string, joinAuthToken?: string) => {
   try {
     const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/join`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ password, linkToken, joinAuthToken }),
     });
 
     const data = await response.json();

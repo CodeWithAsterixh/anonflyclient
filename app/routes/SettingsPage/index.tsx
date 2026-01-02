@@ -13,95 +13,21 @@ import {
   Shield,
   Trash2,
   Users,
-  Copy,
-  Check,
-  Eye,
-  EyeOff
 } from 'lucide-react';
-import React, { useMemo, useState, useRef, useContext } from 'react';
-import { useLoaderData, useNavigate } from 'react-router';
+import React, { useContext } from 'react';
+import { useNavigate } from 'react-router';
 import AlertDialog from '../../../components/alertDialog';
 import Logo from '../../../components/logo';
-import { useClipboard } from '../../../hooks/useClipboard/index';
 import Input from '../../../components/ui/input';
 import { requireAuth } from '../../middleware/auth';
-import CopyWrapper from 'components/copyWrapper';
-import { deleteChatroom, leaveChatroom } from '../../../lib/controllers/chatroomController';
 import { ChatLayoutContext } from '../../contexts/ChatLayoutContext';
+import { useSettings } from '../../../hooks/useSettings';
+import HideableField from './components/HideableField';
 
 export async function loader({ request }: { request: Request }) {
   const { user, token } = await requireAuth(request);
   return { user, token };
 }
-
-const HideableField: React.FC<{ 
-  label?: string; 
-  value: string; 
-  className?: string;
-  labelClassName?: string;
-  mono?: boolean;
-  showLabelOnHidden?: boolean;
-}> = ({ 
-  label, 
-  value, 
-  className = "",
-  labelClassName = "",
-  mono = true,
-  showLabelOnHidden = true
-}) => {
-  const [isVisible, setIsVisible] = useState(false);
-  
-  const labelElement = label ? (
-    <span className={`shrink-0 ${labelClassName}`}>
-      {label}:
-    </span>
-  ) : null;
-
-  if (!isVisible) {
-    return (
-      <div className={`flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 ${mono ? 'font-mono' : ''} ${className}`}>
-        {showLabelOnHidden && labelElement}
-        <span className="truncate tracking-widest opacity-50">••••••••••••••••</span>
-        <button 
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsVisible(true);
-          }}
-          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors text-gray-400 hover:text-blue-500 shrink-0"
-          title="Show"
-        >
-          <Eye size={14} />
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className={`flex items-center gap-2 min-w-0 w-full ${className}`}>
-      <CopyWrapper className="min-w-0 flex-1">
-        <CopyWrapper.Trigger text={value} className={`flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 ${mono ? 'font-mono' : ''} hover:text-blue-500 transition-colors group min-w-0 w-full`}>
-          {labelElement}
-          <span className="truncate text-blue-600 dark:text-blue-400">{value}</span>
-          <CopyWrapper.Content>
-            {(hasCopied) => (
-              hasCopied ? <Check size={12} className="text-green-500 shrink-0" /> : <Copy size={12} className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-            )}
-          </CopyWrapper.Content>
-        </CopyWrapper.Trigger>
-      </CopyWrapper>
-      <button 
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsVisible(false);
-        }}
-        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors text-gray-400 hover:text-blue-500 shrink-0"
-        title="Hide"
-      >
-        <EyeOff size={14} />
-      </button>
-    </div>
-  );
-};
 
 const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -111,168 +37,38 @@ const SettingsPage: React.FC = () => {
     throw new Error("SettingsPage must be used within ChatLayoutContext");
   }
 
-  const { 
-    user, 
-    identities, 
+  const {
+    user,
+    identities,
     authLoading,
-    chatrooms, 
-    switchAccount, 
-    deleteAccount, 
+    chatrooms,
+    switchAccount,
+    deleteAccount,
     logout,
     onBack
   } = context;
 
-  const [alertDialog, setAlertDialog] = useState<{
-    isOpen: boolean;
-    title: string;
-    message: string;
-    type: "alert" | "confirm" | "error" | "success";
-    onConfirm?: () => void;
-    children?: React.ReactNode;
-  }>({
-    isOpen: false,
-    title: "",
-    message: "",
-    type: "alert",
+  const {
+    alertDialog,
+    setAlertDialog,
+    showDialog,
+    currentIdentity,
+    myRooms,
+    roomAction,
+    setRoomAction,
+    isProcessing,
+    handleSwitchAccount,
+    handleLogout,
+    handleDeleteAccount,
+  } = useSettings({
+    user,
+    identities,
+    chatrooms,
+    switchAccount,
+    deleteAccount,
+    logout,
+    authLoading
   });
-
-  const showDialog = (
-    title: string,
-    message: string,
-    type: "alert" | "confirm" | "error" | "success" = "alert",
-    onConfirm?: () => void,
-    children?: React.ReactNode
-  ) => {
-    setAlertDialog({
-      isOpen: true,
-      title,
-      message,
-      type,
-      onConfirm,
-      children,
-    });
-  };
-
-  const [roomAction, setRoomActionState] = useState<'transfer' | 'delete'>('transfer');
-  const roomActionRef = useRef<'transfer' | 'delete'>('transfer');
-
-  const setRoomAction = (action: 'transfer' | 'delete') => {
-    setRoomActionState(action);
-    roomActionRef.current = action;
-  };
-
-  // Find the full identity object for the current user
-  const currentIdentity = useMemo(() => {
-    return identities.find(id => id.aid === user?.userId);
-  }, [identities, user]);
-
-  const handleSwitchAccount = async (aid: string) => {
-    if (aid === user?.userId) return;
-    try {
-      await switchAccount(aid);
-    } catch (error) {
-      showDialog("Error", "Failed to switch account. Please try again.", "error");
-    }
-  };
-
-  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [deletingAid, setDeletingAid] = useState<string | null>(null);
-
-  const handleDeleteAccount = (aid: string, username: string) => {
-    setIsDeletingAccount(true);
-    setDeletingAid(aid);
-    setRoomAction('transfer');
-    showDialog(
-      "Delete Account",
-      `Are you sure you want to delete the identity "${username}"? This action cannot be undone and you will lose access to all rooms joined with this identity.`,
-      "confirm",
-      async () => {
-        setIsProcessing(true);
-        try {
-          // If it's the active account, handle room cleanup
-          if (aid === user?.userId) {
-            const roomsToProcess = myRooms;
-            const currentAction = roomActionRef.current;
-            
-            for (const room of roomsToProcess) {
-              try {
-                if (currentAction === 'delete') {
-                  await deleteChatroom(room.id);
-                } else {
-                  await leaveChatroom(room.id);
-                }
-              } catch (err) {
-                console.error(`Failed to ${currentAction} room ${room.id}:`, err);
-              }
-            }
-          }
-          
-          await deleteAccount(aid);
-        } catch (error) {
-          showDialog("Error", "Failed to delete account. Please try again.", "error");
-        } finally {
-          setIsProcessing(false);
-          setIsDeletingAccount(false);
-          setDeletingAid(null);
-        }
-      },
-      aid === user?.userId && myRooms.length > 0 && (
-        <div className="space-y-4 mt-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800">
-          <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
-            Manage your {myRooms.length} chatroom{myRooms.length > 1 ? 's' : ''}:
-          </p>
-          <div className="space-y-3">
-            <label className={`flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 transition-colors group ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-blue-500'}`}>
-              <Input
-                type="radio"
-                name="roomAction"
-                value="transfer"
-                checked={roomAction === 'transfer'}
-                onChange={() => !isProcessing && setRoomAction('transfer')}
-                disabled={isProcessing}
-                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 disabled:opacity-50"
-              />
-              <div className="flex-1">
-                <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Transfer Authority</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Pass ownership to the next earliest member</p>
-              </div>
-            </label>
-            <label className={`flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 transition-colors group ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-red-500'}`}>
-              <Input
-                type="radio"
-                name="roomAction"
-                value="delete"
-                checked={roomAction === 'delete'}
-                onChange={() => !isProcessing && setRoomAction('delete')}
-                disabled={isProcessing}
-                className="w-4 h-4 text-red-600 border-gray-300 focus:ring-red-500 disabled:opacity-50"
-              />
-              <div className="flex-1">
-                <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Delete All Rooms</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Completely remove all rooms you created</p>
-              </div>
-            </label>
-          </div>
-        </div>
-      )
-    );
-  };
-
-  const handleLogout = () => {
-    showDialog(
-      "Logout",
-      "Are you sure you want to logout? This will clear your current session, but your identity keys will remain safe on this device.",
-      "confirm",
-      () => logout()
-    );
-  };
-
-  // Filter rooms created by the user
-  const myRooms = useMemo(() => {
-    if (!user) return [];
-    return chatrooms.filter(room => room.hostAid === user.userId);
-  }, [chatrooms, user]);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Not available';
@@ -420,7 +216,45 @@ const SettingsPage: React.FC = () => {
                       </button>
                     )}
                     <button 
-                      onClick={() => handleDeleteAccount(id.aid, id.username)}
+                      onClick={() => handleDeleteAccount(id.aid, id.username, id.aid === user?.userId && myRooms.length > 0 && (
+                        <div className="space-y-4 mt-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800">
+                          <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
+                            Manage your {myRooms.length} chatroom{myRooms.length > 1 ? 's' : ''}:
+                          </p>
+                          <div className="space-y-3">
+                            <label className={`flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 transition-colors group ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-blue-500'}`}>
+                              <Input
+                                type="radio"
+                                name="roomAction"
+                                value="transfer"
+                                checked={roomAction === 'transfer'}
+                                onChange={() => !isProcessing && setRoomAction('transfer')}
+                                disabled={isProcessing}
+                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 disabled:opacity-50"
+                              />
+                              <div className="flex-1">
+                                <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Transfer Authority</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Pass ownership to the next earliest member</p>
+                              </div>
+                            </label>
+                            <label className={`flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 transition-colors group ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-red-500'}`}>
+                              <Input
+                                type="radio"
+                                name="roomAction"
+                                value="delete"
+                                checked={roomAction === 'delete'}
+                                onChange={() => !isProcessing && setRoomAction('delete')}
+                                disabled={isProcessing}
+                                className="w-4 h-4 text-red-600 border-gray-300 focus:ring-red-500 disabled:opacity-50"
+                              />
+                              <div className="flex-1">
+                                <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Delete All Rooms</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Completely remove all rooms you created</p>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      ))}
                       disabled={authLoading}
                       className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all disabled:opacity-50"
                       title="Delete this identity"
@@ -546,15 +380,11 @@ const SettingsPage: React.FC = () => {
 
         <AlertDialog
           isOpen={alertDialog.isOpen}
-          onClose={() => {
-            setAlertDialog(prev => ({ ...prev, isOpen: false }));
-            setIsDeletingAccount(false);
-            setDeletingAid(null);
-          }}
-          onConfirm={alertDialog.onConfirm}
           title={alertDialog.title}
           message={alertDialog.message}
           type={alertDialog.type}
+          onConfirm={alertDialog.onConfirm}
+          onClose={() => setAlertDialog(prev => ({ ...prev, isOpen: false }))}
         >
           {alertDialog.children}
         </AlertDialog>

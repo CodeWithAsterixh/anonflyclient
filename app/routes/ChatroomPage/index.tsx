@@ -41,6 +41,7 @@ const ChatroomPage: React.FC = () => {
   const { user, token, isMobile, onBack, logout } = context;
 
   const [isHost, setIsHost] = useState(false);
+  const [isCreator, setIsCreator] = useState(false);
   const [chatroomDetail, setChatroomDetails] = useState<ChatroomDetail | null>(
     null
   );
@@ -162,10 +163,13 @@ const ChatroomPage: React.FC = () => {
   const { typingUsers, sendTypingStatus } = useTyping(chatroomId, ws);
   const { theme } = useTheme();
 
-  // Sync isHost with SSE updates
+  // Sync isHost and isCreator with SSE updates
   useEffect(() => {
     if (sseChatroomDetail?.hostAid && user) {
       setIsHost(sseChatroomDetail.hostAid === user.userId);
+    }
+    if (sseChatroomDetail?.creatorAid && user) {
+      setIsCreator(sseChatroomDetail.creatorAid === user.userId);
     }
   }, [sseChatroomDetail, user]);
 
@@ -452,6 +456,7 @@ const ChatroomPage: React.FC = () => {
           isConnected={isConnected}
           isSubmitting={isSubmitting}
           isHost={isHost}
+          isCreator={isCreator}
           joinPassword={joinPassword}
           passwordError={passwordError || (error?.toLowerCase().includes("password") || error?.toLowerCase().includes("locked") ? error : null)}
           onBack={onBack}
@@ -473,6 +478,7 @@ const ChatroomPage: React.FC = () => {
         displayDetail={displayDetail}
         isConnected={isConnected}
         isHost={isHost}
+        isCreator={isCreator}
         messages={messages}
         participants={Array.from(participants.values())}
         replyingTo={replyingTo}

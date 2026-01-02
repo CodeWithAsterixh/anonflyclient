@@ -12,6 +12,7 @@ interface JoinRoomScreenProps {
   isConnected: boolean;
   isSubmitting: boolean;
   isHost: boolean;
+  isCreator: boolean;
   joinPassword: string;
   passwordError: string | null;
   onBack: () => void;
@@ -29,6 +30,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
   isConnected,
   isSubmitting,
   isHost,
+  isCreator,
   joinPassword,
   passwordError,
   onBack,
@@ -79,8 +81,8 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
             <button
               onClick={() => setIsOptionsOpen(!isOptionsOpen)}
               className={`p-2 rounded-full transition-all ${
-                isOptionsOpen 
-                  ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" 
+                isOptionsOpen
+                  ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
                   : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
               }`}
               title="Room Options"
@@ -122,9 +124,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
                       placeholder="Enter room password"
                       disabled={isConnecting}
                       error={passwordError || undefined}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && onJoinChatroom()
-                      }
+                      onKeyDown={(e) => e.key === "Enter" && onJoinChatroom()}
                     />
                   </div>
                   <div className="flex flex-col gap-3 mt-6">
@@ -177,16 +177,18 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
       {!isMobile && (
         <>
           {/* Backdrop for screens between 768px and 1024px */}
-          <div 
+          <div
             className={`fixed inset-0 bg-black/20 backdrop-blur-[1px] z-[40] lg:hidden transition-opacity duration-300 ${
-              isOptionsOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+              isOptionsOpen
+                ? "opacity-100 pointer-events-auto"
+                : "opacity-0 pointer-events-none"
             }`}
             onClick={() => setIsOptionsOpen(false)}
           />
-          <div 
+          <div
             className={`z-[50] lg:z-auto transition-all duration-300 ease-in-out absolute right-0 top-0 h-full lg:relative lg:h-auto overflow-hidden ${
-              isOptionsOpen 
-                ? "translate-x-0 w-80 opacity-100 shadow-2xl lg:shadow-none" 
+              isOptionsOpen
+                ? "translate-x-0 w-80 opacity-100 shadow-2xl lg:shadow-none"
                 : "translate-x-full lg:translate-x-0 w-0 lg:w-0 opacity-0"
             }`}
           >
@@ -195,6 +197,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
                 participants={[]}
                 isHost={isHost}
                 hostAid={displayDetail?.hostAid || ""}
+                creatorAid={displayDetail?.creatorAid || ""}
                 roomName={displayDetail?.roomname || ""}
                 roomDescription={displayDetail?.description}
                 allowedFeatures={displayDetail?.allowedFeatures}
@@ -216,11 +219,15 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
           side="bottom"
           height="95dvh"
         >
-          <Drawer.Header title="Room Options" onClose={() => setIsOptionsOpen(false)} />
+          <Drawer.Header
+            title="Room Options"
+            onClose={() => setIsOptionsOpen(false)}
+          />
           <Drawer.Content className="p-0">
             <ChatroomSidebar
               participants={[]}
               isHost={isHost}
+              creatorAid={displayDetail?.creatorAid || ""}
               hostAid={displayDetail?.hostAid || ""}
               roomName={displayDetail?.roomname || ""}
               roomDescription={displayDetail?.description}

@@ -4,6 +4,7 @@ export interface ChatroomSidebarProps {
   participants: Participant[];
   isHost: boolean;
   hostAid: string;
+  creatorAid: string;
   roomName: string;
   roomDescription?: string;
   allowedFeatures?: string[];

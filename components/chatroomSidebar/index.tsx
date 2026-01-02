@@ -16,6 +16,7 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
   participants,
   isHost,
   hostAid,
+  creatorAid,
   roomName,
   roomDescription,
   allowedFeatures = [],
@@ -152,6 +153,9 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
                       <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">
                         {participant.username}
                       </p>
+                      {participant.userAid === creatorAid && (
+                        <span className="text-xs bg-blue-300/30 dark:blue-300/30 text-blue-500 flex items-center justify-center gap-1 py-1 px-2 scale-[0.8] rounded-full"><Users size={12} className="text-blue-500 shrink-0" /> Creator</span>
+                      )}
                       {participant.userAid === hostAid && (
                         <span className="text-xs bg-amber-300/30 dark:amber-300/30 text-amber-500 flex items-center justify-center gap-1 py-1 px-2 scale-[0.8] rounded-full"><ShieldCheck size={12} className="text-amber-500 shrink-0" /> Host</span>
                       )}

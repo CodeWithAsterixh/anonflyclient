@@ -37,6 +37,8 @@ export interface ChatroomDetail {
   roomname: string;
   description: string;
   hostAid: string;
+  creatorAid: string;
+  isCreatorOnline?: boolean;
   isLocked: boolean;
   participants: Participant[];
   participantCount?: number;

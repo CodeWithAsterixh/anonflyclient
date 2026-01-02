@@ -22,6 +22,7 @@ interface ChatScreenProps {
   displayDetail: ChatroomDetail | null;
   isConnected: boolean;
   isHost: boolean;
+  isCreator: boolean;
   messages: Message[];
   participants: Participant[];
   typingUsers: TypingUser[];
@@ -55,6 +56,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   displayDetail,
   isConnected,
   isHost,
+  isCreator,
   messages,
   participants,
   typingUsers,
@@ -160,6 +162,14 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                     </span>
                   ) : (
                     "connecting..."
+                  )}
+                  {displayDetail?.creatorAid && (
+                    <>
+                      {" • "}
+                      <span className={`font-medium ${displayDetail.isCreatorOnline ? 'text-blue-500' : 'text-gray-400'}`}>
+                        creator {displayDetail.isCreatorOnline ? 'online' : 'offline'}
+                      </span>
+                    </>
                   )}
                 </button>
               </div>
@@ -293,6 +303,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
               <ChatroomSidebar
                 participants={participants}
                 isHost={isHost}
+                creatorAid={displayDetail?.creatorAid || ""}
                 hostAid={displayDetail?.hostAid || ""}
                 roomName={displayDetail?.roomname || ""}
                 roomDescription={displayDetail?.description}
@@ -324,6 +335,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
               participants={participants}
               isHost={isHost}
               hostAid={displayDetail?.hostAid || ""}
+              creatorAid={displayDetail?.creatorAid || ""}
               roomName={displayDetail?.roomname || ""}
               roomDescription={displayDetail?.description}
               allowedFeatures={displayDetail?.allowedFeatures}

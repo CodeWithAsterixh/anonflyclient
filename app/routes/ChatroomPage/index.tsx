@@ -65,7 +65,7 @@ const ChatroomPage: React.FC = () => {
   const storedToken = chatroomId ? sessionStorage.getItem(`room_token_${chatroomId}`) : null;
   const hasStoredCredentials = !!(storedToken || storedPassword);
 
-  const shouldDeferConnection = !chatroomDetail || (chatroomDetail.isLocked && !isCreator && !isAlreadyParticipant && !hasStoredCredentials);
+  const shouldDeferConnection = !hasStoredCredentials && (!chatroomDetail || (chatroomDetail.isLocked && !isCreator && !isAlreadyParticipant));
 
   const [alertDialog, setAlertDialog] = useState<{
     isOpen: boolean;
@@ -208,12 +208,7 @@ const ChatroomPage: React.FC = () => {
   }, [isJoined, chatroomId]);
 
   useEffect(() => {
-    if (!isConnected || !chatroomId || !displayDetail || isJoined || isRemoved) {
-      return;
-    }
-
-    // If we are already in the process of joining this specific room, stop
-    if (isJoiningRef.current || lastJoinedRoomRef.current === chatroomId) {
+    if (!isConnected || !chatroomId || isJoined || isRemoved) {
       return;
     }
 
@@ -233,6 +228,21 @@ const ChatroomPage: React.FC = () => {
         }
       }
     };
+
+    // If we are already in the process of joining this specific room, stop
+    if (isJoiningRef.current || lastJoinedRoomRef.current === chatroomId) {
+      return;
+    }
+
+    // If we don't have details yet, we can only join if we have stored credentials
+    if (!displayDetail) {
+      if (hasStoredCredentials) {
+        const storedPassword = sessionStorage.getItem(`room_access_${chatroomId}`);
+        const storedToken = sessionStorage.getItem(`room_token_${chatroomId}`);
+        performJoin(storedPassword || undefined, storedToken || undefined);
+      }
+      return;
+    }
 
     if ((!displayDetail.isLocked && !displayDetail.isPrivate) || isCreator || isAlreadyParticipant) {
       // console.log(`[ChatroomPage] Auto-joining room: ${chatroomId}`);
@@ -262,6 +272,7 @@ const ChatroomPage: React.FC = () => {
     isSubmitting,
     isCreator,
     isAlreadyParticipant,
+    hasStoredCredentials,
   ]);
 
   // Reset joining lock on errors so user can try again

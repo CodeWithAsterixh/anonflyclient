@@ -86,7 +86,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           }}
         />
       </head>
-      <body className="bg-white dark:bg-gray-950 transition-colors duration-300">
+      <body className="bg-white dark:bg-gray-950 isolate relative min-h-[100dvh] transition-colors duration-300">
         {children}
         <ScrollRestoration />
         <Scripts />

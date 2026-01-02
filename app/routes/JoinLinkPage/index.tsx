@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { validateShareLink } from '../../../lib/controllers/chatroomController';
-import { ChatLayoutContext } from '../../contexts/ChatLayoutContext';
+import { useAuth } from '../../../hooks/useAuth';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Background } from '../../../components/background';
 import { useTheme } from '../../../hooks/useTheme';
@@ -9,14 +9,18 @@ import { useTheme } from '../../../hooks/useTheme';
 const JoinLinkPage: React.FC = () => {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
-  const context = useContext(ChatLayoutContext);
+  const { user, token: authToken, isLoading: authLoading } = useAuth();
   const { theme } = useTheme();
   
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const hasValidated = useRef(false);
 
   useEffect(() => {
     const validateToken = async () => {
+      if (hasValidated.current) return;
+      hasValidated.current = true;
+      
       if (!token) {
         setError('Invalid access link');
         setLoading(false);
@@ -25,11 +29,11 @@ const JoinLinkPage: React.FC = () => {
 
       try {
         const response = await validateShareLink(token);
+        
         if (response.success && response.data.accessGranted) {
           const { chatroomId, password } = response.data;
           
           // Store the access token/password in sessionStorage so ChatroomPage can pick it up
-          // This allows us to bypass the password prompt
           if (password) {
             sessionStorage.setItem(`room_access_${chatroomId}`, password);
           }
@@ -38,28 +42,31 @@ const JoinLinkPage: React.FC = () => {
           sessionStorage.setItem(`room_token_${chatroomId}`, token);
           
           // Navigate to the chatroom
-          navigate(`/${chatroomId}`);
+          navigate(`/${chatroomId}`, { replace: true });
         } else {
           setError(response.message || 'Failed to validate access link');
+          setLoading(false);
         }
       } catch (err: any) {
         setError(err.message || 'Invalid or expired access link');
-      } finally {
         setLoading(false);
       }
     };
 
-    if (context?.user && context?.token) {
-      validateToken();
-    } else if (context && !context.user) {
+    if (!authLoading) {
+      if (user) {
+        validateToken();
+      } else {
         // If not logged in, redirect to login with this URL as redirect
-        navigate(`/login?redirect_to=${encodeURIComponent(window.location.pathname)}`);
+        navigate(`/login?redirect_to=${encodeURIComponent(window.location.pathname)}`, { replace: true });
+      }
     }
-  }, [token, context, navigate]);
+  }, [token, user, authToken, authLoading, navigate]);
 
   return (
     <Background mode={theme} className="flex flex-col items-center justify-center min-h-screen p-4">
-      <div className="max-w-md w-full bg-white dark:bg-gray-900 rounded-3xl shadow-xl p-8 border border-gray-100 dark:border-gray-800 text-center space-y-6">
+      <main className="w-full h-[100dvh] flex items-center justify-center">
+        <div className="max-w-md w-full bg-white dark:bg-gray-900 rounded-3xl shadow-xl p-8 border border-gray-100 dark:border-gray-800 text-center space-y-6">
         {loading ? (
           <>
             <div className="flex justify-center">
@@ -94,6 +101,7 @@ const JoinLinkPage: React.FC = () => {
           </>
         ) : null}
       </div>
+      </main>
     </Background>
   );
 };

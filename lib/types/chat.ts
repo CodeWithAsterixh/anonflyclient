@@ -30,6 +30,7 @@ export interface Participant {
   username: string;
   publicKey?: string;
   exchangePublicKey?: string;
+  allowedFeatures?: string[];
 }
 
 export interface ChatroomDetail {

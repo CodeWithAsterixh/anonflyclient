@@ -13,6 +13,7 @@ import {
   Shield,
   Trash2,
   Users,
+  Crown,
 } from 'lucide-react';
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router';
@@ -81,12 +82,7 @@ const SettingsPage: React.FC = () => {
     });
   };
 
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-    }
-    navigate('/');
-  };
+  const isPremium = user?.allowedFeatures?.includes('CREATE_PRIVATE_ROOM');
 
   return (
     <div className="h-full overflow-y-auto bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
@@ -95,7 +91,12 @@ const SettingsPage: React.FC = () => {
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button 
-                onClick={handleBack}
+                onClick={() => {
+                  if (onBack) {
+                    onBack();
+                  }
+                  navigate('/');
+                }}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-600 dark:text-gray-400"
               >
                 <ArrowLeft size={20} />
@@ -115,7 +116,15 @@ const SettingsPage: React.FC = () => {
                   {user?.username?.[0].toUpperCase() || '?'}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 truncate whitespace-nowrap">{user?.username}</h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 truncate whitespace-nowrap">{user?.username}</h2>
+                    {isPremium && (
+                      <div className="flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black rounded-full uppercase tracking-wider shadow-sm shadow-orange-500/20">
+                        <Crown size={10} fill="currentColor" />
+                        Premium
+                      </div>
+                    )}
+                  </div>
                   <HideableField 
                     label="AID" 
                     value={user?.userId || ''} 

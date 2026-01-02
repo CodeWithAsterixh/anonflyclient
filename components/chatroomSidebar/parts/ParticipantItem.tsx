@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserMinus, Hammer } from 'lucide-react';
+import { UserMinus, Hammer, Crown } from 'lucide-react';
 import { type Participant } from '../../../lib/types/chat';
 import Avatar from '../../ui/avatar';
 import Badge from '../../ui/badge';
@@ -39,6 +39,7 @@ const ParticipantItem: React.FC<ParticipantItemProps> = ({
   const isParticipantCreator = participant.userAid === creatorAid;
   const isRemoving = removingId === participant.userAid;
   const isBanning = banningId === participant.userAid;
+  const isPremium = participant.allowedFeatures?.includes('CREATE_PRIVATE_ROOM');
 
   // Permitted roles for removal: Host + Creator
   const canPerformRemoval = (isHost || isCreator) && !isParticipantCreator && !isMe;
@@ -53,9 +54,12 @@ const ParticipantItem: React.FC<ParticipantItemProps> = ({
           <Avatar name={participant.username} userAid={participant.userAid} size="md" />
           <div className="min-w-0">
             <div className="flex items-center gap-1">
-              <span className="font-semibold text-gray-900 dark:text-gray-100 truncate text-sm">
+              <span className="font-semibold text-gray-900 dark:text-gray-100 truncate text-sm flex items-center gap-1">
                 {participant.username}
-                {isMe && <span className="ml-1 text-gray-400 font-normal">(You)</span>}
+                {isPremium && (
+                  <Crown size={12} className="text-amber-500 fill-amber-500 shrink-0" />
+                )}
+                {isMe && <span className="ml-1 text-gray-400 font-normal shrink-0">(You)</span>}
               </span>
             </div>
             <div className="flex gap-1 mt-0.5">

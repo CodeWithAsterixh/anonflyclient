@@ -10,6 +10,7 @@ export interface AuthState {
   error: string | null;
   identities: Identity[];
   retryCountdown: number | null;
+  allowedFeatures?: string[];
 }
 
 export interface AuthContextType {
@@ -24,4 +25,6 @@ export interface AuthContextType {
   isInitialCheck: boolean;
   error: string | null;
   retryCountdown: number | null;
+  allowedFeatures?: string[];
+  checkPremiumStatus: () => Promise<void>;
 }

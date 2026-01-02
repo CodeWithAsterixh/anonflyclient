@@ -218,6 +218,7 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
               username: message.username,
               publicKey: message.publicKey,
               exchangePublicKey: message.exchangePublicKey,
+              allowedFeatures: message.allowedFeatures,
             });
             return next;
           });

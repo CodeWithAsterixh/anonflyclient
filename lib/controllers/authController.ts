@@ -2,6 +2,25 @@ import { getAPIBaseURL } from "lib/constants/api";
 import { getIdentity, type Identity } from "../helpers/identityManager";
 import { setSessionUser, clearSessionUser } from "../helpers/authStorage";
 
+export const fetchPremiumStatus = async (token: string) => {
+  try {
+    const response = await fetch(`${getAPIBaseURL()}/auth/premium-status`, {
+      method: 'GET',
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch premium status');
+
+    return data.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const performHandshake = async (identity: Identity) => {
   try {
     // 1. Request Challenge

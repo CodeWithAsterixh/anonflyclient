@@ -133,6 +133,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
                 username: identity.username,
                 publicKey: identity.publicKey,
                 exchangePublicKey: identity.exchangePublicKey,
+                allowedFeatures: user?.allowedFeatures,
                 password,
                 linkToken,
               })

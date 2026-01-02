@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { performHandshake } from '../../lib/controllers/authController';
+import { performHandshake, fetchPremiumStatus } from '../../lib/controllers/authController';
 import { getIdentity, getAllIdentities, switchIdentity as switchLocalIdentity, generateIdentity, clearIdentity } from '../../lib/helpers/identityManager';
 import type { User } from '../../types/User';
 import { getSessionUser, setSessionUser, clearSessionUser } from '../../lib/helpers/authStorage';
@@ -23,6 +23,28 @@ export const useAuthInternal = () => {
   });
 
   const [retryKey, setRetryKey] = useState(0);
+
+  const checkPremiumStatus = useCallback(async () => {
+    if (!authState.token) return;
+
+    try {
+      const data = await fetchPremiumStatus(authState.token);
+      setAuthState(prev => ({
+        ...prev,
+        allowedFeatures: data.allowedFeatures,
+        user: prev.user ? { ...prev.user, allowedFeatures: data.allowedFeatures } : null,
+      }));
+      
+      // Update session storage as well
+      const session = getSessionUser();
+      if (session && session.user) {
+        setSessionUser({ ...session.user, allowedFeatures: data.allowedFeatures }, session.token);
+      }
+    } catch (error: any) {
+      console.error("[useAuthInternal] Failed to fetch premium status:", error);
+      // If 429, we just ignore it as it's rate limited
+    }
+  }, [authState.token]);
 
   const logout = useCallback(() => {
     // We only clear the ephemeral session, NOT the IndexedDB identity
@@ -114,6 +136,7 @@ export const useAuthInternal = () => {
         error: session.token ? null : 'Network issue: Working in offline mode.',
         identities: allIdentities,
         retryCountdown: null,
+        allowedFeatures: session.user.allowedFeatures,
       });
       return;
     }
@@ -125,7 +148,11 @@ export const useAuthInternal = () => {
         try {
           // If identity exists, perform handshake to get a session
           const sessionData = await performHandshake(identity);
-          const user: User = { userId: sessionData.aid, username: sessionData.username };
+          const user: User = { 
+            userId: sessionData.aid, 
+            username: sessionData.username,
+            allowedFeatures: sessionData.allowedFeatures 
+          };
           setSessionUser(user, sessionData.token);
           setAuthState({
             user,
@@ -136,6 +163,7 @@ export const useAuthInternal = () => {
             error: null,
             identities: allIdentities,
             retryCountdown: null,
+            allowedFeatures: sessionData.allowedFeatures,
           });
         } catch (handshakeError) {
           // HANDSHAKE FAILED (e.g. Bad Network)
@@ -175,6 +203,12 @@ export const useAuthInternal = () => {
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
+
+  useEffect(() => {
+    if (authState.isAuthenticated && authState.token && !authState.allowedFeatures) {
+      checkPremiumStatus();
+    }
+  }, [authState.isAuthenticated, authState.token, authState.allowedFeatures, checkPremiumStatus]);
 
   useEffect(() => {
     if (authState.retryCountdown === null) return;
@@ -233,12 +267,15 @@ export const useAuthInternal = () => {
     isAuthenticated: authState.isAuthenticated,
     error: authState.error,
     retryCountdown: authState.retryCountdown,
+    allowedFeatures: authState.allowedFeatures,
+    checkPremiumStatus,
   }), [
     authState,
     joinAnonymously,
     switchAccount,
     deleteAccount,
-    logout
+    logout,
+    checkPremiumStatus
   ]);
 
   return value;

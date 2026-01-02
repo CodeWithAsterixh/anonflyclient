@@ -49,14 +49,13 @@ export const useAuthInternal = () => {
           identity.allowedFeatures = data.allowedFeatures;
           identity.premiumLastChecked = Date.now();
           await saveIdentity(identity);
-          console.log("[useAuthInternal] Premium status saved to IndexDB");
+          // console.log("[useAuthInternal] Premium status saved to IndexDB");
         }
       } catch (dbError) {
         console.error("[useAuthInternal] Failed to save premium status to IndexDB:", dbError);
       }
     } catch (error: any) {
       console.error("[useAuthInternal] Failed to fetch premium status:", error);
-      // If 429, we just ignore it as it's rate limited
     }
   }, [authState.token]);
 
@@ -254,7 +253,7 @@ export const useAuthInternal = () => {
   // Handle premium status refresh if needed (over 5 hours)
   useEffect(() => {
     if (needsPremiumRefresh && authState.isAuthenticated && authState.token) {
-      console.log("[useAuthInternal] Triggering scheduled premium status refresh...");
+      // console.log("[useAuthInternal] Triggering scheduled premium status refresh...");
       checkPremiumStatus();
       setNeedsPremiumRefresh(false);
     }

@@ -145,13 +145,13 @@ export const formatInline = (content: string): React.ReactNode[] => {
   const rules: {
     name: string;
     regex: RegExp;
-    render: (...args: string[]) => React.ReactNode;
+    render: (...args: any[]) => React.ReactNode;
   }[] = [
     {
       name: 'bold',
       regex: /(\*\*)(.*?)(\*\*)/g,
-      render: (s1: string, text: string, s2: string) => (
-        <span key={text} className="font-bold">
+      render: (match, s1, text, s2, idx) => (
+        <span key={`bold-${idx}`} className="font-bold">
           <span className="opacity-30 font-normal">{s1}</span>
           {text}
           <span className="opacity-30 font-normal">{s2}</span>
@@ -161,8 +161,8 @@ export const formatInline = (content: string): React.ReactNode[] => {
     {
       name: 'italic',
       regex: /(\*)(.*?)(\*)/g,
-      render: (s1: string, text: string, s2: string) => (
-        <span key={text} className="italic">
+      render: (match, s1, text, s2, idx) => (
+        <span key={`italic-${idx}`} className="italic">
           <span className="opacity-30 italic-none font-normal">{s1}</span>
           {text}
           <span className="opacity-30 italic-none font-normal">{s2}</span>
@@ -172,8 +172,8 @@ export const formatInline = (content: string): React.ReactNode[] => {
     {
       name: 'underline',
       regex: /(__)(.*?)(__)/g,
-      render: (s1: string, text: string, s2: string) => (
-        <span key={text} className="underline">
+      render: (match, s1, text, s2, idx) => (
+        <span key={`underline-${idx}`} className="underline">
           <span className="opacity-30 no-underline font-normal">{s1}</span>
           {text}
           <span className="opacity-30 no-underline font-normal">{s2}</span>
@@ -183,8 +183,8 @@ export const formatInline = (content: string): React.ReactNode[] => {
     {
       name: 'strikethrough',
       regex: /(~~)(.*?)(~~)/g,
-      render: (s1: string, text: string, s2: string) => (
-        <span key={text} className="line-through">
+      render: (match, s1, text, s2, idx) => (
+        <span key={`strike-${idx}`} className="line-through">
           <span className="opacity-30 no-line-through font-normal">{s1}</span>
           {text}
           <span className="opacity-30 no-line-through font-normal">{s2}</span>
@@ -194,8 +194,8 @@ export const formatInline = (content: string): React.ReactNode[] => {
     {
       name: 'code',
       regex: /(`)(.*?)(`)/g,
-      render: (s1: string, text: string, s2: string) => (
-        <span key={text} className="bg-black/10 dark:bg-white/10 px-0.5 rounded font-mono text-sm">
+      render: (match, s1, text, s2, idx) => (
+        <span key={`code-${idx}`} className="bg-black/10 dark:bg-white/10 px-0.5 rounded font-mono text-sm">
           <span className="opacity-30 font-normal">{s1}</span>
           {text}
           <span className="opacity-30 font-normal">{s2}</span>
@@ -205,20 +205,13 @@ export const formatInline = (content: string): React.ReactNode[] => {
     {
       name: 'link',
       regex: /(\[)(.*?)(\])(\()(.*?)(\))/g,
-      render: (s1: string, text: string, s2: string, s3: string, url: string, s4: string) => (
-        <span key={url} className="text-blue-500">
-          <span className="opacity-30 text-gray-500">{s1}</span>
+      render: (match, s1, text, s2, s3, url, s4, idx) => (
+        <span key={`link-${idx}`} className="text-blue-500 dark:text-blue-400 underline decoration-blue-500/30">
+          <span className="opacity-30 no-underline">{s1}</span>
           {text}
-          <span className="opacity-30 text-gray-500">{s2}{s3}{url}{s4}</span>
-        </span>
-      )
-    },
-    {
-      name: 'autolink',
-      regex: /(https?:\/\/[^\s]+)/g,
-      render: (url: string) => (
-        <span key={url} className="text-blue-500 underline">
-          {url}
+          <span className="opacity-30 no-underline">{s2}{s3}</span>
+          <span className="opacity-30 no-underline">{url}</span>
+          <span className="opacity-30 no-underline">{s4}</span>
         </span>
       )
     }
@@ -228,7 +221,7 @@ export const formatInline = (content: string): React.ReactNode[] => {
 
   rules.forEach(rule => {
     const newParts: (string | React.ReactNode)[] = [];
-    parts.forEach(part => {
+    parts.forEach((part, partIdx) => {
       if (typeof part !== 'string') {
         newParts.push(part);
         return;
@@ -237,21 +230,22 @@ export const formatInline = (content: string): React.ReactNode[] => {
       let lastIndex = 0;
       let match;
       rule.regex.lastIndex = 0;
+      let matchIdx = 0;
       
       while ((match = rule.regex.exec(part)) !== null) {
         if (match.index > lastIndex) {
           newParts.push(part.substring(lastIndex, match.index));
         }
 
+        const uniqueIdx = `${partIdx}-${matchIdx}`;
         if (rule.name === 'link') {
-          newParts.push(rule.render(match[1], match[2], match[3], match[4], match[5], match[6]));
-        } else if (rule.name === 'autolink') {
-          newParts.push(rule.render(match[1]));
+          newParts.push(rule.render(match[0], match[1], match[2], match[3], match[4], match[5], match[6], uniqueIdx));
         } else {
-          newParts.push(rule.render(match[1], match[2], match[3]));
+          newParts.push(rule.render(match[0], match[1], match[2], match[3], uniqueIdx));
         }
 
         lastIndex = rule.regex.lastIndex;
+        matchIdx++;
       }
 
       if (lastIndex < part.length) {

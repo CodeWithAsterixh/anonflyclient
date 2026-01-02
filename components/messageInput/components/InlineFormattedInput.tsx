@@ -22,7 +22,10 @@ export const InlineFormattedInput = React.forwardRef<HTMLTextAreaElement, Inline
   ({ value, onChange, onKeyDown, onSelect, onBlur, placeholder, disabled, className, autoFocus, maxHeight = 200 }, ref) => {
     const internalRef = useRef<HTMLTextAreaElement>(null);
     const mirrorRef = useRef<HTMLDivElement>(null);
-    const [isFocused, setIsFocused] = useState(false);
+    const [isFocused, setIsFocused] = React.useState(false);
+
+    // Expose the internal textarea ref correctly
+    React.useImperativeHandle(ref, () => internalRef.current as HTMLTextAreaElement);
 
     // Sync scroll between textarea and mirror
     const handleScroll = () => {
@@ -31,17 +34,13 @@ export const InlineFormattedInput = React.forwardRef<HTMLTextAreaElement, Inline
       }
     };
 
-    // Use the external ref if provided
-    useEffect(() => {
-      if (typeof ref === 'function') {
-        ref(internalRef.current);
-      } else if (ref) {
-        (ref as any).current = internalRef.current;
-      }
-    }, [ref]);
+    // Ensure scroll sync when value changes (e.g., after typing or pasting)
+    React.useEffect(() => {
+      handleScroll();
+    }, [value]);
 
     // Focus handling
-    useEffect(() => {
+    React.useEffect(() => {
       if (autoFocus && internalRef.current) {
         internalRef.current.focus();
       }
@@ -65,6 +64,7 @@ export const InlineFormattedInput = React.forwardRef<HTMLTextAreaElement, Inline
       border: 'none',
       outline: 'none',
       margin: 0,
+      boxSizing: 'border-box',
     };
 
     return (
@@ -112,7 +112,7 @@ export const InlineFormattedInput = React.forwardRef<HTMLTextAreaElement, Inline
             left: 0,
             height: '100%',
             color: 'transparent',
-            caretColor: 'currentColor', // Caret is visible even if text is transparent
+            caretColor: '#3b82f6', // Bright blue cursor for visibility
             background: 'transparent',
             resize: 'none',
             zIndex: 1,

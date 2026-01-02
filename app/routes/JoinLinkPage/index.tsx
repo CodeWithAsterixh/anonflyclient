@@ -65,7 +65,7 @@ const JoinLinkPage: React.FC = () => {
 
   return (
     <Background mode={theme} className="flex flex-col items-center justify-center min-h-screen p-4">
-      <main className="w-full h-[100dvh] flex items-center justify-center">
+      <main className="w-full h-[100dvh] px-4 flex items-center justify-center">
         <div className="max-w-md w-full bg-white dark:bg-gray-900 rounded-3xl shadow-xl p-8 border border-gray-100 dark:border-gray-800 text-center space-y-6">
         {loading ? (
           <>

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
 import { useIsMobile } from '../../hooks/useIsMobile/index';
 import { MessagePreview } from './components/MessagePreview';
+import { InlineFormattedInput } from './components/InlineFormattedInput';
 import type { MessageInputProps } from './types';
 import { useTypingStatus } from './hooks/useTypingStatus';
 import FormattingContextMenu, { type FormattingAction } from '../common/FormattingContextMenu/FormattingContextMenu';
@@ -118,16 +119,17 @@ const MessageInput: React.FC<MessageInputProps> = ({
           isMobile={isMobileDevice}
         />
 
-        <textarea
+        <InlineFormattedInput
           ref={textareaRef}
           value={messageInput}
-          onChange={(e) => setMessageInput(e.target.value)}
+          onChange={setMessageInput}
           onKeyDown={handleKeyDown}
           onSelect={handleSelect}
           onContextMenu={handleContextMenu}
           placeholder={editingMessage ? "Edit your message..." : "Type a message"}
           disabled={isDisabled}
-          className="flex-1 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-3 min-h-[44px] max-h-[200px] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 resize-none text-gray-900 dark:text-gray-100"
+          className="flex-1"
+          maxHeight={200}
         />
         <button
           onClick={() => handleSubmit()}

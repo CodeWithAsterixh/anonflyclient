@@ -101,7 +101,40 @@ export const useTextSelection = (textareaRef: React.RefObject<HTMLTextAreaElemen
 
   const closeMenu = useCallback(() => {
     setIsOpen(false);
+    setSelection(null);
   }, []);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const handleBlur = () => {
+      // Small delay to allow clicking on the menu itself
+      setTimeout(() => {
+        if (!document.activeElement?.closest('[role="menu"]') && 
+            !document.activeElement?.closest('[role="dialog"]')) {
+          closeMenu();
+        }
+      }, 100);
+    };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (isOpen && 
+          !textarea.contains(e.target as Node) && 
+          !document.querySelector('[role="menu"]')?.contains(e.target as Node) &&
+          !document.querySelector('[role="dialog"]')?.contains(e.target as Node)) {
+        closeMenu();
+      }
+    };
+
+    textarea.addEventListener('blur', handleBlur);
+    document.addEventListener('mousedown', handleMouseDown);
+
+    return () => {
+      textarea.removeEventListener('blur', handleBlur);
+      document.removeEventListener('mousedown', handleMouseDown);
+    };
+  }, [textareaRef, isOpen, closeMenu]);
 
   return {
     selection,

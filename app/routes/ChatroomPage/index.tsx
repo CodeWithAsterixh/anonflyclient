@@ -388,17 +388,19 @@ const ChatroomPage: React.FC = () => {
   };
 
   const handleGenerateShareLink = async () => {
-    if (!chatroomId) return;
+    if (!chatroomId) return null;
     try {
       const response = await generateShareLink(chatroomId);
       if (response.success && response.data.token) {
         const shareUrl = `${window.location.origin}/join/${response.data.token}`;
         await navigator.clipboard.writeText(shareUrl);
-        // We could show a toast here, but the sidebar button handles the "Copied!" state
+        return response.data;
       }
+      return null;
     } catch (err) {
       console.error("Failed to generate share link:", err);
       showAlertDialog("Error", "Failed to generate share link. Please try again.", "error");
+      return null;
     }
   };
 

@@ -6,7 +6,7 @@ interface RoomActionsProps {
   onLeaveRoom: () => void;
   onEditRoom: () => void;
   onDeleteRoom: () => void;
-  onGenerateShareLink: () => Promise<void>;
+  onGenerateShareLink: () => Promise<any>;
 }
 
 const RoomActions: React.FC<RoomActionsProps> = ({
@@ -18,11 +18,15 @@ const RoomActions: React.FC<RoomActionsProps> = ({
 }) => {
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [showCopied, setShowCopied] = React.useState(false);
+  const [expiresAt, setExpiresAt] = React.useState<number | null>(null);
 
   const handleShare = async () => {
     try {
       setIsGenerating(true);
-      await onGenerateShareLink();
+      const data = await onGenerateShareLink();
+      if (data && data.expiresAt) {
+        setExpiresAt(data.expiresAt);
+      }
       setShowCopied(true);
       setTimeout(() => setShowCopied(false), 2000);
     } catch (error) {
@@ -30,6 +34,15 @@ const RoomActions: React.FC<RoomActionsProps> = ({
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const formatExpiry = (timestamp: number) => {
+    const diff = timestamp - Date.now();
+    if (diff <= 0) return "Expired";
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
   };
 
   return (
@@ -40,28 +53,36 @@ const RoomActions: React.FC<RoomActionsProps> = ({
       
       <div className="grid grid-cols-1 gap-2">
         {isHost && (
-          <button
-            onClick={handleShare}
-            disabled={isGenerating}
-            className="flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800 rounded-xl transition-all disabled:opacity-50"
-          >
-            {showCopied ? (
-              <>
-                <Check size={16} />
-                <span>Copied!</span>
-              </>
-            ) : isGenerating ? (
-              <>
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                <span>Generating...</span>
-              </>
-            ) : (
-              <>
-                <Share2 size={16} />
-                <span>Share Access Link</span>
-              </>
+          <div className="space-y-1">
+            <button
+              onClick={handleShare}
+              disabled={isGenerating}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800 rounded-xl transition-all disabled:opacity-50"
+            >
+              {showCopied ? (
+                <>
+                  <Check size={16} />
+                  <span>Copied!</span>
+                </>
+              ) : isGenerating ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <Share2 size={16} />
+                  <span>Share Access Link</span>
+                </>
+              )}
+            </button>
+            {expiresAt && (
+              <p className="text-[10px] text-gray-500 dark:text-gray-400 px-3 flex items-center gap-1">
+                <span className="w-1 h-1 rounded-full bg-amber-400" />
+                Link expires in {formatExpiry(expiresAt)}
+              </p>
             )}
-          </button>
+          </div>
         )}
 
         <button

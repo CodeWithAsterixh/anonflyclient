@@ -51,7 +51,7 @@ interface ChatScreenProps {
   onRemoveParticipant: (userAid: string) => Promise<void>;
   onBanParticipant: (userAid: string, reason?: string) => Promise<void>;
   onUnbanParticipant: (userAid: string) => Promise<void>;
-  onGenerateShareLink: () => Promise<void>;
+  onGenerateShareLink: () => Promise<any>;
 }
 
 const ChatScreen: React.FC<ChatScreenProps> = ({

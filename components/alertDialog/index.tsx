@@ -45,7 +45,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidth="sm">
-      <div className="p-6 flex flex-col items-center text-center">
+      <div className="p-6 flex flex-col items-center text-center isolate">
         <div className="mb-4">
           {getIcon()}
         </div>

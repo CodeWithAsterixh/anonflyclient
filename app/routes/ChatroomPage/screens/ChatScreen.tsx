@@ -136,7 +136,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   }, [visibleMessages]);
 
   return (
-    <div className="flex h-[100dvh] bg-transparent relative overflow-hidden transition-colors duration-300 w-full">
+    <div className="isolate flex h-[100dvh] bg-transparent relative overflow-hidden transition-colors duration-300 w-full">
       <div className="flex-1 flex flex-col min-w-0 relative h-full">
         {/* Header */}
         <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm flex flex-col gap-1 justify-between items-center z-10">

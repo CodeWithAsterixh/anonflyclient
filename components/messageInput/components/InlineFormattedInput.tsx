@@ -53,14 +53,13 @@ export const InlineFormattedInput = React.forwardRef<HTMLTextAreaElement, Inline
 
     // Shared styles for textarea and mirror to ensure alignment
     const sharedStyles: React.CSSProperties = {
-      padding: '12px',
+      padding: '8px 14px',
       fontSize: '15px',
-      lineHeight: '1.5',
+      lineHeight: '1.4',
       fontFamily: 'inherit',
       whiteSpace: 'pre-wrap',
       wordBreak: 'break-word',
       width: '100%',
-      minHeight: '44px',
       maxHeight: `${maxHeight}px`,
       border: 'none',
       outline: 'none',
@@ -85,10 +84,10 @@ export const InlineFormattedInput = React.forwardRef<HTMLTextAreaElement, Inline
           className="text-gray-900 dark:text-gray-100"
         >
           {value ? formatInline(value) : (
-            <span className="text-gray-400 dark:text-gray-500">{placeholder}</span>
+            <span className="text-gray-400 dark:text-gray-500 absolute left-[14px] top-[8px] pointer-events-none">{placeholder}</span>
           )}
           {/* Extra space for the cursor at the end of text */}
-          {value.endsWith('\n') ? '\n ' : ' '}
+          {value.endsWith('\n') ? '\n ' : ''}
         </div>
 
         {/* Real Textarea (Front) */}

@@ -69,6 +69,7 @@ export const useChatroomConnection = ({
   isRemovedRef: isRemovedRef as React.RefObject<boolean | 'removed' | 'banned'>,
   currentChatroomIdRef,
       chatroomDetailRef,
+      setMessages,
       user,
       connect,
       MAX_RETRIES,

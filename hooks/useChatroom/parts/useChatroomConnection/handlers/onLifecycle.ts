@@ -10,6 +10,7 @@ interface LifecycleContext {
   isRemovedRef: React.RefObject<boolean | 'removed' | 'banned'>;
   currentChatroomIdRef: React.RefObject<string | null>;
   chatroomDetailRef: React.RefObject<any>;
+  setMessages: (msgs: any[]) => void;
   user: any;
   connect: () => void;
   MAX_RETRIES: number;
@@ -26,6 +27,7 @@ export const createLifecycleHandlers = (ctx: LifecycleContext) => {
     isRemovedRef,
     currentChatroomIdRef,
     chatroomDetailRef,
+    setMessages,
     user,
     connect,
     MAX_RETRIES,
@@ -49,6 +51,8 @@ export const createLifecycleHandlers = (ctx: LifecycleContext) => {
     joiningRef.current = null;
     if (heartbeatIntervalRef.current) clearInterval(heartbeatIntervalRef.current);
     
+    // Clear messages on disconnect to ensure session isolation
+    setMessages([]);
     const currentRetryCount = retryCountRef.current;
     if (event.code !== 1000 && !isRemovedRef.current) {
       if (currentRetryCount < MAX_RETRIES) {

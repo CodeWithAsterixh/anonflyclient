@@ -15,6 +15,14 @@ import { ThemeProvider } from "../hooks/useTheme/index";
 import { AuthProvider } from "./contexts/AuthContext";
 import "./app.css";
 
+/**
+ * Root loader to determine the initial theme from cookies.
+ * 
+ * @async
+ * @param {Object} args - Loader arguments.
+ * @param {Request} args.request - The incoming fetch request.
+ * @returns {Promise<{ theme: string }>} The initial theme ("dark" or "light").
+ */
 export async function loader({ request }: { request: Request }) {
   const cookieHeader = request.headers.get("Cookie");
   const theme = cookieHeader?.includes("theme=dark") ? "dark" : "light";
@@ -58,6 +66,14 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+/**
+ * The base HTML layout for the entire application.
+ * Handles theme initialization, global styles, and meta tags.
+ * 
+ * @param {Object} props - Component props.
+ * @param {React.ReactNode} props.children - The content to render inside the layout.
+ * @returns {JSX.Element} The root HTML structure.
+ */
 export function Layout({ children }: { children: React.ReactNode }) {
   const data = useLoaderData<typeof loader>();
   const theme = data?.theme || "light";
@@ -95,6 +111,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * The main App component that wraps the application with necessary providers.
+ * Initializes the API and manages global state like theme and authentication.
+ * 
+ * @returns {JSX.Element} The rendered application with providers.
+ */
 export default function App() {
   const { theme } = useLoaderData<typeof loader>();
 
@@ -111,6 +133,13 @@ export default function App() {
   );
 }
 
+/**
+ * Global error boundary for the application.
+ * Renders a fallback UI when a route error or unexpected exception occurs.
+ * 
+ * @param {Route.ErrorBoundaryProps} props - Component props containing the error.
+ * @returns {JSX.Element} The error fallback UI.
+ */
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = "Oops!";
   let details = "An unexpected error occurred.";

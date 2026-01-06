@@ -22,6 +22,14 @@ const STORE_NAME = 'identity_store';
 const ROOM_KEY_STORE = 'room_key_store';
 const ACTIVE_IDENTITY_KEY = 'active_identity_aid';
 
+/**
+ * Opens (and initializes if necessary) the IndexedDB for identity storage.
+ * Handles database versioning and object store creation for identities and room keys.
+ * 
+ * @async
+ * @returns {Promise<IDBDatabase>} A promise that resolves to the opened IDBDatabase instance.
+ * @throws {Error} If the database fails to open or schema upgrade fails.
+ */
 async function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -54,6 +62,16 @@ async function openDB(): Promise<IDBDatabase> {
   });
 }
 
+/**
+ * Saves an E2E encryption key for a specific chatroom to the local database.
+ * Supports an optional expiration time for temporary keys.
+ * 
+ * @async
+ * @param {string} chatroomId - The unique identifier of the chatroom.
+ * @param {string} keyBase64 - The base64 encoded symmetric key.
+ * @param {number} [expiresAt] - Optional timestamp (ms) when the key should expire.
+ * @returns {Promise<void>}
+ */
 export async function saveRoomKey(chatroomId: string, keyBase64: string, expiresAt?: number): Promise<void> {
   if (!chatroomId) {
     console.error("[identityManager] Cannot save room key: chatroomId is missing");
@@ -70,6 +88,14 @@ export async function saveRoomKey(chatroomId: string, keyBase64: string, expires
   });
 }
 
+/**
+ * Retrieves a stored room key for a chatroom from the local database.
+ * Handles both legacy string format and newer object format with expiration checks.
+ * 
+ * @async
+ * @param {string} chatroomId - The unique identifier of the chatroom.
+ * @returns {Promise<string | null>} The base64 encoded key, or null if not found or expired.
+ */
 export async function getRoomKey(chatroomId: string): Promise<string | null> {
   if (!chatroomId) return null;
   const db = await openDB();
@@ -104,6 +130,12 @@ export async function getRoomKey(chatroomId: string): Promise<string | null> {
   });
 }
 
+/**
+ * Deletes all stored room keys from the local database.
+ * 
+ * @async
+ * @returns {Promise<void>}
+ */
 export async function clearRoomKeys(): Promise<void> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -115,6 +147,14 @@ export async function clearRoomKeys(): Promise<void> {
   });
 }
 
+/**
+ * Persists a user identity to the local database and sets it as the active identity.
+ * 
+ * @async
+ * @param {Identity} identity - The identity object containing keys and metadata.
+ * @returns {Promise<void>}
+ * @throws {Error} If saving fails or database schema is invalid.
+ */
 export async function saveIdentity(identity: Identity): Promise<void> {
   if (!identity || !identity.aid) {
     console.error("[identityManager] Cannot save identity: aid is missing");
@@ -144,6 +184,14 @@ export async function saveIdentity(identity: Identity): Promise<void> {
   });
 }
 
+/**
+ * Retrieves the currently active identity from the local database.
+ * If no active identity is set in localStorage, falls back to the first available identity in DB.
+ * Automatically backfills top-level public keys from key pairs if missing.
+ * 
+ * @async
+ * @returns {Promise<Identity | null>} The active identity or null if no identities exist.
+ */
 export async function getIdentity(): Promise<Identity | null> {
   const db = await openDB();
   const activeAid = localStorage.getItem(ACTIVE_IDENTITY_KEY);
@@ -186,6 +234,12 @@ export async function getIdentity(): Promise<Identity | null> {
   });
 }
 
+/**
+ * Retrieves all stored identities from the local database.
+ * 
+ * @async
+ * @returns {Promise<Identity[]>} An array of all stored identities.
+ */
 export async function getAllIdentities(): Promise<Identity[]> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -204,6 +258,13 @@ export async function getAllIdentities(): Promise<Identity[]> {
   });
 }
 
+/**
+ * Switches the active identity by AID.
+ * 
+ * @async
+ * @param {string} aid - The unique identifier of the identity to switch to.
+ * @returns {Promise<Identity | null>} The new active identity, or null if not found.
+ */
 export async function switchIdentity(aid: string): Promise<Identity | null> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -227,6 +288,14 @@ export async function switchIdentity(aid: string): Promise<Identity | null> {
   });
 }
 
+/**
+ * Deletes an identity from the local database.
+ * If no AID is provided, deletes the currently active identity.
+ * 
+ * @async
+ * @param {string} [aid] - Optional AID of the identity to delete.
+ * @returns {Promise<void>}
+ */
 export async function clearIdentity(aid?: string): Promise<void> {
   const db = await openDB();
   const targetAid = aid || localStorage.getItem(ACTIVE_IDENTITY_KEY);
@@ -246,6 +315,14 @@ export async function clearIdentity(aid?: string): Promise<void> {
   });
 }
 
+/**
+ * Generates a new cryptographic identity (Ed25519 for signing, X25519 for exchange).
+ * Automatically saves the new identity to the local database.
+ * 
+ * @async
+ * @param {string} username - The username to associate with the new identity.
+ * @returns {Promise<Identity>} The newly generated and saved identity.
+ */
 export async function generateIdentity(username: string): Promise<Identity> {
   // 1. Generate Identity Key Pair (Ed25519 for signing)
   const identityKeyPair = (await window.crypto.subtle.generateKey(

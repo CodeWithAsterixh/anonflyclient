@@ -2,6 +2,14 @@ import { getAPIBaseURL } from "lib/constants/api";
 import { getIdentity, type Identity } from "../helpers/identityManager";
 import { setSessionUser, clearSessionUser } from "../helpers/authStorage";
 
+/**
+ * Fetches the premium status for the current user from the server.
+ * 
+ * @async
+ * @param {string} token - The authentication token.
+ * @returns {Promise<Object>} The premium status data.
+ * @throws {Error} If the request fails or returns an error.
+ */
 export const fetchPremiumStatus = async (token: string) => {
   try {
     const response = await fetch(`${getAPIBaseURL()}/auth/premium-status`, {
@@ -21,6 +29,18 @@ export const fetchPremiumStatus = async (token: string) => {
   }
 };
 
+/**
+ * Performs a cryptographic handshake to authenticate the user.
+ * 1. Requests a challenge nonce from the server.
+ * 2. Signs the nonce using the user's private Ed25519 key.
+ * 3. Sends the signature back to the server for verification.
+ * 4. Stores the resulting session token and user details in cookies.
+ * 
+ * @async
+ * @param {Identity} identity - The user identity containing key pairs and metadata.
+ * @returns {Promise<Object>} The session data including token and user info.
+ * @throws {Error} If any step of the handshake or verification fails.
+ */
 export const performHandshake = async (identity: Identity) => {
   try {
     // 1. Request Challenge
@@ -81,6 +101,12 @@ export const performHandshake = async (identity: Identity) => {
   }
 };
 
+/**
+ * Logs out the current user by clearing session cookies and redirecting to the login page.
+ * 
+ * @async
+ * @returns {Promise<void>}
+ */
 export const logout = async () => {
   // Clear the auth cookie and session data
   clearSessionUser();

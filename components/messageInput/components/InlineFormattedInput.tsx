@@ -60,6 +60,7 @@ export const InlineFormattedInput = React.forwardRef<HTMLTextAreaElement, Inline
       whiteSpace: 'pre-wrap',
       wordBreak: 'break-word',
       width: '100%',
+      minHeight: '38px',
       maxHeight: `${maxHeight}px`,
       border: 'none',
       outline: 'none',

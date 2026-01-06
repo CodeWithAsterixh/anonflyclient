@@ -1,7 +1,7 @@
 import NoChatSelectedFallback from "../../../components/noChatSelectedFallback";
 import { getAPIBaseURL } from "../../../lib/constants/api";
 import React, { useEffect, useRef, useState, useContext } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, type MetaFunction } from "react-router";
 import { useChatroom } from "../../../hooks/useChatroom/index";
 import { useTheme } from "../../../hooks/useTheme/index";
 import { useTyping } from "../../../components/typingIndicator";
@@ -28,6 +28,17 @@ import {
   generateShareLink,
   checkAccess,
 } from "../../../lib/controllers/chatroomController";
+
+export const meta: MetaFunction = ({ params }) => {
+  const chatroomId = params.chatroomId;
+  return [
+    { title: `Chatroom ${chatroomId || ''} | Anonfly` },
+    { name: "description", content: "Join this private, encrypted chatroom on Anonfly. No registration, no logs, just secure conversation." },
+    { property: "og:title", content: `Secure Chatroom | Anonfly` },
+    { property: "og:description", content: "Join this private, encrypted chatroom. Secure and anonymous conversation." },
+    { name: "robots", content: "noindex, nofollow" },
+  ];
+};
 
 /**
  * ChatroomPage component displays the messages within a specific chatroom,

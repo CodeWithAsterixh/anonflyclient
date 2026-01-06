@@ -13,6 +13,8 @@ import type { Route } from "./+types/root";
 import { initializeAPI } from "../lib/constants/api";
 import { ThemeProvider } from "../hooks/useTheme/index";
 import { AuthProvider } from "./contexts/AuthContext";
+import { usePWA } from "../hooks/usePWA";
+import PWAInstallPrompt from "../components/pwaInstallPrompt";
 import "./app.css";
 
 /**
@@ -29,24 +31,27 @@ export async function loader({ request }: { request: Request }) {
   return { theme };
 }
 
+const BASE_URL = "https://anonfly.vercel.app";
+
 export const meta: Route.MetaFunction = () => [
   { title: "Anonfly | Secure, Anonymous & Free Messaging" },
   { name: "description", content: "Anonfly is the ultimate free, secure, and anonymous messaging platform. No registration, no tracking—just private chatrooms for everyone." },
   { name: "keywords", content: "anonymous chat, secure messaging, free chatrooms, private messaging, no registration chat, encrypted chat, anonfly" },
+  { rel: "canonical", href: BASE_URL },
   
   // Open Graph / Facebook
   { property: "og:type", content: "website" },
-  { property: "og:url", content: "https://anonfly.vercel.app" },
+  { property: "og:url", content: BASE_URL },
   { property: "og:title", content: "Anonfly | Secure, Anonymous & Free Messaging" },
   { property: "og:description", content: "Join anonymous chatrooms instantly. No tracking, no sign-ups. 100% secure and free." },
-  { property: "og:image", content: "/logo.svg" },
+  { property: "og:image", content: `${BASE_URL}/logo.svg` },
 
   // Twitter
   { name: "twitter:card", content: "summary_large_image" },
-  { name: "twitter:url", content: "https://anonfly.vercel.app" },
+  { name: "twitter:url", content: BASE_URL },
   { name: "twitter:title", content: "Anonfly | Secure, Anonymous & Free Messaging" },
   { name: "twitter:description", content: "Join anonymous chatrooms instantly. No tracking, no sign-ups. 100% secure and free." },
-  { name: "twitter:image", content: "/logo.svg" },
+  { name: "twitter:image", content: `${BASE_URL}/logo.svg` },
   
   // Theme Color for mobile browsers
   { name: "theme-color", content: "#2563eb" },
@@ -54,7 +59,8 @@ export const meta: Route.MetaFunction = () => [
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {rel: "icon", href:"/logo.svg"},
+  { rel: "icon", href: "/logo.svg" },
+  { rel: "manifest", href: "/manifest.json" },
   {
     rel: "preconnect",
     href: "https://fonts.gstatic.com",
@@ -85,6 +91,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "Anonfly",
+              "url": BASE_URL,
+              "description": "Secure, anonymous, and free messaging platform. No registration required.",
+              "applicationCategory": "CommunicationApplication",
+              "operatingSystem": "Any",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              },
+              "author": {
+                "@type": "Organization",
+                "name": "Anonfly"
+              }
+            })
+          }}
+        />
         {/* Inline script to prevent theme flash */}
         <script
           dangerouslySetInnerHTML={{
@@ -119,15 +148,37 @@ export function Layout({ children }: { children: React.ReactNode }) {
  */
 export default function App() {
   const { theme } = useLoaderData<typeof loader>();
+  const { showInstallPrompt, installApp, remindLater, cancelInstallation } = usePWA();
 
   useEffect(() => {
     initializeAPI();
+
+    // Register Service Worker
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/sw.js")
+          .then((registration) => {
+            console.log("SW registered: ", registration);
+          })
+          .catch((registrationError) => {
+            console.log("SW registration failed: ", registrationError);
+          });
+      });
+    }
   }, []);
 
   return (
     <ThemeProvider initialTheme={theme as "light" | "dark"}>
       <AuthProvider>
         <Outlet />
+        {showInstallPrompt && (
+          <PWAInstallPrompt 
+            onInstall={installApp} 
+            onRemindLater={remindLater} 
+            onCancel={cancelInstallation} 
+          />
+        )}
       </AuthProvider>
     </ThemeProvider>
   );

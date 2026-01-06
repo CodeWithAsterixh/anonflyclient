@@ -1,3 +1,17 @@
+import { type MetaFunction } from "react-router";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Dashboard | Anonfly - Secure Anonymous Chat" },
+    { name: "description", content: "Manage your private chatrooms and conversations on Anonfly. The ultimate platform for secure, anonymous, and free messaging." },
+    { property: "og:title", content: "Dashboard | Anonfly - Secure Anonymous Chat" },
+    { property: "og:description", content: "Your personal dashboard for secure and private conversations." },
+    { name: "twitter:title", content: "Dashboard | Anonfly - Secure Anonymous Chat" },
+    { name: "twitter:description", content: "Your personal dashboard for secure and private conversations." },
+    { rel: "canonical", href: "https://anonfly.vercel.app/" },
+  ];
+};
+
 export default function Home() {
   return (
     <div className="flex items-center justify-center h-full bg-white text-gray-400">

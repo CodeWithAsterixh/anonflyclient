@@ -11,6 +11,8 @@ const Logo: React.FC<LogoProps> = ({ className = "", size = 40, showText = false
         fill="none" 
         xmlns="http://www.w3.org/2000/svg"
         className="drop-shadow-md"
+        role="img"
+        aria-label="Anonfly Logo - Secure and Anonymous Messaging"
       >
         <defs>
           <linearGradient id="logo-shield-grad" x1="0%" y1="0%" x2="100%" y2="100%">

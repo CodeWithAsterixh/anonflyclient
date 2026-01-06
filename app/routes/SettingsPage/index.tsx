@@ -14,10 +14,25 @@ import {
   Trash2,
   Users,
   Crown,
+  Download,
+  Smartphone,
+  CheckCircle2,
+  Info
 } from 'lucide-react';
 import React, { useContext } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, type MetaFunction } from 'react-router';
+import { usePWA } from '../../../hooks/usePWA';
 import AlertDialog from '../../../components/alertDialog';
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Settings | Anonfly - Manage Your Identity" },
+    { name: "description", content: "Manage your Anonfly account, identities, and app settings. Securely control your anonymous presence." },
+    { property: "og:title", content: "Settings | Anonfly" },
+    { property: "og:description", content: "Manage your Anonfly account and security settings." },
+    { name: "robots", content: "noindex, nofollow" },
+  ];
+};
 import Logo from '../../../components/logo';
 import Input from '../../../components/ui/input';
 import { requireAuth } from '../../middleware/auth';
@@ -71,6 +86,8 @@ const SettingsPage: React.FC = () => {
     logout,
     authLoading
   });
+
+  const { isInstallable, isInstalled, installApp, appVersion, updateAvailable, updateApp } = usePWA();
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Not available';
@@ -401,10 +418,68 @@ const SettingsPage: React.FC = () => {
             )}
           </section>
 
+          {/* App Management Section */}
+          <section className="space-y-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 px-2 flex items-center gap-2">
+              <Smartphone size={20} className="text-blue-500" />
+              App Management
+            </h3>
+            <div className="bg-white dark:bg-gray-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 divide-y divide-gray-50 dark:divide-gray-800">
+              <div className="p-4 sm:p-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400 shrink-0">
+                      <Info size={24} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-gray-100">App Status</h4>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {isInstalled ? 'App is installed on your device' : 'App is running in browser'}
+                      </p>
+                    </div>
+                  </div>
+                  {isInstallable && !isInstalled && (
+                    <button
+                      onClick={installApp}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20"
+                    >
+                      <Download size={18} />
+                      Install App
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {updateAvailable && (
+                <div className="p-4 sm:p-6 bg-green-50/30 dark:bg-green-900/10">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 text-green-700 dark:text-green-300">
+                      <CheckCircle2 size={18} />
+                      <p className="text-sm font-medium">A new version of Anonfly is available!</p>
+                    </div>
+                    <button
+                      onClick={updateApp}
+                      className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-green-500/20"
+                    >
+                      Update Now
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Current Version</span>
+                  <span className="text-sm font-bold text-gray-900 dark:text-gray-100">v{appVersion}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* Privacy & App Info */}
           <section className="pt-8 border-t border-gray-200 dark:border-gray-800">
             <div className="text-center space-y-2">
-              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Anonfly v1.0.0</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Anonfly v{appVersion}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 max-w-md mx-auto">
                 Anonfly is built with privacy in mind. All your chat data is encrypted and identities are managed locally. 
                 We don't track your IP address or store any personal information.

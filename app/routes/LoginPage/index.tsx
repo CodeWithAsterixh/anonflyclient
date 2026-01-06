@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate, useLocation, type MetaFunction } from "react-router";
 import { useAuth } from "../../../hooks/useAuth/index";
 import { validateUsername } from "../../../lib/helpers/validation";
 import { Loader2, Users } from "lucide-react";
@@ -14,6 +14,16 @@ import Logo from "../../../components/logo";
 import AccountSelectionModal from "./components/AccountSelectionModal";
 import Input from "../../../components/ui/input";
 import Loader from "../../../components/ui/loader";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Join Anonfly | Anonymous & Secure Chat" },
+    { name: "description", content: "Join Anonfly instantly without registration. Choose a temporary username and start chatting securely and anonymously for free." },
+    { property: "og:title", content: "Join Anonfly | Anonymous & Secure Chat" },
+    { property: "og:description", content: "No sign-up, no tracking. Just pick a name and join the private conversation." },
+    { rel: "canonical", href: "https://anonfly.vercel.app/login" },
+  ];
+};
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState<string>("");

@@ -1,10 +1,20 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate, type MetaFunction } from 'react-router';
 import { validateShareLink } from '../../../lib/controllers/chatroomController';
 import { useAuth } from '../../../hooks/useAuth';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Background } from '../../../components/background';
 import { useTheme } from '../../../hooks/useTheme';
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Join Chatroom | Anonfly" },
+    { name: "description", content: "Validating your invitation to join a private chatroom on Anonfly." },
+    { property: "og:title", content: "Join Chatroom | Anonfly" },
+    { property: "og:description", content: "You've been invited to join a secure and private chatroom on Anonfly." },
+    { name: "robots", content: "noindex, nofollow" },
+  ];
+};
 
 const JoinLinkPage: React.FC = () => {
   const { token } = useParams<{ token: string }>();

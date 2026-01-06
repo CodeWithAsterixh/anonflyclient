@@ -72,8 +72,26 @@ self.addEventListener('fetch', (event) => {
 });
 
 // Listen for update message
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
+self.addEventListener('message', async (event) => {
+  if (!event.data || event.data.type !== 'SKIP_WAITING') {
+    return;
   }
+
+  if (!event.source) {
+    return;
+  }
+
+  const client = await self.clients.get(event.source.id);
+  if (!client) {
+    return;
+  }
+
+  const allowedOrigin = self.location.origin;
+
+  if (!client.url.startsWith(allowedOrigin)) {
+    return;
+  }
+
+  self.skipWaiting();
 });
+

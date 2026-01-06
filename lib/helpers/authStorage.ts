@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 import type { User } from '../../types/User';
 
-const SESSION_KEY = 'anonfly_session_user';
+const SESSION_KEY = import.meta.env.VITE_SESSION_COOKIE_KEY as string;
 
 export interface SessionPayload {
   user: User;

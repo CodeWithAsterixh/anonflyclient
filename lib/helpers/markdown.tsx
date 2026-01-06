@@ -10,6 +10,21 @@ import React from 'react';
  * - `inline code`
  * - [text](url) or auto-linking URLs
  */
+
+/**
+ * Validates if a URL is safe by checking its protocol against an allowlist.
+ */
+const isSafeUrl = (url: string): boolean => {
+  try {
+    const urlObj = new URL(url);
+    const safeProtocols = ['http:', 'https:', 'mailto:', 'tel:'];
+    return safeProtocols.includes(urlObj.protocol);
+  } catch {
+    // If URL parsing fails, treat relative URLs as safe if they don't contain dangerous protocols
+    return !url.toLowerCase().match(/^(javascript|data|vbscript):/i);
+  }
+};
+
 export const formatMessage = (content: string): React.ReactNode[] => {
   if (!content) return [];
 
@@ -48,7 +63,7 @@ export const formatMessage = (content: string): React.ReactNode[] => {
       name: 'link',
       regex: /\[(.*?)\]\((.*?)\)/g,
       render: (text: string, url: string) => {
-        const isSafe = !url.toLowerCase().startsWith('javascript:');
+        const isSafe = isSafeUrl(url);
         const href = isSafe ? (url.startsWith('http') ? url : `https://${url}`) : '#';
         return (
           <a 
@@ -67,7 +82,7 @@ export const formatMessage = (content: string): React.ReactNode[] => {
       name: 'autolink',
       regex: /(https?:\/\/[^\s]+)/g,
       render: (url: string) => {
-        const isSafe = !url.toLowerCase().startsWith('javascript:');
+        const isSafe = isSafeUrl(url);
         return isSafe ? (
           <a 
             key={url} 

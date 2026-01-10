@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Outlet, useParams, useLoaderData, useLocation } from 'react-router';
-import ChatroomListPage from '../ChatroomListPage';
-import NoChatSelectedFallback from '../../../components/noChatSelectedFallback';
-import { requireAuth } from '../../middleware/auth';
-import ProtectedRoute from '../../../components/protectedRoute';
-import { useAuth } from '../../../hooks/useAuth/index';
-import { useChatroomList } from '../../../hooks/useChatroomList/index';
-import { ChatLayoutContext } from '../../contexts/ChatLayoutContext';
+import React, { useState, useEffect, useMemo } from "react";
+import { Outlet, useParams, useLoaderData, useLocation } from "react-router";
+import ChatroomListPage from "../ChatroomListPage";
+import NoChatSelectedFallback from "../../../components/noChatSelectedFallback";
+import { requireAuth } from "../../middleware/auth";
+import ProtectedRoute from "../../../components/protectedRoute";
+import { useAuth } from "../../../hooks/useAuth/index";
+import { useChatroomList } from "../../../hooks/useChatroomList/index";
+import { ChatLayoutContext } from "../../contexts/ChatLayoutContext";
 
 export async function loader({ request }: { request: Request }) {
   const { user, token } = await requireAuth(request);
@@ -15,33 +15,36 @@ export async function loader({ request }: { request: Request }) {
 
 const ChatLayout: React.FC = () => {
   const location = useLocation();
-  const isSettingsPage = location.pathname === '/settings';
-  const { user: serverUser, token: serverToken } = useLoaderData<typeof loader>();
-  const { 
-    user: clientUser, 
-    token: clientToken, 
-    identities, 
+  const isSettingsPage = location.pathname === "/settings";
+  const { user: serverUser, token: serverToken } =
+    useLoaderData<typeof loader>();
+  const {
+    user: clientUser,
+    token: clientToken,
+    identities,
     isLoading: authLoading,
-    switchAccount, 
+    switchAccount,
     deleteAccount,
     logout,
-    refreshUserInfo 
+    refreshUserInfo,
   } = useAuth();
-  
-  const { 
-    chatrooms, 
-    loading: loadingChatrooms, 
-    error: chatroomError, 
-    retryCountdown 
+
+  const {
+    chatrooms,
+    loading: loadingChatrooms,
+    error: chatroomError,
+    retryCountdown,
   } = useChatroomList();
-  
+
   // Prefer client-side state for real-time updates, but fallback to server-side for initial render
   const user = clientUser || serverUser;
   const token = clientToken || serverToken;
 
   const { chatroomId } = useParams<{ chatroomId: string }>();
   const [isMobile, setIsMobile] = useState(false);
-  const [showChatList, setShowChatList] = useState(!chatroomId && !isSettingsPage);
+  const [showChatList, setShowChatList] = useState(
+    !chatroomId && !isSettingsPage
+  );
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Only run on client side
@@ -62,8 +65,8 @@ const ChatLayout: React.FC = () => {
       }
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [chatroomId, isSettingsPage]);
 
   // Auto-hide list on mobile when chatroom or settings is selected
@@ -81,37 +84,43 @@ const ChatLayout: React.FC = () => {
     setShowChatList(true); // Show list again on mobile
   };
 
-  const contextValue = useMemo(() => ({
-    user,
-    token,
-    identities,
-    authLoading,
-    chatrooms,
-    loadingChatrooms,
-    chatroomError,
-    retryCountdown,
-    switchAccount,
-    deleteAccount,
-    logout,
-    refreshUserInfo,
-    isMobile,
-    onBack: handleBackFromChat
-  }), [
-    user,
-    token,
-    identities,
-    authLoading,
-    chatrooms,
-    loadingChatrooms,
-    chatroomError,
-    retryCountdown,
-    switchAccount,
-    deleteAccount,
-    logout,
-    refreshUserInfo,
-    isMobile,
-    handleBackFromChat
-  ]);
+  const contextValue = useMemo(
+    () => ({
+      user,
+      token,
+      identities,
+      authLoading,
+      chatrooms,
+      loadingChatrooms,
+      chatroomError,
+      retryCountdown,
+      switchAccount,
+      deleteAccount,
+      logout,
+      refreshUserInfo,
+      isMobile,
+      onBack: handleBackFromChat,
+    }),
+    [
+      user,
+      token,
+      identities,
+      authLoading,
+      chatrooms,
+      loadingChatrooms,
+      chatroomError,
+      retryCountdown,
+      switchAccount,
+      deleteAccount,
+      logout,
+      refreshUserInfo,
+      isMobile,
+      handleBackFromChat,
+    ]
+  );
+
+  const showCLnonMobile = showChatList || !isMobile ? "block" : "hidden";
+  const showCLonMobile = showChatList || !isMobile ? "hidden" : "flex";
 
   return (
     <ProtectedRoute>
@@ -123,11 +132,7 @@ const ChatLayout: React.FC = () => {
           */}
           <div
             className={`${
-              isHydrated
-                ? showChatList || !isMobile
-                  ? 'block'
-                  : 'hidden'
-                : 'block md:block'
+              isHydrated ? showCLnonMobile : "block md:block"
             } w-full md:w-80 lg:w-1/4 border-r h-full border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col transition-all duration-300 ease-in-out`}
           >
             <ChatroomListPage onChatroomSelect={handleSelectChatroom} />
@@ -139,11 +144,7 @@ const ChatLayout: React.FC = () => {
           */}
           <div
             className={`${
-              isHydrated
-                ? showChatList && isMobile
-                  ? 'hidden'
-                  : 'flex'
-                : 'hidden md:flex'
+              isHydrated ? showCLonMobile : "hidden md:flex"
             } flex-1 flex-col overflow-hidden relative isolate w-full md:w-auto bg-gray-50 dark:bg-gray-900 transition-colors duration-300`}
           >
             {chatroomId || isSettingsPage ? (

@@ -18,7 +18,7 @@ export async function requireAuth(request: Request) {
   try {
     // Decode and parse the session cookie
     const session = JSON.parse(decodeURIComponent(sessionCookie));
-    if (session && session.user) {
+    if (session?.user) {
       return {
         user: session.user,
         token: session.token || null,
@@ -26,7 +26,7 @@ export async function requireAuth(request: Request) {
     } else {
       throw redirect("/login");
     }
-  } catch (e) {
+  } catch{
     // If parsing fails, the cookie is invalid
     throw redirect("/login");
   }

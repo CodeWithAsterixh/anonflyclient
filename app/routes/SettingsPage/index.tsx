@@ -2,8 +2,12 @@ import {
   Activity,
   ArrowLeft,
   Calendar,
+  CheckCircle2,
+  Crown,
+  Download,
   ExternalLink,
   Globe,
+  Info,
   Key,
   Lock,
   LogOut,
@@ -11,18 +15,20 @@ import {
   PlusCircle,
   RefreshCw,
   Shield,
-  Trash2,
-  Users,
-  Crown,
-  Download,
   Smartphone,
-  CheckCircle2,
-  Info
+  Trash2,
+  Users
 } from 'lucide-react';
 import React, { useContext } from 'react';
 import { useNavigate, type MetaFunction } from 'react-router';
-import { usePWA } from '../../../hooks/usePWA';
 import AlertDialog from '../../../components/alertDialog';
+import Logo from '../../../components/logo';
+import Input from '../../../components/ui/input';
+import { usePWA } from '../../../hooks/usePWA';
+import { useSettings } from '../../../hooks/useSettings';
+import { ChatLayoutContext } from '../../contexts/ChatLayoutContext';
+import { requireAuth } from '../../middleware/auth';
+import HideableField from './components/HideableField';
 
 export const meta: MetaFunction = () => {
   return [
@@ -33,12 +39,6 @@ export const meta: MetaFunction = () => {
     { name: "robots", content: "noindex, nofollow" },
   ];
 };
-import Logo from '../../../components/logo';
-import Input from '../../../components/ui/input';
-import { requireAuth } from '../../middleware/auth';
-import { ChatLayoutContext } from '../../contexts/ChatLayoutContext';
-import { useSettings } from '../../../hooks/useSettings';
-import HideableField from './components/HideableField';
 
 export async function loader({ request }: { request: Request }) {
   const { user, token } = await requireAuth(request);
@@ -68,7 +68,6 @@ const SettingsPage: React.FC = () => {
   const {
     alertDialog,
     setAlertDialog,
-    showDialog,
     currentIdentity,
     myRooms,
     roomAction,

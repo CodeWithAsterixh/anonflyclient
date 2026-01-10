@@ -15,7 +15,7 @@ import ChatroomCard from "../../../components/chatroomCard";
 import CreateChatroomModal from "../../../components/createChatroomModal";
 import Logo from "../../../components/logo";
 import { useTheme } from "../../../hooks/useTheme/index";
-import { Menu, Transition } from "@headlessui/react";
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import type { ChatroomListPageProps } from "./types";
 import { ChatLayoutContext } from "../../contexts/ChatLayoutContext";
@@ -60,7 +60,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
           <div className="flex items-center gap-2">
             {/* Account Switcher */}
             <Menu as="div" className="relative inline-block text-left">
-              <Menu.Button className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors group">
+              <MenuButton className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors group">
                 <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-sm border-2 border-white dark:border-gray-700 shadow-sm group-hover:bg-blue-200 dark:group-hover:bg-blue-800 transition-colors">
                   {user?.username?.[0].toUpperCase() || "?"}
                 </div>
@@ -68,7 +68,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                   size={16}
                   className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300"
                 />
-              </Menu.Button>
+              </MenuButton>
 
               <Transition
                 as={Fragment}
@@ -79,7 +79,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
               >
-                <Menu.Items className="absolute right-0 mt-2 w-64 origin-top-right rounded-xl bg-white dark:bg-gray-800 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none z-30 p-1.5 border border-gray-100 dark:border-gray-700">
+                <MenuItems className="absolute right-0 mt-2 w-64 origin-top-right rounded-xl bg-white dark:bg-gray-800 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none z-30 p-1.5 border border-gray-100 dark:border-gray-700">
                   <div className="px-3 py-2 border-b border-gray-50 dark:border-gray-700 mb-1">
                     <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                       Switch Account
@@ -88,12 +88,12 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
 
                   <div className="max-h-60 overflow-y-auto flex flex-col gap-1">
                     {identities.map((identity) => (
-                      <Menu.Item key={identity.aid}>
-                        {({ active }) => (
+                      <MenuItem key={identity.aid}>
+                        {({ focus }) => (
                           <button
                             onClick={() => switchAccount(identity.aid)}
                             className={`flex w-full items-center justify-between px-3 py-2.5 rounded-lg transition-all ${
-                              active
+                              focus
                                 ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
                                 : "text-gray-700 dark:text-gray-300"
                             } ${
@@ -124,17 +124,17 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                             )}
                           </button>
                         )}
-                      </Menu.Item>
+                      </MenuItem>
                     ))}
                   </div>
 
                   <div className="mt-1 pt-1 border-t border-gray-50 dark:border-gray-700 flex flex-col gap-1">
-                    <Menu.Item>
-                      {({ active }) => (
+                    <MenuItem>
+                      {({ focus }) => (
                         <button
                           onClick={() => setIsModalOpen(true)}
                           className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                            active
+                            focus
                               ? "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300"
                               : "text-gray-700 dark:text-gray-300"
                           }`}
@@ -145,13 +145,13 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                           <span className="font-medium">Create Chatroom</span>
                         </button>
                       )}
-                    </Menu.Item>
-                    <Menu.Item>
-                      {({ active }) => (
+                    </MenuItem>
+                    <MenuItem>
+                      {({ focus }) => (
                         <button
                           onClick={toggleTheme}
                           className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                            active
+                            focus
                               ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
                               : "text-gray-700 dark:text-gray-300"
                           }`}
@@ -174,13 +174,13 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                           </span>
                         </button>
                       )}
-                    </Menu.Item>
-                    <Menu.Item>
-                      {({ active }) => (
+                    </MenuItem>
+                    <MenuItem>
+                      {({ focus }) => (
                         <button
                           onClick={() => navigate("/settings")}
                           className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                            active
+                            focus
                               ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
                               : "text-gray-700 dark:text-gray-300"
                           }`}
@@ -191,13 +191,13 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                           <span className="font-medium">Settings</span>
                         </button>
                       )}
-                    </Menu.Item>
-                    <Menu.Item>
-                      {({ active }) => (
+                    </MenuItem>
+                    <MenuItem>
+                      {({ focus }) => (
                         <button
                           onClick={logout}
                           className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                            active
+                            focus
                               ? "bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300"
                               : "text-gray-700 dark:text-gray-300"
                           }`}
@@ -208,9 +208,9 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                           <span className="font-medium">Logout</span>
                         </button>
                       )}
-                    </Menu.Item>
+                    </MenuItem>
                   </div>
-                </Menu.Items>
+                </MenuItems>
               </Transition>
             </Menu>
           </div>

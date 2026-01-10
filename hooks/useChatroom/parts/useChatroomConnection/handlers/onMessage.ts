@@ -318,7 +318,7 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
           break;
 
         case "userTyping":
-          window.dispatchEvent(new CustomEvent('chatroom-typing', { detail: message }));
+          globalThis.window.dispatchEvent(new CustomEvent('chatroom-typing', { detail: message }));
           break;
       }
     } catch (e) {

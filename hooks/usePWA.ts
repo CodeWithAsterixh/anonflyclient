@@ -23,8 +23,8 @@ export const usePWA = () => {
 
   useEffect(() => {
     // Check if app is already installed
-    if (window.matchMedia('(display-mode: standalone)').matches || 
-        (window.navigator as any).standalone === true) {
+    if (globalThis.window.matchMedia('(display-mode: standalone)').matches || 
+        (globalThis.window.navigator as any).standalone === true) {
       setIsInstalled(true);
     }
 
@@ -57,8 +57,8 @@ export const usePWA = () => {
       setDeferredPrompt(null);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
+    globalThis.window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    globalThis.window.addEventListener('appinstalled', handleAppInstalled);
 
     // Service Worker update detection
     if ('serviceWorker' in navigator) {
@@ -85,14 +85,14 @@ export const usePWA = () => {
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!refreshing) {
           refreshing = true;
-          window.location.reload();
+          globalThis.window.location.reload();
         }
       });
     }
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
+      globalThis.window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      globalThis.window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 

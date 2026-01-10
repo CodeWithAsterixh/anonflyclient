@@ -136,7 +136,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   }, [visibleMessages]);
 
   return (
-    <div className="isolate flex h-[100dvh] bg-transparent relative overflow-hidden transition-colors duration-300 w-full">
+    <div className="isolate flex h-dvh bg-transparent relative overflow-hidden transition-colors duration-300 w-full">
       <div className="flex-1 flex flex-col min-w-0 relative h-full">
         {/* Header */}
         <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
@@ -168,7 +168,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                   className={`text-xs text-gray-500 dark:text-gray-400 transition-colors text-left hover:text-blue-500`}
                 >
                   {participants.length} participant
-                  {participants.length !== 1 ? "s" : ""} •{" "}
+                  {participants.length === 1 ? "" : "s"} •{" "}
                   {isConnected ? (
                     <span className="text-green-500 dark:text-green-400 font-medium">
                       connected
@@ -228,7 +228,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
         <div
           ref={messagePortalRootRef}
           id="message-portal-root"
-          className="absolute inset-0 z-[100] size-full pointer-events-none"
+          className="absolute inset-0 z-100 size-full pointer-events-none"
         />
 
         {/* Messages Area */}
@@ -299,14 +299,23 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
       {!isMobile && (
         <>
           {/* Backdrop for screens between 768px and 1024px */}
-          <div 
-            className={`fixed inset-0 bg-black/20 backdrop-blur-[1px] z-[40] lg:hidden transition-opacity duration-300 ${
+          <input 
+            type="button"
+            tabIndex={0}
+            className={`fixed inset-0 bg-black/20 backdrop-blur-[1px] z-40 lg:hidden transition-opacity duration-300 ${
               isOptionsOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
             }`}
             onClick={() => setIsOptionsOpen(false)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setIsOptionsOpen(false);
+              }
+            }}
+            aria-label="Close room options overlay"
           />
           <div 
-            className={`z-[50] lg:z-auto transition-all duration-300 ease-in-out absolute right-0 top-0 h-full lg:relative lg:h-auto overflow-hidden ${
+            className={`z-50 lg:z-auto transition-all duration-300 ease-in-out absolute right-0 top-0 h-full lg:relative lg:h-auto overflow-hidden ${
               isOptionsOpen 
                 ? "translate-x-0 w-80 opacity-100 shadow-2xl lg:shadow-none" 
                 : "translate-x-full lg:translate-x-0 w-0 lg:w-0 opacity-0"

@@ -1,6 +1,5 @@
 import {
   Plus,
-  Users,
   ChevronDown,
   Check,
   LogOut,
@@ -8,15 +7,14 @@ import {
   Moon,
   Settings,
 } from "lucide-react";
-import React, { useState, useContext } from "react";
+import React, { useState, useContext,Fragment } from "react";
 import { useNavigate } from "react-router";
 import ChatListSkeleton from "../../../components/chatListSkeleton";
-import ChatroomCard from "../../../components/chatroomCard";
 import CreateChatroomModal from "../../../components/createChatroomModal";
 import Logo from "../../../components/logo";
+import ErrorDisplay from "./components/errorDisplay";
 import { useTheme } from "../../../hooks/useTheme/index";
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from "@headlessui/react";
-import { Fragment } from "react";
 import type { ChatroomListPageProps } from "./types";
 import { ChatLayoutContext } from "../../contexts/ChatLayoutContext";
 
@@ -50,6 +48,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
   const handleChatroomClick = (chatroomId: string) => {
     onChatroomSelect?.(chatroomId);
   };
+  
 
   return (
     <>
@@ -219,55 +218,14 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
         <div className="flex-1">
           {loading ? (
             <ChatListSkeleton />
-          ) : error ? (
-            <div className="flex flex-col items-center justify-center h-64 text-center">
-              <div className="w-16 h-16 bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 rounded-full flex items-center justify-center mb-4">
-                <Users size={32} />
-              </div>
-              <p className="text-gray-600 dark:text-gray-400 font-medium">
-                {error}
-              </p>
-              {retryCountdown !== null && (
-                <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
-                  Retrying in{" "}
-                  <span className="font-bold text-blue-500">
-                    {retryCountdown}s
-                  </span>
-                  ...
-                </p>
-              )}
-            </div>
-          ) : chatrooms.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-center">
-              <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 rounded-full flex items-center justify-center mb-4">
-                <Users size={32} />
-              </div>
-              <p className="text-gray-500 dark:text-gray-400 font-medium">
-                No chatrooms found
-              </p>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="mt-4 text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-              >
-                Create the first one!
-              </button>
-            </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4">
-              {chatrooms.map((room) => (
-                <ChatroomCard
-                  key={room.id}
-                  id={room.id}
-                  roomname={room.roomname}
-                  description={room.description || ""}
-                  participantCount={room.participantCount}
-                  lastMessage={room.lastMessage}
-                  isLocked={room.isLocked}
-                  isPrivate={room.isPrivate}
-                  onClick={() => handleChatroomClick(room.id)}
-                />
-              ))}
-            </div>
+            <ErrorDisplay
+              error={error}
+              chatrooms={chatrooms}
+              retryCountdown={retryCountdown}
+              setIsModalOpen={setIsModalOpen}
+              handleChatroomClick={handleChatroomClick}
+            />
           )}
         </div>
       </div>

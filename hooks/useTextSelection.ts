@@ -21,7 +21,7 @@ export const useTextSelection = (textareaRef: React.RefObject<HTMLTextAreaElemen
 
     const textarea = textareaRef.current;
     const div = document.createElement('div');
-    const style = window.getComputedStyle(textarea);
+    const style = globalThis.window.getComputedStyle(textarea);
 
     // Copy textarea styles to the mirror div
     const properties = [

@@ -1,4 +1,4 @@
-import { getChatWSURL } from "lib/constants/api";
+import { getChatWSURL } from "../constants/api";
 
 interface WebSocketMessage {
   type: string;
@@ -7,14 +7,14 @@ interface WebSocketMessage {
 
 class WebSocketController {
   private ws: WebSocket | null = null;
-  private messageHandlers: Map<string, ((data: any) => void)[]> = new Map();
+  private readonly messageHandlers: Map<string, ((data: any) => void)[]> = new Map();
 
   public connect(onOpen?: () => void, onClose?: () => void, onError?: (event: Event) => void) {
     if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
       return;
     }
 
-    const wsUrl = typeof window !== 'undefined' ? getChatWSURL() : getChatWSURL();
+    const wsUrl = getChatWSURL();
     this.ws = new WebSocket(wsUrl);
 
     this.ws.onopen = () => {
@@ -28,7 +28,7 @@ class WebSocketController {
         if (handlers) {
           handlers.forEach(handler => handler(parsedMessage));
         }
-      } catch (error) {
+      } catch {
         // Silently fail parsing
       }
     };

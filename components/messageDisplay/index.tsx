@@ -63,7 +63,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
     if (showReactions) {
       document.body.style.overflow = "hidden";
       document.body.style.paddingRight = `${
-        window.innerWidth - document.documentElement.clientWidth
+        globalThis.window.innerWidth - document.documentElement.clientWidth
       }px`;
     } else {
       document.body.style.overflow = "";
@@ -103,9 +103,9 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
       }
     };
 
-    window.addEventListener("highlight-message" as any, handleHighlight);
+    globalThis.window.addEventListener("highlight-message" as any, handleHighlight);
     return () =>
-      window.removeEventListener("highlight-message" as any, handleHighlight);
+      globalThis.window.removeEventListener("highlight-message" as any, handleHighlight);
   }, [message.id]);
 
   const scrollToRepliedMessage = (messageId: string) => {
@@ -117,7 +117,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
         element.scrollIntoView({ behavior: "auto", block: "center" });
         
         // Dispatch highlight event
-        window.dispatchEvent(
+        globalThis.window.dispatchEvent(
           new CustomEvent("highlight-message", { detail: { messageId } })
         );
       } else {
@@ -125,7 +125,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
         const fallbackElement = document.querySelector(`[data-message-id="${messageId}"]`);
         if (fallbackElement) {
           fallbackElement.scrollIntoView({ behavior: "auto", block: "center" });
-          window.dispatchEvent(
+          globalThis.window.dispatchEvent(
             new CustomEvent("highlight-message", { detail: { messageId } })
           );
         }

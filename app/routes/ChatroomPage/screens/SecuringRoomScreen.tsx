@@ -17,7 +17,7 @@ const SecuringRoomScreen: React.FC<SecuringRoomScreenProps> = ({
   displayDetail,
 }) => {
   return (
-    <div className="flex flex-col h-[100dvh] bg-transparent relative overflow-hidden transition-colors duration-300">
+    <div className="flex flex-col h-dvh bg-transparent relative overflow-hidden transition-colors duration-300">
       <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
         {isMobile && <Logo showText size={32} className="py-2" />}
         <div className="w-full flex justify-between items-center bg-neutral-200/50 dark:bg-gray-800/50 px-4 py-3">

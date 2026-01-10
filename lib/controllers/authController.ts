@@ -57,7 +57,7 @@ export const performHandshake = async (identity: Identity) => {
 
     // 2. Sign Challenge
     const privateKeyBuffer = Uint8Array.from(atob(identity.identityKeyPair.privateKey), c => c.charCodeAt(0));
-    const privateKey = await window.crypto.subtle.importKey(
+    const privateKey = await globalThis.window.crypto.subtle.importKey(
       'pkcs8',
       privateKeyBuffer,
       { name: 'Ed25519' },
@@ -66,7 +66,7 @@ export const performHandshake = async (identity: Identity) => {
     );
 
     const nonceBuffer = new TextEncoder().encode(nonce);
-    const signatureBuffer = await window.crypto.subtle.sign(
+    const signatureBuffer = await globalThis.window.crypto.subtle.sign(
       { name: 'Ed25519' },
       privateKey,
       nonceBuffer
@@ -110,5 +110,5 @@ export const performHandshake = async (identity: Identity) => {
 export const logout = async () => {
   // Clear the auth cookie and session data
   clearSessionUser();
-  window.location.href = '/login';
+  globalThis.window.location.href = '/login';
 };

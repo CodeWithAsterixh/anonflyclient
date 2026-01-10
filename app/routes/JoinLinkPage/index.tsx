@@ -79,7 +79,7 @@ const JoinLinkPage: React.FC = () => {
         validateToken();
       } else if (!user) {
         // If not logged in, redirect to login with this URL as redirect
-        navigate(`/login?redirect_to=${encodeURIComponent(window.location.pathname)}`, { replace: true });
+        navigate(`/login?redirect_to=${encodeURIComponent(globalThis.window.location.pathname)}`, { replace: true });
       } else if (user && !authToken) {
         // We have a user but no token (handshake failed or in progress)
         setError('Connection issue: Please wait while we reconnect or try refreshing the page.');
@@ -90,7 +90,7 @@ const JoinLinkPage: React.FC = () => {
 
   return (
     <Background mode={theme} className="flex flex-col items-center justify-center min-h-screen p-4">
-      <main className="w-full h-[100dvh] px-4 flex items-center justify-center">
+      <main className="w-full h-dvh px-4 flex items-center justify-center">
         <div className="max-w-md w-full bg-white dark:bg-gray-900 rounded-3xl shadow-xl p-8 border border-gray-100 dark:border-gray-800 text-center space-y-6">
         {loading ? (
           <>

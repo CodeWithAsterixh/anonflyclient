@@ -12,7 +12,7 @@ export interface SessionPayload {
 export function setSessionUser(user: User, token: string) {
   try {
     const payload: SessionPayload = { user, token, ts: Date.now() };
-    const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+    const isSecure = globalThis.window?.location.protocol === 'https:';
     
     // Set cookie with 1 week expiration (7 days)
     Cookies.set(SESSION_KEY, JSON.stringify(payload), { 
@@ -20,7 +20,7 @@ export function setSessionUser(user: User, token: string) {
       sameSite: 'strict', 
       secure: isSecure 
     });
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 }
@@ -31,7 +31,7 @@ export function getSessionUser(): { user: User; token: string } | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as SessionPayload;
     return { user: parsed.user, token: parsed.token };
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -39,7 +39,7 @@ export function getSessionUser(): { user: User; token: string } | null {
 export function clearSessionUser() {
   try {
     Cookies.remove(SESSION_KEY);
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 }

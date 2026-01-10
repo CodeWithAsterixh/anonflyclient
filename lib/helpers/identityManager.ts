@@ -325,7 +325,7 @@ export async function clearIdentity(aid?: string): Promise<void> {
  */
 export async function generateIdentity(username: string): Promise<Identity> {
   // 1. Generate Identity Key Pair (Ed25519 for signing)
-  const identityKeyPair = (await window.crypto.subtle.generateKey(
+  const identityKeyPair = (await globalThis.window.crypto.subtle.generateKey(
     {
       name: 'Ed25519',
     },
@@ -334,7 +334,7 @@ export async function generateIdentity(username: string): Promise<Identity> {
   )) as CryptoKeyPair;
 
   // 2. Generate Exchange Key Pair (X25519 for E2EE)
-  const exchangeKeyPair = (await window.crypto.subtle.generateKey(
+  const exchangeKeyPair = (await globalThis.window.crypto.subtle.generateKey(
     {
       name: 'X25519',
     },
@@ -344,7 +344,7 @@ export async function generateIdentity(username: string): Promise<Identity> {
 
   // Export keys to Base64 DER (spki for public, pkcs8 for private)
   const exportKey = async (key: CryptoKey, format: 'spki' | 'pkcs8') => {
-    const exported = await window.crypto.subtle.exportKey(format, key);
+    const exported = await globalThis.window.crypto.subtle.exportKey(format, key);
     return btoa(String.fromCharCode(...new Uint8Array(exported)));
   };
 
@@ -357,8 +357,8 @@ export async function generateIdentity(username: string): Promise<Identity> {
   const exPrivKeyBase64 = await exportKey(exchangeKeyPair.privateKey, 'pkcs8');
 
   // 3. Derive AID (SHA-256 of Public Key)
-  const pubKeyBuffer = new Uint8Array(await window.crypto.subtle.exportKey('spki', identityKeyPair.publicKey));
-  const aidBuffer = await window.crypto.subtle.digest('SHA-256', pubKeyBuffer);
+  const pubKeyBuffer = new Uint8Array(await globalThis.window.crypto.subtle.exportKey('spki', identityKeyPair.publicKey));
+  const aidBuffer = await globalThis.window.crypto.subtle.digest('SHA-256', pubKeyBuffer);
   const aid = Array.from(new Uint8Array(aidBuffer))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');

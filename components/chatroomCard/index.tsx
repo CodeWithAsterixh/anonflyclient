@@ -28,7 +28,7 @@ const ChatroomCard: React.FC<ChatroomCardProps> = ({
       aria-label={`Join chatroom ${roomname}`}
     >
       {/* Avatar */}
-      <div className="relative flex-shrink-0">
+      <div className="relative shrink-0">
         <img 
           src={avatarUrl} 
           alt={roomname} 
@@ -59,7 +59,7 @@ const ChatroomCard: React.FC<ChatroomCardProps> = ({
       </div>
 
       {/* Users */}
-      <div className="flex items-center space-x-1 text-gray-500 dark:text-gray-400 text-sm flex-shrink-0">
+      <div className="flex items-center space-x-1 text-gray-500 dark:text-gray-400 text-sm shrink-0">
         <User className="h-5 w-5" />
         <span>{participantCount}</span>
       </div>

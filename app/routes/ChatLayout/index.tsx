@@ -51,13 +51,13 @@ const ChatLayout: React.FC = () => {
   useEffect(() => {
     setIsHydrated(true);
     // Set initial mobile state after hydration
-    const mobile = window.innerWidth < 768;
+    const mobile = globalThis.window.innerWidth < 768;
     setIsMobile(mobile);
     setShowChatList(!chatroomId && !isSettingsPage);
 
-    // Handle window resize to detect mobile/desktop
+    // Handle globalThis.window resize to detect mobile/desktop
     const handleResize = () => {
-      const mobile = window.innerWidth < 768;
+      const mobile = globalThis.window.innerWidth < 768;
       setIsMobile(mobile);
       // On desktop, always show list
       if (!mobile) {
@@ -65,8 +65,8 @@ const ChatLayout: React.FC = () => {
       }
     };
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    globalThis.window.addEventListener("resize", handleResize);
+    return () => globalThis.window.removeEventListener("resize", handleResize);
   }, [chatroomId, isSettingsPage]);
 
   // Auto-hide list on mobile when chatroom or settings is selected
@@ -125,7 +125,7 @@ const ChatLayout: React.FC = () => {
   return (
     <ProtectedRoute>
       <ChatLayoutContext.Provider value={contextValue}>
-        <div className="flex h-[100dvh] overflow-hidden bg-white dark:bg-gray-950 transition-colors duration-300">
+        <div className="flex h-dvh overflow-hidden bg-white dark:bg-gray-950 transition-colors duration-300">
           {/* Left Column: Chatroom List 
               - Desktop: Always visible (md:block)
               - Mobile: Shows based on JavaScript state or Tailwind hidden state

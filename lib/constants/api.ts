@@ -12,7 +12,7 @@ export function getChatWSURL(): string {
 
   // Prefer explicit env value when present
   if (envWs) {
-    if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+    if (globalThis.window?.location.protocol === 'https:') {
       return envWs.startsWith('ws://') ? envWs.replace(/^ws:\/\//i, 'wss://') : envWs;
     }
     return envWs;

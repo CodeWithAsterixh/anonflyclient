@@ -69,7 +69,7 @@ const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4 transition-colors duration-300">
+    <div className="min-h-dvh flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4 transition-colors duration-300">
       <div className="bg-white dark:bg-gray-900 p-8 rounded-3xl shadow-xl w-full max-w-md border border-gray-100 dark:border-gray-800">
         <div className="flex flex-col items-center mb-8">
           <Logo size={64} className="mb-4" />

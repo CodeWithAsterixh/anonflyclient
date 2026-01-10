@@ -1,7 +1,7 @@
 import React, { createContext, useContext, type ReactNode } from 'react';
 import { useAuthInternal } from '../../hooks/useAuth/useAuthInternal';
 import type { Identity } from '../../lib/helpers/identityManager';
-import type { User } from 'types/User';
+import type { User } from '../../types/User';
 
 export interface AuthContextType {
   user: User | null;

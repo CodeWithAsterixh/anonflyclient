@@ -64,9 +64,9 @@ export const useTyping = (chatroomId: string | undefined, wsRef: React.RefObject
       handleTypingEvent(e.detail);
     };
 
-    window.addEventListener('chatroom-typing', handleCustomEvent);
+    globalThis.window.addEventListener('chatroom-typing', handleCustomEvent);
     return () => {
-      window.removeEventListener('chatroom-typing', handleCustomEvent);
+      globalThis.window.removeEventListener('chatroom-typing', handleCustomEvent);
     };
   }, [handleTypingEvent]);
 

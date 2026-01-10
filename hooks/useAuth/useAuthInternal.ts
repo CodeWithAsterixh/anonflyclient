@@ -75,7 +75,7 @@ export const useAuthInternal = () => {
       loading: false,
       retryCountdown: null,
     }));
-    window.location.href = '/login';
+    globalThis.window.location.href = '/login';
   }, []);
 
   const switchAccount = useCallback(async (aid: string, redirectTo: string = '/') => {
@@ -93,7 +93,7 @@ export const useAuthInternal = () => {
           setSessionUser(user, sessionData.token);
           
           // Force a full page reload to clear all states and redirect
-          window.location.href = redirectTo;
+          globalThis.window.location.href = redirectTo;
         } catch (handshakeError) {
           // If handshake fails (bad network), we still "switch" but without a token
           // This prevents being locked out
@@ -101,7 +101,7 @@ export const useAuthInternal = () => {
           setSessionUser(user, ""); // Empty token for offline mode
           
           // Force a full page reload to clear all states and redirect
-          window.location.href = redirectTo;
+          globalThis.window.location.href = redirectTo;
         }
       }
     } catch (error) {
@@ -118,7 +118,7 @@ export const useAuthInternal = () => {
       const currentSession = getSessionUser();
       if (currentSession?.user?.userId === aid) {
         clearSessionUser();
-        window.location.href = '/login';
+        globalThis.window.location.href = '/login';
       } else {
         // Just refresh the identity list
         const allIdentities = await getAllIdentities();
@@ -301,7 +301,7 @@ export const useAuthInternal = () => {
       setSessionUser(user, sessionData.token);
       
       // Force a full page reload to clear all states and redirect
-      window.location.href = redirectTo;
+      globalThis.window.location.href = redirectTo;
     } catch (error: any) {
       setAuthState(prev => ({
         ...prev,

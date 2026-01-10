@@ -122,7 +122,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 try {
                   var theme = document.cookie.split('; ').find(row => row.startsWith('theme='))?.split('=')[1] || 
                               localStorage.getItem('theme') || 
-                              (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                              (globalThis.window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
                   document.documentElement.classList.add(theme);
                   document.body.style.backgroundColor = theme === 'dark' ? '#030712' : '#ffffff';
                 } catch (e) {}
@@ -131,7 +131,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           }}
         />
       </head>
-      <body className="bg-white dark:bg-gray-950 isolate relative min-h-[100dvh] transition-colors duration-300">
+      <body className="bg-white dark:bg-gray-950 isolate relative min-h-dvh transition-colors duration-300">
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -155,7 +155,7 @@ export default function App() {
 
     // Register Service Worker
     if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
+      globalThis.window.addEventListener("load", () => {
         navigator.serviceWorker
           .register("/sw.js")
           .then((registration) => {

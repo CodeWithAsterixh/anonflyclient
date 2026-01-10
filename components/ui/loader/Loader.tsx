@@ -1,6 +1,6 @@
 import React from "react";
 import type { LoaderProps } from "./types";
-import Logo from "components/logo";
+import Logo from "../../logo";
 
 const Loader: React.FC<LoaderProps> = ({
   message = "Loading...",
@@ -13,7 +13,7 @@ const Loader: React.FC<LoaderProps> = ({
   animateText = true,
 }) => {
   const containerClasses = `
-    ${fullScreen ? "min-h-[100dvh]" : "w-full py-12"} 
+    ${fullScreen ? "min-h-dvh" : "w-full py-12"} 
     bg-gray-50 dark:bg-gray-950 flex items-center justify-center px-4 transition-colors duration-300
     ${className}
   `.trim();
@@ -27,7 +27,7 @@ const Loader: React.FC<LoaderProps> = ({
         <div className="relative">
           <div className="w-16 h-16 border-4 border-blue-100 dark:border-blue-900/30 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin"></div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="size-fit p-2 border-1 border-blue-600/50 dark:border-blue-500/50 rounded-full relative isolate overflow-hidden">
+            <div className="size-fit p-2 border border-blue-600/50 dark:border-blue-500/50 rounded-full relative isolate overflow-hidden">
             <span className="-z-10 size-full block absolute inset-0 bg-blue-600/50 dark:bg-blue-500/50 rounded-full animate-pulse"/>
               <Logo size={32}/>
             </div>

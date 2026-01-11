@@ -150,7 +150,7 @@ const SettingsPage: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 truncate whitespace-nowrap">{user?.username}</h2>
                     {isPremium && (
-                      <div className="flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black rounded-full uppercase tracking-wider shadow-sm shadow-orange-500/20">
+                      <div className="flex items-center gap-1 px-2 py-0.5 bg-linear-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black rounded-full uppercase tracking-wider shadow-sm shadow-orange-500/20">
                         <Crown size={10} fill="currentColor" />
                         Premium
                       </div>
@@ -340,7 +340,7 @@ const SettingsPage: React.FC = () => {
                         <HideableField 
                           label="Public Identity Key (Ed25519)" 
                           value={currentIdentity?.identityKeyPair.publicKey || ''} 
-                          className="flex-col !items-start !gap-1.5"
+                          className="flex-col items-start! gap-1.5!"
                           labelClassName="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500"
                           showLabelOnHidden={true}
                         />
@@ -349,7 +349,7 @@ const SettingsPage: React.FC = () => {
                         <HideableField 
                           label="Public Exchange Key (X25519)" 
                           value={currentIdentity?.exchangeKeyPair.publicKey || ''} 
-                          className="flex-col !items-start !gap-1.5"
+                          className="flex-col items-start! gap-1.5!"
                           labelClassName="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500"
                           showLabelOnHidden={true}
                         />

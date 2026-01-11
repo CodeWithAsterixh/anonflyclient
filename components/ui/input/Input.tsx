@@ -39,6 +39,46 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
       );
     }
 
+    const renderInput = () => {
+      if (multiline) {
+        return (
+          <TextareaInput
+            {...props as any}
+            ref={ref as React.Ref<HTMLTextAreaElement>}
+            error={error}
+            className={className}
+            id={id}
+          />
+        );
+      }
+
+      if (isPassword) {
+        return (
+          <PasswordInput
+            {...props}
+            ref={ref as React.Ref<HTMLInputElement>}
+            error={error}
+            leftIcon={leftIcon}
+            className={className}
+            id={id}
+          />
+        );
+      }
+
+      return (
+        <BaseInput
+          {...props}
+          ref={ref as React.Ref<HTMLInputElement>}
+          type={type}
+          error={error}
+          leftIcon={leftIcon}
+          rightIcon={rightIcon}
+          className={className}
+          id={id}
+        />
+      );
+    };
+
     return (
       <InputWrapper
         label={label}
@@ -48,35 +88,7 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
         containerClassName={containerClassName}
         labelClassName={labelClassName}
       >
-        {multiline ? (
-          <TextareaInput
-            {...props as any}
-            ref={ref as React.Ref<HTMLTextAreaElement>}
-            error={error}
-            className={className}
-            id={id}
-          />
-        ) : isPassword ? (
-          <PasswordInput
-            {...props}
-            ref={ref as React.Ref<HTMLInputElement>}
-            error={error}
-            leftIcon={leftIcon}
-            className={className}
-            id={id}
-          />
-        ) : (
-          <BaseInput
-            {...props}
-            ref={ref as React.Ref<HTMLInputElement>}
-            type={type}
-            error={error}
-            leftIcon={leftIcon}
-            rightIcon={rightIcon}
-            className={className}
-            id={id}
-          />
-        )}
+        {renderInput()}
       </InputWrapper>
     );
   }

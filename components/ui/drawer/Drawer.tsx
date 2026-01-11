@@ -49,8 +49,10 @@ const DrawerRoot: React.FC<DrawerProps> = ({
   return (
     <div className={`fixed inset-0 z-100 flex items-center justify-center transition-all duration-300 ${isActive ? "visible" : "invisible delay-300"}`}>
       {/* Backdrop */}
-      <div
-        className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
+      <button
+        type="button"
+        aria-label="Close drawer"
+        className={`absolute inset-0 w-full h-full bg-black/40 backdrop-blur-sm transition-opacity duration-300 border-none cursor-default ${
           isActive ? "opacity-100" : "opacity-0"
         }`}
         onClick={onClose}

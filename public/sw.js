@@ -16,7 +16,7 @@ self.addEventListener('install', (event) => {
       return cache.addAll(STATIC_ASSETS);
     })
   );
-  self.skipWaiting();
+  globalThis.self.skipWaiting();
 });
 
 // Activate Event
@@ -33,16 +33,18 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  self.clients.claim();
+  globalThis.self.clients.claim();
 });
 
 // Fetch Event
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+
   // Skip cross-origin requests
-  if (!event.request.url.startsWith(self.location.origin)) return;
+  if (url.origin !== self.location.origin) return;
 
   // Skip API requests and WebSocket
-  if (event.request.url.includes('/api/') || event.request.url.includes('socket')) {
+  if (url.pathname.includes('/api/') || url.pathname.includes('socket')) {
     return;
   }
 
@@ -72,26 +74,17 @@ self.addEventListener('fetch', (event) => {
 });
 
 // Listen for update message
-self.addEventListener('message', async (event) => {
+self.addEventListener('message', (event) => {
+  // 1. Verify origin immediately
+  if (event.origin !== self.location.origin) {
+    return;
+  }
+
+  // 2. Validate message data
   if (!event.data || event.data.type !== 'SKIP_WAITING') {
     return;
   }
 
-  if (!event.source) {
-    return;
-  }
-
-  const client = await self.clients.get(event.source.id);
-  if (!client) {
-    return;
-  }
-
-  const allowedOrigin = self.location.origin;
-
-  if (!client.url.startsWith(allowedOrigin)) {
-    return;
-  }
-
-  self.skipWaiting();
+  globalThis.self.skipWaiting();
 });
 

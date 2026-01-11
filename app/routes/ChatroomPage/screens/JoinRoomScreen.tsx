@@ -57,6 +57,11 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
   const isLocked = displayDetail?.isLocked;
   const isConnecting = isLocked && !isConnected && isSubmitting;
 
+  const connectionStatus = isConnected ? "connected" : "ready";
+  const statusText = displayDetail?.participantCount === undefined
+    ? connectionStatus
+    : `${displayDetail.participantCount} participants • ${connectionStatus}`;
+
   return (
     <div className="flex h-dvh bg-transparent relative overflow-hidden transition-colors duration-300 w-full">
       <div className="flex-1 flex flex-col min-w-0 relative h-full">
@@ -79,13 +84,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
                   {displayDetail?.roomname || "Loading..."}
                 </h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {displayDetail?.participantCount !== undefined
-                    ? `${displayDetail.participantCount} participants • ${
-                        isConnected ? "connected" : "ready"
-                      }`
-                    : isConnected
-                    ? "connected"
-                    : "ready"}
+                  {statusText}
                 </p>
               </div>
             </div>
@@ -144,9 +143,9 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
                       onClick={onJoinChatroom}
                       disabled={isConnecting}
                       className={`w-full py-3 rounded-xl font-bold text-white transition-all shadow-lg ${
-                        !isConnecting
-                          ? "bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/20"
-                          : "bg-blue-400 cursor-not-allowed"
+                        isConnecting
+                          ? "bg-blue-400 cursor-not-allowed"
+                          : "bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/20"
                       }`}
                     >
                       {isConnecting ? (
@@ -189,8 +188,10 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
       {!isMobile && (
         <>
           {/* Backdrop for screens between 768px and 1024px */}
-          <div
-            className={`fixed inset-0 bg-black/20 backdrop-blur-[1px] z-40 lg:hidden transition-opacity duration-300 ${
+          <button
+            type="button"
+            aria-label="Close options"
+            className={`fixed inset-0 bg-black/20 backdrop-blur-[1px] z-40 lg:hidden transition-opacity duration-300 border-none outline-none ${
               isOptionsOpen
                 ? "opacity-100 pointer-events-auto"
                 : "opacity-0 pointer-events-none"

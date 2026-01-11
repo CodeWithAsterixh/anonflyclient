@@ -36,9 +36,9 @@ const SecuringRoomScreen: React.FC<SecuringRoomScreenProps> = ({
                 {displayDetail?.roomname || "Loading..."}
               </h1>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {displayDetail?.participantCount !== undefined
-                  ? `${displayDetail.participantCount} participants • Securing room...`
-                  : "Securing room..."}
+                {displayDetail?.participantCount === undefined
+                  ? "Securing room..."
+                  : `${displayDetail.participantCount} participants • Securing room...`}
               </p>
             </div>
           </div>

@@ -5,14 +5,12 @@ interface AccessDeniedScreenProps {
   message?: string;
   onNavigateHome: () => void;
   onNavigateToLogin?: () => void;
-  theme?: 'light' | 'dark' | 'system';
 }
 
 const AccessDeniedScreen: React.FC<AccessDeniedScreenProps> = ({ 
   message = "You don't have access to this chatroom.", 
   onNavigateHome,
   onNavigateToLogin,
-  theme = 'system'
 }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center space-y-8 max-w-md mx-auto">

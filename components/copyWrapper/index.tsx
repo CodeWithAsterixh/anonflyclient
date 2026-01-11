@@ -1,4 +1,4 @@
-import React, { createContext, useContext, type ReactNode } from 'react';
+import React, { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { useClipboard } from '../../hooks';
 
 interface CopyWrapperContextType {
@@ -28,8 +28,10 @@ export const CopyWrapper: React.FC<CopyWrapperProps> & {
 } = ({ children, className = '', timeout = 2000 }) => {
   const { hasCopied, copy } = useClipboard(timeout);
 
+  const contextValue = useMemo(() => ({ hasCopied, copy }), [hasCopied, copy]);
+
   return (
-    <CopyWrapperContext.Provider value={{ hasCopied, copy }}>
+    <CopyWrapperContext.Provider value={contextValue}>
       <div 
         className={className} 
         data-copied={hasCopied}
@@ -48,15 +50,16 @@ const Trigger: React.FC<{ children: ReactNode; text: string; className?: string 
   const { copy } = useCopyWrapperContext();
   
   return (
-    <div 
+    <button 
+      type="button"
       onClick={(e) => {
         e.stopPropagation();
         copy(text);
       }}
-      className={`cursor-pointer ${className}`}
+      className={`cursor-pointer bg-transparent border-none p-0 text-inherit font-inherit ${className}`}
     >
       {children}
-    </div>
+    </button>
   );
 };
 

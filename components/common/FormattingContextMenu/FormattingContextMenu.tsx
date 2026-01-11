@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Bold, Italic, Underline, Strikethrough, Code, Eraser, MoreHorizontal, X } from 'lucide-react';
+import { Bold, Code, Eraser, Italic, MoreHorizontal, Strikethrough, Underline } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 export type FormattingAction = 'bold' | 'italic' | 'underline' | 'strikethrough' | 'code' | 'clear';
@@ -21,7 +21,7 @@ const FormattingContextMenu: React.FC<FormattingContextMenuProps> = ({
 }) => {
   const [showOverflow, setShowOverflow] = useState(false);
   const [isRendered, setIsRendered] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -57,25 +57,34 @@ const FormattingContextMenu: React.FC<FormattingContextMenuProps> = ({
     };
   }, [isOpen, onClose]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      onClose();
-      return;
-    }
+  useEffect(() => {
+    if (!isOpen) return;
 
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      const buttons = Array.from(menuRef.current?.querySelectorAll('button') || []);
-      const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
-      if (e.key === 'ArrowDown') {
-        const next = buttons[(index + 1) % buttons.length];
-        if (next instanceof HTMLElement) next.focus();
-      } else {
-        const prev = buttons[(index - 1 + buttons.length) % buttons.length];
-        if (prev instanceof HTMLElement) prev.focus();
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+        return;
       }
-    }
-  };
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const buttons = Array.from(menuRef.current?.querySelectorAll('button') || []);
+        const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+        if (e.key === 'ArrowDown') {
+          const next = buttons[(index + 1) % buttons.length];
+          if (next instanceof HTMLElement) next.focus();
+        } else {
+          const prev = buttons[(index - 1 + buttons.length) % buttons.length];
+          if (prev instanceof HTMLElement) prev.focus();
+        }
+      }
+    };
+
+    globalThis.window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => {
+      globalThis.window.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   if (!isRendered) return null;
 
@@ -94,12 +103,11 @@ const FormattingContextMenu: React.FC<FormattingContextMenuProps> = ({
   };
 
   const desktopMenu = (
-    <div
+    <dialog
       ref={menuRef}
-      role="menu"
+      open={isOpen}
       aria-label="Text formatting menu"
-      onKeyDown={handleKeyDown}
-      className={`fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl py-1 min-w-[160px] transition-all duration-100 ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+      className={`fixed z-9999 bg-white dark:bg-gray-800 border-none rounded-lg shadow-xl py-1 min-w-[160px] transition-all duration-100 block m-0 p-0 outline-none ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
       style={{
         top: Math.max(10, position.top),
         left: Math.max(10, position.left),
@@ -116,16 +124,15 @@ const FormattingContextMenu: React.FC<FormattingContextMenuProps> = ({
           {action.label}
         </button>
       ))}
-    </div>
+    </dialog>
   );
 
   const mobileMenu = (
-    <div
+    <dialog
       ref={menuRef}
-      role="dialog"
+      open={isOpen}
       aria-label="Text formatting tools"
-      onKeyDown={handleKeyDown}
-      className={`fixed z-[9999] flex flex-col items-center transition-all duration-200 ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
+      className={`fixed z-9999 flex flex-col items-center transition-all duration-200 bg-transparent border-none p-0 m-0 overflow-visible outline-none ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
       style={{
         top: position.top,
         left: '50%',
@@ -157,9 +164,9 @@ const FormattingContextMenu: React.FC<FormattingContextMenuProps> = ({
 
       {/* Overflow Menu */}
       {showOverflow && (
-        <div 
-          role="menu"
-          className="mt-2 bg-gray-900/95 dark:bg-gray-100/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/10 dark:border-black/10 py-2 min-w-[200px] max-h-[40vh] overflow-y-auto transition-all duration-200"
+        <dialog 
+          open
+          className="mt-2 bg-gray-900/95 dark:bg-gray-100/95 backdrop-blur-sm rounded-2xl shadow-2xl border-none py-2 min-w-[200px] max-h-[40vh] overflow-y-auto transition-all duration-200 block p-0 outline-none"
         >
           {actions.map((action) => (
             <button
@@ -172,9 +179,9 @@ const FormattingContextMenu: React.FC<FormattingContextMenuProps> = ({
               <span className="text-base font-medium">{action.label}</span>
             </button>
           ))}
-        </div>
+        </dialog>
       )}
-    </div>
+    </dialog>
   );
 
   return createPortal(

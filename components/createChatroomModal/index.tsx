@@ -55,7 +55,7 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
       setIsPrivate(false);
       
       // Redirect to the newly created room
-      if (response && response.data && response.data.id) {
+      if (response?.data?.id) {
         const { id, isPrivate, token } = response.data;
         const redirectPath = isPrivate && token ? `/join/${token}` : `/${id}`;
         navigate(redirectPath);
@@ -127,7 +127,7 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
           />
           <label 
             htmlFor="isPrivate" 
-            className={`text-sm font-medium ${!isPremium ? 'text-gray-400' : 'text-gray-700 dark:text-gray-300'}`}
+            className={`text-sm font-medium ${isPremium ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'}`}
           >
             Private Room (Premium Only)
             {!isPremium && <span className="ml-2 text-xs text-yellow-500">(Upgrade required)</span>}

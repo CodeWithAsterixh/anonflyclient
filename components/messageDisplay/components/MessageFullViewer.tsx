@@ -10,7 +10,6 @@ interface MessageFullViewerProps {
   message: Message;
   isCurrentUser: boolean | null;
   avatarUrl: string;
-  bubbleColors: { primary: string; text: string };
   isReplyToMe: boolean;
   scrollToRepliedMessage: (messageId: string) => void;
   showReactions: boolean;
@@ -29,7 +28,6 @@ export const MessageFullViewer: React.FC<MessageFullViewerProps> = ({
   message,
   isCurrentUser,
   avatarUrl,
-  bubbleColors,
   isReplyToMe,
   scrollToRepliedMessage,
   showReactions,
@@ -80,7 +78,6 @@ export const MessageFullViewer: React.FC<MessageFullViewerProps> = ({
           message={message}
           isCurrentUser={isCurrentUser}
           avatarUrl={avatarUrl}
-          bubbleColors={bubbleColors}
           isReplyToMe={isReplyToMe}
           scrollToRepliedMessage={scrollToRepliedMessage}
           isFocused={true}

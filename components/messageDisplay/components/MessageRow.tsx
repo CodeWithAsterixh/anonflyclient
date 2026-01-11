@@ -7,7 +7,6 @@ interface MessageRowProps {
   message: Message;
   isCurrentUser: boolean|null;
   avatarUrl: string;
-  bubbleColors: { primary: string; text: string };
   isReplyToMe: boolean;
   scrollToRepliedMessage: (id: string) => void;
   isFocused?: boolean;
@@ -22,7 +21,6 @@ export const MessageRow: React.FC<MessageRowProps> = ({
   message,
   isCurrentUser,
   avatarUrl,
-  bubbleColors,
   isReplyToMe,
   scrollToRepliedMessage,
   isFocused = false,
@@ -40,6 +38,9 @@ export const MessageRow: React.FC<MessageRowProps> = ({
   const getBubbleClassName = () => {
     const baseClasses = `min-w-[2rem] w-fit line-break max-w-[70%] md:max-w-[50%] px-2 py-2 rounded-2xl shadow-sm relative transition-all duration-300`;
     const alignmentClass = isCurrentUser ? "rounded-br-none" : "rounded-bl-none";
+    const colorClass = isCurrentUser 
+      ? "bg-primary text-white" 
+      : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100";
     
     let stateClass = "";
     if (isPreview) {
@@ -50,7 +51,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
       stateClass = "shadow-2xl ring-4 ring-black/10 dark:ring-white/10";
     }
 
-    return `${baseClasses} ${alignmentClass} ${stateClass}`;
+    return `${baseClasses} ${alignmentClass} ${colorClass} ${stateClass}`;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -87,8 +88,6 @@ export const MessageRow: React.FC<MessageRowProps> = ({
         onKeyDown={handleKeyDown}
         aria-label={`Message from ${message.senderUsername}`}
         style={{
-          backgroundColor: bubbleColors.primary,
-          color: bubbleColors.text,
           transform: getBubbleTransform(),
         }}
         className={`${getBubbleClassName()} text-left border-none cursor-default`}
@@ -96,7 +95,6 @@ export const MessageRow: React.FC<MessageRowProps> = ({
         <MessageBubble
           message={message}
           isCurrentUser={isCurrentUser}
-          bubbleColors={bubbleColors}
           isReplyToMe={isReplyToMe}
           scrollToRepliedMessage={scrollToRepliedMessage}
           isFocused={isFocused}

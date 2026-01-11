@@ -7,7 +7,6 @@ import { formatMessage } from "../../../lib/helpers/markdown";
 interface MessageBubbleProps {
   message: Message;
   isCurrentUser: boolean | null;
-  bubbleColors: { primary: string; text: string };
   isReplyToMe: boolean;
   scrollToRepliedMessage: (id: string) => void;
   isFocused?: boolean;
@@ -16,7 +15,6 @@ interface MessageBubbleProps {
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
   message,
   isCurrentUser,
-  bubbleColors,
   isReplyToMe,
   scrollToRepliedMessage,
   isFocused,
@@ -31,7 +29,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
             e.stopPropagation();
             scrollToRepliedMessage(message.replyTo!.messageId);
           }}
-          className="w-full text-left mb-2 p-2 rounded-lg bg-black/10 dark:bg-white/10 border-l-4 border-black/20 dark:border-white/20 text-xs cursor-pointer hover:bg-black/20 dark:hover:bg-white/20 transition-colors border-y-0 border-r-0"
+          className={`w-full text-left mb-2 p-2 rounded-lg border-l-4 text-xs cursor-pointer transition-colors border-y-0 border-r-0 ${
+            isCurrentUser 
+              ? "bg-white/20 border-white/40 hover:bg-white/30" 
+              : "bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10"
+          }`}
         >
           <p className="font-bold opacity-70 truncate">
             {isReplyToMe ? "You" : message.replyTo.senderUsername || "Anonymous"}
@@ -42,7 +44,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
       {!isCurrentUser && (
         <div className="flex items-center justify-between mb-1 gap-2 px-2">
-          <p className="font-bold text-[11px] uppercase tracking-wider opacity-90 truncate" style={{ color: bubbleColors.text }}>
+          <p className="font-bold text-[11px] uppercase tracking-wider text-primary truncate">
             {message.senderUsername}
           </p>
           {message.isEncrypted && <ShieldCheck className="w-3 h-3 opacity-70" />}

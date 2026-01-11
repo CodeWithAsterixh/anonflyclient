@@ -4,13 +4,12 @@ import { createPortal } from "react-dom";
 import { useAuth, useIsMobile, useSwipe } from "../../hooks";
 import { type Emoji } from "../../lib/assets/emojis";
 import {
-  getUserAvatar,
-  getUserBubbleColors,
+  getUserAvatar
 } from "../../lib/controllers/colorsProcessors/userAvatar";
+import AlertDialog from "../alertDialog";
 import { MessageFullViewer } from "./components/MessageFullViewer";
 import { MessageRow } from "./components/MessageRow";
 import SystemMessage from "./components/SystemMessage";
-import AlertDialog from "../alertDialog";
 import type { MessageDisplayProps } from "./types";
 
 /**
@@ -199,11 +198,6 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
     [message.senderUsername, message.senderAid]
   );
 
-  const bubbleColors = useMemo(
-    () => getUserBubbleColors(message.senderAid),
-    [message.senderAid]
-  );
-
   if (isSystemMessage) {
     return (
       <SystemMessage 
@@ -238,7 +232,6 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
           message={message}
           isCurrentUser={isCurrentUser}
           avatarUrl={avatarUrl}
-          bubbleColors={bubbleColors}
           isReplyToMe={isReplyToMe}
           scrollToRepliedMessage={scrollToRepliedMessage}
           swipeOffset={swipeOffset}
@@ -253,7 +246,6 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
             message={message}
             isCurrentUser={isCurrentUser}
             avatarUrl={avatarUrl}
-            bubbleColors={bubbleColors}
             isReplyToMe={isReplyToMe}
             scrollToRepliedMessage={scrollToRepliedMessage}
             showReactions={showReactions}

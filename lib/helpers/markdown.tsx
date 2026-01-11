@@ -21,7 +21,7 @@ const isSafeUrl = (url: string): boolean => {
     return safeProtocols.includes(urlObj.protocol);
   } catch {
     // If URL parsing fails, treat relative URLs as safe if they don't contain dangerous protocols
-    return !url.toLowerCase().match(/^(javascript|data|vbscript):/i);
+    return !(new RegExp(/^(javascript|data|vbscript):/i).exec(url.toLowerCase()));
   }
 };
 
@@ -64,7 +64,8 @@ export const formatMessage = (content: string): React.ReactNode[] => {
       regex: /\[(.*?)\]\((.*?)\)/g,
       render: (text: string, url: string) => {
         const isSafe = isSafeUrl(url);
-        const href = isSafe ? (url.startsWith('http') ? url : `https://${url}`) : '#';
+        const hasExternalUrl =  (url.startsWith('http') ? url : `https://${url}`) 
+        const href = isSafe ?hasExternalUrl: '#';
         return (
           <a 
             key={url} 
@@ -146,7 +147,7 @@ export const formatMessage = (content: string): React.ReactNode[] => {
     parts = newParts;
   });
 
-  return parts as React.ReactNode[];
+  return parts;
 };
 
 /**
@@ -165,70 +166,88 @@ export const formatInline = (content: string): React.ReactNode[] => {
     {
       name: 'bold',
       regex: /(\*\*)(.*?)(\*\*)/g,
-      render: (match, s1, text, s2, idx) => (
-        <span key={`bold-${idx}`} className="font-bold">
-          <span className="opacity-30 font-normal">{s1}</span>
-          {text}
-          <span className="opacity-30 font-normal">{s2}</span>
-        </span>
-      )
+      render: (match, idx) => {
+        const [, s1, text, s2] = match;
+        return (
+          <span key={`bold-${idx}`} className="font-bold">
+            <span className="opacity-30 font-normal">{s1}</span>
+            {text}
+            <span className="opacity-30 font-normal">{s2}</span>
+          </span>
+        );
+      }
     },
     {
       name: 'italic',
       regex: /(\*)(.*?)(\*)/g,
-      render: (match, s1, text, s2, idx) => (
-        <span key={`italic-${idx}`} className="italic">
-          <span className="opacity-30 italic-none font-normal">{s1}</span>
-          {text}
-          <span className="opacity-30 italic-none font-normal">{s2}</span>
-        </span>
-      )
+      render: (match, idx) => {
+        const [, s1, text, s2] = match;
+        return (
+          <span key={`italic-${idx}`} className="italic">
+            <span className="opacity-30 italic-none font-normal">{s1}</span>
+            {text}
+            <span className="opacity-30 italic-none font-normal">{s2}</span>
+          </span>
+        );
+      }
     },
     {
       name: 'underline',
       regex: /(__)(.*?)(__)/g,
-      render: (match, s1, text, s2, idx) => (
-        <span key={`underline-${idx}`} className="underline">
-          <span className="opacity-30 no-underline font-normal">{s1}</span>
-          {text}
-          <span className="opacity-30 no-underline font-normal">{s2}</span>
-        </span>
-      )
+      render: (match, idx) => {
+        const [, s1, text, s2] = match;
+        return (
+          <span key={`underline-${idx}`} className="underline">
+            <span className="opacity-30 no-underline font-normal">{s1}</span>
+            {text}
+            <span className="opacity-30 no-underline font-normal">{s2}</span>
+          </span>
+        );
+      }
     },
     {
       name: 'strikethrough',
       regex: /(~~)(.*?)(~~)/g,
-      render: (match, s1, text, s2, idx) => (
-        <span key={`strike-${idx}`} className="line-through">
-          <span className="opacity-30 no-line-through font-normal">{s1}</span>
-          {text}
-          <span className="opacity-30 no-line-through font-normal">{s2}</span>
-        </span>
-      )
+      render: (match, idx) => {
+        const [, s1, text, s2] = match;
+        return (
+          <span key={`strike-${idx}`} className="line-through">
+            <span className="opacity-30 no-line-through font-normal">{s1}</span>
+            {text}
+            <span className="opacity-30 no-line-through font-normal">{s2}</span>
+          </span>
+        );
+      }
     },
     {
       name: 'code',
       regex: /(`)(.*?)(`)/g,
-      render: (match, s1, text, s2, idx) => (
-        <span key={`code-${idx}`} className="bg-black/10 dark:bg-white/10 px-0.5 rounded font-mono text-sm">
-          <span className="opacity-30 font-normal">{s1}</span>
-          {text}
-          <span className="opacity-30 font-normal">{s2}</span>
-        </span>
-      )
+      render: (match, idx) => {
+        const [, s1, text, s2] = match;
+        return (
+          <span key={`code-${idx}`} className="bg-black/10 dark:bg-white/10 px-0.5 rounded font-mono text-sm">
+            <span className="opacity-30 font-normal">{s1}</span>
+            {text}
+            <span className="opacity-30 font-normal">{s2}</span>
+          </span>
+        );
+      }
     },
     {
       name: 'link',
       regex: /(\[)(.*?)(\])(\()(.*?)(\))/g,
-      render: (match, s1, text, s2, s3, url, s4, idx) => (
-        <span key={`link-${idx}`} className="text-blue-500 dark:text-blue-400 underline decoration-blue-500/30">
-          <span className="opacity-30 no-underline">{s1}</span>
-          {text}
-          <span className="opacity-30 no-underline">{s2}{s3}</span>
-          <span className="opacity-30 no-underline">{url}</span>
-          <span className="opacity-30 no-underline">{s4}</span>
-        </span>
-      )
+      render: (match, idx) => {
+        const [, s1, text, s2, s3, url, s4] = match;
+        return (
+          <span key={`link-${idx}`} className="text-blue-500 dark:text-blue-400 underline decoration-blue-500/30">
+            <span className="opacity-30 no-underline">{s1}</span>
+            {text}
+            <span className="opacity-30 no-underline">{s2}{s3}</span>
+            <span className="opacity-30 no-underline">{url}</span>
+            <span className="opacity-30 no-underline">{s4}</span>
+          </span>
+        );
+      }
     }
   ];
 
@@ -253,11 +272,7 @@ export const formatInline = (content: string): React.ReactNode[] => {
         }
 
         const uniqueIdx = `${partIdx}-${matchIdx}`;
-        if (rule.name === 'link') {
-          newParts.push(rule.render(match[0], match[1], match[2], match[3], match[4], match[5], match[6], uniqueIdx));
-        } else {
-          newParts.push(rule.render(match[0], match[1], match[2], match[3], uniqueIdx));
-        }
+        newParts.push(rule.render(match, uniqueIdx));
 
         lastIndex = rule.regex.lastIndex;
         matchIdx++;
@@ -270,5 +285,5 @@ export const formatInline = (content: string): React.ReactNode[] => {
     parts = newParts;
   });
 
-  return parts as React.ReactNode[];
+  return parts;
 };

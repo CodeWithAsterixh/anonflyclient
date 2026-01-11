@@ -4,14 +4,13 @@
  */
 
 // Import from identityManager if needed, or keep utilities here
-import { type Identity } from './identityManager';
 
 /**
  * Derives a shared secret between the local user and a remote user.
  */
 export async function deriveSharedSecret(localPrivateKeyBase64: string, remotePublicKeyBase64: string): Promise<CryptoKey> {
-  const privateKeyBuffer = Uint8Array.from(atob(localPrivateKeyBase64), c => c.charCodeAt(0));
-  const publicKeyBuffer = Uint8Array.from(atob(remotePublicKeyBase64), c => c.charCodeAt(0));
+  const privateKeyBuffer = Uint8Array.from(atob(localPrivateKeyBase64), c => c.codePointAt(0) || 0);
+  const publicKeyBuffer = Uint8Array.from(atob(remotePublicKeyBase64), c => c.codePointAt(0) || 0);
 
   const localPrivateKey = await globalThis.window.crypto.subtle.importKey(
     'pkcs8',
@@ -52,8 +51,8 @@ export async function encryptMessage(content: string, sharedSecret: CryptoKey): 
   );
 
   return {
-    ciphertext: btoa(String.fromCharCode(...new Uint8Array(ciphertextBuffer))),
-    iv: btoa(String.fromCharCode(...iv)),
+    ciphertext: btoa(String.fromCodePoint(...new Uint8Array(ciphertextBuffer))),
+    iv: btoa(String.fromCodePoint(...iv)),
   };
 }
 
@@ -62,8 +61,8 @@ export async function encryptMessage(content: string, sharedSecret: CryptoKey): 
  */
 export async function decryptMessage(ciphertextBase64: string, ivBase64: string, sharedSecret: CryptoKey): Promise<string> {
   try {
-    const ciphertext = Uint8Array.from(atob(ciphertextBase64), c => c.charCodeAt(0));
-    const iv = Uint8Array.from(atob(ivBase64), c => c.charCodeAt(0));
+    const ciphertext = Uint8Array.from(atob(ciphertextBase64), c => c.codePointAt(0) || 0);
+    const iv = Uint8Array.from(atob(ivBase64), c => c.codePointAt(0) || 0);
 
     const decryptedBuffer = await globalThis.window.crypto.subtle.decrypt(
       { name: 'AES-GCM', iv },
@@ -100,7 +99,7 @@ export async function generateRoomKey(): Promise<CryptoKey> {
  */
 export async function exportKey(key: CryptoKey): Promise<string> {
   const exported = await globalThis.window.crypto.subtle.exportKey('raw', key);
-  const base64 = btoa(String.fromCharCode(...new Uint8Array(exported)));
+  const base64 = btoa(String.fromCodePoint(...new Uint8Array(exported)));
   return base64;
 }
 
@@ -108,7 +107,7 @@ export async function exportKey(key: CryptoKey): Promise<string> {
  * Imports a base64 string as an AES-GCM CryptoKey.
  */
 export async function importRoomKey(keyBase64: string): Promise<CryptoKey> {
-  const keyBuffer = Uint8Array.from(atob(keyBase64), c => c.charCodeAt(0));
+  const keyBuffer = Uint8Array.from(atob(keyBase64), c => c.codePointAt(0) || 0);
   return globalThis.window.crypto.subtle.importKey(
     'raw',
     keyBuffer,
@@ -122,7 +121,7 @@ export async function importRoomKey(keyBase64: string): Promise<CryptoKey> {
  * Signs a blob using the Identity Private Key.
  */
 export async function signBlob(blobBase64: string, privateKeyBase64: string): Promise<string> {
-  const privateKeyBuffer = Uint8Array.from(atob(privateKeyBase64), c => c.charCodeAt(0));
+  const privateKeyBuffer = Uint8Array.from(atob(privateKeyBase64), c => c.codePointAt(0) || 0);
   const privateKey = await globalThis.window.crypto.subtle.importKey(
     'pkcs8',
     privateKeyBuffer,
@@ -131,21 +130,21 @@ export async function signBlob(blobBase64: string, privateKeyBase64: string): Pr
     ['sign']
   );
 
-  const blob = Uint8Array.from(atob(blobBase64), c => c.charCodeAt(0));
+  const blob = Uint8Array.from(atob(blobBase64), c => c.codePointAt(0) || 0);
   const signatureBuffer = await globalThis.window.crypto.subtle.sign(
     { name: 'Ed25519' },
     privateKey,
     blob
   );
 
-  return btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)));
+  return btoa(String.fromCodePoint(...new Uint8Array(signatureBuffer)));
 }
 
 /**
  * Verifies a blob signature using the Identity Public Key.
  */
 export async function verifyBlobSignature(blobBase64: string, signatureBase64: string, publicKeyBase64: string): Promise<boolean> {
-  const publicKeyBuffer = Uint8Array.from(atob(publicKeyBase64), c => c.charCodeAt(0));
+  const publicKeyBuffer = Uint8Array.from(atob(publicKeyBase64), c => c.codePointAt(0) || 0);
   const publicKey = await globalThis.window.crypto.subtle.importKey(
     'spki',
     publicKeyBuffer,
@@ -154,8 +153,8 @@ export async function verifyBlobSignature(blobBase64: string, signatureBase64: s
     ['verify']
   );
 
-  const blob = Uint8Array.from(atob(blobBase64), c => c.charCodeAt(0));
-  const signature = Uint8Array.from(atob(signatureBase64), c => c.charCodeAt(0));
+  const blob = Uint8Array.from(atob(blobBase64), c => c.codePointAt(0) || 0);
+  const signature = Uint8Array.from(atob(signatureBase64), c => c.codePointAt(0) || 0);
 
   return globalThis.window.crypto.subtle.verify(
     { name: 'Ed25519' },

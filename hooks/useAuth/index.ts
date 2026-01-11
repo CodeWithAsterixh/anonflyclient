@@ -3,7 +3,5 @@
  * @description Export the shared authentication context hook.
  */
 
-import { useAuth as useAuthFromContext } from '../../app/contexts/AuthContext';
-
-export const useAuth = useAuthFromContext;
+export { useAuth } from '../../app/contexts/AuthContext';
 export * from './types';

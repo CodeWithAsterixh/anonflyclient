@@ -71,57 +71,49 @@ const SERVER_COORDINATES: Record<string, { lat: number; lon: number }> = {
  * Derive an encryption key from a seed using PBKDF2
  */
 async function deriveEncryptionKey(): Promise<CryptoKey> {
-  try {
-    const keyMaterial = await crypto.subtle.importKey(
-      'raw',
-      new TextEncoder().encode(ENCRYPTION_KEY_SEED),
-      { name: 'PBKDF2' },
-      false,
-      ['deriveKey']
-    );
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(ENCRYPTION_KEY_SEED),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveKey']
+  );
 
-    const key = await crypto.subtle.deriveKey(
-      {
-        name: 'PBKDF2',
-        salt: new TextEncoder().encode(ENCRYPTION_SALT),
-        iterations: 100000,
-        hash: 'SHA-256',
-      },
-      keyMaterial,
-      { name: 'AES-GCM', length: 256 },
-      false,
-      ['encrypt', 'decrypt']
-    );
+  const key = await crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: new TextEncoder().encode(ENCRYPTION_SALT),
+      iterations: 100000,
+      hash: 'SHA-256',
+    },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
 
-    return key;
-  } catch (error) {
-    throw error;
-  }
+  return key;
 }
 
 /**
  * Encrypt server identifier using AES-GCM
  */
 async function encryptServerId(serverId: string): Promise<EncryptedCache> {
-  try {
-    const key = await deriveEncryptionKey();
-    const iv = crypto.getRandomValues(new Uint8Array(12)); // 96-bit IV for GCM
-    
-    const encrypted = await crypto.subtle.encrypt(
-      { name: 'AES-GCM', iv },
-      key,
-      new TextEncoder().encode(serverId)
-    );
+  const key = await deriveEncryptionKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12)); // 96-bit IV for GCM
+  
+  const encrypted = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    new TextEncoder().encode(serverId)
+  );
 
-    return {
-      data: btoa(String.fromCharCode(...new Uint8Array(encrypted))),
-      iv: btoa(String.fromCharCode(...iv)),
-      v: 1,
-      ts: Date.now(),
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    data: btoa(String.fromCodePoint(...new Uint8Array(encrypted))),
+    iv: btoa(String.fromCodePoint(...iv)),
+    v: 1,
+    ts: Date.now(),
+  };
 }
 
 /**
@@ -130,8 +122,8 @@ async function encryptServerId(serverId: string): Promise<EncryptedCache> {
 async function decryptServerId(cache: EncryptedCache): Promise<string | null> {
   try {
     const key = await deriveEncryptionKey();
-    const iv = new Uint8Array(atob(cache.iv).split('').map(c => c.charCodeAt(0)));
-    const encrypted = new Uint8Array(atob(cache.data).split('').map(c => c.charCodeAt(0)));
+    const iv = new Uint8Array(atob(cache.iv).split('').map(c => c.codePointAt(0) || 0));
+    const encrypted = new Uint8Array(atob(cache.data).split('').map(c => c.codePointAt(0) || 0));
 
     const decrypted = await crypto.subtle.decrypt(
       { name: 'AES-GCM', iv },
@@ -140,9 +132,26 @@ async function decryptServerId(cache: EncryptedCache): Promise<string | null> {
     );
 
     return new TextDecoder().decode(decrypted);
-  } catch (error) {
+  } catch {
     return null;
   }
+}
+
+/**
+ * Validates if the server is suitable for the user's current location.
+ * If not suitable, clears the cache.
+ */
+async function validateServerLocation(server: ServerConfig): Promise<boolean> {
+  try {
+    const location = await getUserLocation();
+    if (location && !server.continents.includes(location.continent)) {
+      localStorage.removeItem(CACHE_KEY);
+      return false;
+    }
+  } catch {
+    // If checking location fails, fall back to true (assume suitable)
+  }
+  return true;
 }
 
 /**
@@ -154,43 +163,20 @@ async function getCachedServerSelector(): Promise<string | null> {
     if (!cached) return null;
 
     const cacheData: EncryptedCache = JSON.parse(cached);
-    const now = Date.now();
-    const age = now - cacheData.ts;
-
-    // Check if cache has expired
-    if (age > CACHE_DURATION) {
+    if (Date.now() - cacheData.ts > CACHE_DURATION) {
       localStorage.removeItem(CACHE_KEY);
       return null;
     }
 
-    // Decrypt the server ID
     const serverId = await decryptServerId(cacheData);
+    if (!serverId) return null;
 
-    if (serverId) {
-      const server = SERVERS.find(s => s.id === serverId);
-      if (server) {
-        // Attempt to verify cached server is suitable for the current user location
-        try {
-          const location = await getUserLocation();
-          if (location) {
-            // If the cached server does not serve the user's continent, ignore the cache
-            if (!server.continents.includes(location.continent)) {
-              
-              // Clear the bad cache to avoid repeated mismatches
-              localStorage.removeItem(CACHE_KEY);
-              return null;
-            }
-          }
-        } catch (err) {
-          // If checking location fails, fall back to using the cached server
-        }
+    const server = SERVERS.find(s => s.id === serverId);
+    if (!server) return null;
 
-        return serverId;
-      }
-    }
-
-    return null;
-  } catch (error) {
+    const isSuitable = await validateServerLocation(server);
+    return isSuitable ? serverId : null;
+  } catch {
     return null;
   }
 }
@@ -202,8 +188,7 @@ async function cacheServerSelector(serverId: string): Promise<void> {
   try {
     const encrypted = await encryptServerId(serverId);
     localStorage.setItem(CACHE_KEY, JSON.stringify(encrypted));
-    const server = SERVERS.find(s => s.id === serverId);
-  } catch (error) {
+  } catch {
     // Silently fail
   }
 }
@@ -214,7 +199,7 @@ async function cacheServerSelector(serverId: string): Promise<void> {
 export function clearServerCache(): void {
   try {
     localStorage.removeItem(CACHE_KEY);
-  } catch (error) {
+  } catch {
     // Silently fail
   }
 }
@@ -267,7 +252,7 @@ async function getUserLocation(): Promise<LocationData | null> {
       latitude: data.lat,
       longitude: data.lon,
     };
-  } catch (error) {
+  } catch {
     return null;
   }
 }

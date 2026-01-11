@@ -35,7 +35,7 @@ async function openDB(): Promise<IDBDatabase> {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onerror = () => {
       console.error("[identityManager] Failed to open IndexedDB:", request.error);
-      reject(request.error);
+      reject(new Error(request.error?.message || 'Failed to open IndexedDB'));
     };
     request.onsuccess = () => resolve(request.result);
     request.onupgradeneeded = (event) => {
@@ -83,7 +83,7 @@ export async function saveRoomKey(chatroomId: string, keyBase64: string, expires
     const store = transaction.objectStore(ROOM_KEY_STORE);
     const data = expiresAt ? { key: keyBase64, expiresAt } : keyBase64;
     const request = store.put(data, chatroomId);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => reject(new Error(request.error?.message || 'Failed to save room key'));
     request.onsuccess = () => resolve();
   });
 }
@@ -103,7 +103,7 @@ export async function getRoomKey(chatroomId: string): Promise<string | null> {
     const transaction = db.transaction(ROOM_KEY_STORE, 'readonly');
     const store = transaction.objectStore(ROOM_KEY_STORE);
     const request = store.get(chatroomId);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => reject(new Error(request.error?.message || 'Failed to get room key'));
     request.onsuccess = () => {
       const result = request.result;
       if (!result) {
@@ -142,7 +142,7 @@ export async function clearRoomKeys(): Promise<void> {
     const transaction = db.transaction(ROOM_KEY_STORE, 'readwrite');
     const store = transaction.objectStore(ROOM_KEY_STORE);
     const request = store.clear();
-    request.onerror = () => reject(request.error);
+    request.onerror = () => reject(new Error(request.error?.message || 'Failed to clear room keys'));
     request.onsuccess = () => resolve();
   });
 }
@@ -156,7 +156,7 @@ export async function clearRoomKeys(): Promise<void> {
  * @throws {Error} If saving fails or database schema is invalid.
  */
 export async function saveIdentity(identity: Identity): Promise<void> {
-  if (!identity || !identity.aid) {
+  if (!identity?.aid) {
     console.error("[identityManager] Cannot save identity: aid is missing");
     return;
   }
@@ -175,7 +175,7 @@ export async function saveIdentity(identity: Identity): Promise<void> {
     const request = store.put(identity);
     request.onerror = () => {
       console.error("[identityManager] Error in saveIdentity put request:", request.error);
-      reject(request.error);
+      reject(new Error(request.error?.message || 'Failed to save identity'));
     };
     request.onsuccess = () => {
       localStorage.setItem(ACTIVE_IDENTITY_KEY, identity.aid);
@@ -202,7 +202,7 @@ export async function getIdentity(): Promise<Identity | null> {
     
     if (activeAid) {
       const request = store.get(activeAid);
-      request.onerror = () => reject(request.error);
+      request.onerror = () => reject(new Error(request.error?.message || 'Failed to get identity'));
       request.onsuccess = () => {
         const result = request.result;
         if (result) {
@@ -215,7 +215,7 @@ export async function getIdentity(): Promise<Identity | null> {
     } else {
       // Fallback: Get the first available identity if no active one is set
       const request = store.openCursor();
-      request.onerror = () => reject(request.error);
+      request.onerror = () => reject(new Error(request.error?.message || 'Failed to open cursor for identities'));
       request.onsuccess = () => {
         const cursor = request.result;
         if (cursor) {
@@ -246,7 +246,7 @@ export async function getAllIdentities(): Promise<Identity[]> {
     const transaction = db.transaction(STORE_NAME, 'readonly');
     const store = transaction.objectStore(STORE_NAME);
     const request = store.getAll();
-    request.onerror = () => reject(request.error);
+    request.onerror = () => reject(new Error(request.error?.message || 'Failed to get all identities'));
     request.onsuccess = () => {
       const results = (request.result || []) as Identity[];
       results.forEach(result => {
@@ -271,7 +271,7 @@ export async function switchIdentity(aid: string): Promise<Identity | null> {
     const transaction = db.transaction(STORE_NAME, 'readonly');
     const store = transaction.objectStore(STORE_NAME);
     const request = store.get(aid);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => reject(new Error(request.error?.message || 'Failed to switch identity'));
     request.onsuccess = () => {
       const result = request.result;
       if (result) {
@@ -305,7 +305,7 @@ export async function clearIdentity(aid?: string): Promise<void> {
     const transaction = db.transaction(STORE_NAME, 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
     const request = store.delete(targetAid);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => reject(new Error(request.error?.message || 'Failed to delete identity'));
     request.onsuccess = () => {
       if (targetAid === localStorage.getItem(ACTIVE_IDENTITY_KEY)) {
         localStorage.removeItem(ACTIVE_IDENTITY_KEY);
@@ -331,7 +331,7 @@ export async function generateIdentity(username: string): Promise<Identity> {
     },
     true,
     ['sign', 'verify']
-  )) as CryptoKeyPair;
+  ))
 
   // 2. Generate Exchange Key Pair (X25519 for E2EE)
   const exchangeKeyPair = (await globalThis.window.crypto.subtle.generateKey(
@@ -345,7 +345,7 @@ export async function generateIdentity(username: string): Promise<Identity> {
   // Export keys to Base64 DER (spki for public, pkcs8 for private)
   const exportKey = async (key: CryptoKey, format: 'spki' | 'pkcs8') => {
     const exported = await globalThis.window.crypto.subtle.exportKey(format, key);
-    return btoa(String.fromCharCode(...new Uint8Array(exported)));
+    return btoa(String.fromCodePoint(...new Uint8Array(exported)));
   };
 
   const idPubKeyBase64 = await exportKey(identityKeyPair.publicKey, 'spki');

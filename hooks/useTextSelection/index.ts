@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface SelectionState {
   start: number;
@@ -50,13 +50,12 @@ export const useTextSelection = (textareaRef: React.RefObject<HTMLTextAreaElemen
 
     document.body.appendChild(div);
     const textareaRect = textarea.getBoundingClientRect();
-    const spanRect = span.getBoundingClientRect();
     
     // Calculate position relative to the viewport
     const top = textareaRect.top + span.offsetTop - textarea.scrollTop;
     const left = textareaRect.left + span.offsetLeft - textarea.scrollLeft;
 
-    document.body.removeChild(div);
+    div.remove();
 
     return { top, left };
   }, [textareaRef]);
@@ -66,7 +65,10 @@ export const useTextSelection = (textareaRef: React.RefObject<HTMLTextAreaElemen
 
     const { selectionStart, selectionEnd, value } = textareaRef.current;
 
-    if (selectionStart !== selectionEnd) {
+    if (selectionStart === selectionEnd) {
+      setIsOpen(false);
+      setSelection(null);
+    } else {
       const text = value.substring(selectionStart, selectionEnd);
       setSelection({ start: selectionStart, end: selectionEnd, text });
 
@@ -80,9 +82,6 @@ export const useTextSelection = (textareaRef: React.RefObject<HTMLTextAreaElemen
         left: (startCoords.left + endCoords.left) / 2
       });
       setIsOpen(true);
-    } else {
-      setIsOpen(false);
-      setSelection(null);
     }
   }, [textareaRef, getCaretCoordinates]);
 

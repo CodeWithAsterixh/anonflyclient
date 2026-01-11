@@ -30,7 +30,7 @@ export const useSettings = ({
   const {
     currentIdentity,
     myRooms,
-    roomAction,
+    roomActionState,
     setRoomAction,
     isDeletingAccount,
     setIsDeletingAccount,
@@ -59,7 +59,7 @@ export const useSettings = ({
     closeDialog,
     currentIdentity,
     myRooms,
-    roomAction,
+    roomActionState,
     setRoomAction,
     isDeletingAccount,
     setIsDeletingAccount,

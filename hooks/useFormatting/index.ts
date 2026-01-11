@@ -30,10 +30,10 @@ export const useFormatting = ({ value, onChange, selection, textareaRef }: UseFo
       // Simple clear: remove all common markdown tags
       newValue = 
         value.substring(0, start) + 
-        selectedText.replace(/(\*\*|\*|__|~~|`|\[|\]\(.*?\))/g, '') + 
+        selectedText.replaceAll(/(\*\*|\*|__|~~|`|\[|\]\(.*?\))/g, '') + 
         value.substring(end);
       
-      const removedCount = selectedText.length - selectedText.replace(/(\*\*|\*|__|~~|`|\[|\]\(.*?\))/g, '').length;
+      const removedCount = selectedText.length - selectedText.replaceAll(/(\*\*|\*|__|~~|`|\[|\]\(.*?\))/g, '').length;
       cursorOffsetEnd = -removedCount;
     } else {
       const { prefix, suffix } = formats[type];

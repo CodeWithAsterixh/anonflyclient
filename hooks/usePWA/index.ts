@@ -38,7 +38,7 @@ export const usePWA = () => {
       const promptData = localStorage.getItem(PWA_STORAGE_KEY);
       if (promptData) {
         const { status, nextPromptDate } = JSON.parse(promptData);
-        if (status === 'dismissed' && nextPromptDate && new Date().getTime() < nextPromptDate) {
+        if (status === 'dismissed' && nextPromptDate && Date.now() < nextPromptDate) {
           return;
         }
         if (status === 'cancelled') {
@@ -60,27 +60,33 @@ export const usePWA = () => {
     globalThis.window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     globalThis.window.addEventListener('appinstalled', handleAppInstalled);
 
-    // Service Worker update detection
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistration().then(reg => {
-        if (reg) {
-          setRegistration(reg);
-          
-          // Check for updates
-          reg.addEventListener('updatefound', () => {
-            const newWorker = reg.installing;
-            if (newWorker) {
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  setUpdateAvailable(true);
-                }
-              });
-            }
-          });
-        }
-      });
+    const onStateChange = (newWorker: ServiceWorker) => {
+      if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+        setUpdateAvailable(true);
+      }
+    };
 
-      // Handle controller change (reload when new SW takes over)
+    const onUpdateFound = (reg: ServiceWorkerRegistration) => {
+      const newWorker = reg.installing;
+      if (newWorker) {
+        newWorker.addEventListener('statechange', () => onStateChange(newWorker));
+      }
+    };
+
+    const initServiceWorker = async () => {
+      if (!('serviceWorker' in navigator)) return;
+      
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (!reg) return;
+
+      setRegistration(reg);
+      reg.addEventListener('updatefound', () => onUpdateFound(reg));
+    };
+
+    initServiceWorker();
+
+    // Handle controller change (reload when new SW takes over)
+    if ('serviceWorker' in navigator) {
       let refreshing = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!refreshing) {
@@ -110,14 +116,14 @@ export const usePWA = () => {
   };
 
   const updateApp = () => {
-    if (registration && registration.waiting) {
+    if (registration?.waiting) {
       registration.waiting.postMessage({ type: 'SKIP_WAITING' });
     }
   };
 
   const remindLater = () => {
     const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
-    const nextPromptDate = new Date().getTime() + oneWeekInMs;
+    const nextPromptDate = Date.now() + oneWeekInMs;
     localStorage.setItem(PWA_STORAGE_KEY, JSON.stringify({ 
       status: 'dismissed', 
       nextPromptDate 

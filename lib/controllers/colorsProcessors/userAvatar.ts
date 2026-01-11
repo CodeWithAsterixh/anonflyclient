@@ -1,5 +1,4 @@
 import { createColorSwatchDataUrl } from "./color_swatch";
-import { generateAccessibleColorPair } from "./colorGenerator";
 
 /**
  * Generates a deterministic color based on a user's unique ID (userAid).
@@ -8,7 +7,7 @@ import { generateAccessibleColorPair } from "./colorGenerator";
 export function getUserColor(userAid: string): string {
   let hash = 0;
   for (let i = 0; i < userAid.length; i++) {
-    hash = userAid.charCodeAt(i) + ((hash << 5) - hash);
+    hash = (userAid.codePointAt(i) || 0) + ((hash << 5) - hash);
   }
   
   // Convert hash to a color using HSL
@@ -26,7 +25,7 @@ export function getUserColor(userAid: string): string {
  * it searches for the first available letter.
  */
 export function getUsernameInitial(username: string): string {
-  const match = username.match(/[a-zA-Z]/);
+  const match = new RegExp(/[a-zA-Z]/).exec(username);
   return match ? match[0].toUpperCase() : (username[0]?.toUpperCase() || "?");
 }
 

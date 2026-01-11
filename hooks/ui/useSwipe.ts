@@ -44,11 +44,9 @@ export const useSwipe = ({
       if (diff > 0) {
         setSwipeOffset(Math.min(diff, 100));
       }
-    } else {
+    } else if (diff < 0) {
       // Other's message: drag right to left (negative diff)
-      if (diff < 0) {
-        setSwipeOffset(Math.max(diff, -100));
-      }
+      setSwipeOffset(Math.max(diff, -100));
     }
   };
 
@@ -67,9 +65,10 @@ export const useSwipe = ({
 
     // For current user: swipe right (positive distance) triggers reply
     // For other user: swipe left (negative distance) triggers reply
-    if (isCurrentUser && distance > minSwipeDistance) {
-      onReply();
-    } else if (!isCurrentUser && distance < -minSwipeDistance) {
+    const isForwardSwipe = isCurrentUser && distance > minSwipeDistance;
+    const isBackwardSwipe = !isCurrentUser && distance < -minSwipeDistance;
+    
+    if (isForwardSwipe || isBackwardSwipe) {
       onReply();
     }
 

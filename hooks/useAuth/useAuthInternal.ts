@@ -38,7 +38,6 @@ export const useAuthInternal = () => {
           identity.allowedFeatures = data.allowedFeatures;
           identity.premiumLastChecked = Date.now();
           await saveIdentity(identity);
-          // console.log("[useAuthInternal] Premium status saved to IndexDB");
         }
       } catch (dbError) {
         console.error("[useAuthInternal] Failed to save premium status to IndexDB:", dbError);
@@ -56,7 +55,7 @@ export const useAuthInternal = () => {
       
       // Update session storage as well
       const session = getSessionUser();
-      if (session && session.user) {
+      if (session?.user) {
         setSessionUser({ ...session.user, allowedFeatures: data.allowedFeatures }, session.token);
       }
     } catch (error: any) {
@@ -94,7 +93,7 @@ export const useAuthInternal = () => {
           
           // Force a full page reload to clear all states and redirect
           globalThis.window.location.href = redirectTo;
-        } catch (handshakeError) {
+        } catch {
           // If handshake fails (bad network), we still "switch" but without a token
           // This prevents being locked out
           const user: User = { userId: identity.aid, username: identity.username };
@@ -104,7 +103,7 @@ export const useAuthInternal = () => {
           globalThis.window.location.href = redirectTo;
         }
       }
-    } catch (error) {
+    } catch {
       setAuthState(prev => ({ ...prev, loading: false, error: 'Failed to switch account' }));
     }
   }, []);
@@ -128,35 +127,70 @@ export const useAuthInternal = () => {
           identities: allIdentities 
         }));
       }
-    } catch (error) {
+    } catch {
       setAuthState(prev => ({ ...prev, loading: false, error: 'Failed to delete account' }));
     }
   }, []);
 
+  const getNeedsPremiumRefresh = (identity: any) => {
+    const lastChecked = identity?.premiumLastChecked || 0;
+    const fiveHours = 5 * 60 * 60 * 1000;
+    return Date.now() - lastChecked > fiveHours;
+  };
+
+  const handleHandshake = async (identity: any, allIdentities: any[]) => {
+    try {
+      const sessionData = await performHandshake(identity);
+      const user: User = { 
+        userId: sessionData.aid, 
+        username: sessionData.username,
+        allowedFeatures: sessionData.allowedFeatures 
+      };
+      setSessionUser(user, sessionData.token);
+      
+      try {
+        identity.allowedFeatures = sessionData.allowedFeatures;
+        await saveIdentity(identity);
+      } catch (dbError) {
+        console.error("[useAuthInternal] Failed to update identity features in IndexDB:", dbError);
+      }
+
+      setAuthState({
+        user,
+        token: sessionData.token,
+        isAuthenticated: true,
+        loading: false,
+        isInitialCheck: false,
+        error: null,
+        identities: allIdentities,
+        retryCountdown: null,
+        allowedFeatures: sessionData.allowedFeatures,
+      });
+    } catch {
+      setAuthState(prev => ({
+        ...prev,
+        loading: false,
+        isInitialCheck: false,
+        error: 'Authentication failed. Retrying...',
+        identities: allIdentities,
+        retryCountdown: 5,
+      }));
+    }
+  };
+
   const initializeAuth = useCallback(async () => {
     let allIdentities: any[] = [];
     try {
-      // Load all stored identities first
       allIdentities = await getAllIdentities();
     } catch (e) {
       console.error("[useAuthInternal] Failed to load identities:", e);
     }
 
-    // 1. Check for ephemeral session
     const session = getSessionUser();
-    if (session && session.user) {
-      // Even with a session, check if we need to refresh premium status from IndexDB
-      try {
-        const identity = await getIdentity();
-        if (identity) {
-          const lastChecked = identity.premiumLastChecked || 0;
-          const fiveHours = 5 * 60 * 60 * 1000;
-          if (Date.now() - lastChecked > fiveHours) {
-            setNeedsPremiumRefresh(true);
-          }
-        }
-      } catch (e) {
-        console.error("[useAuthInternal] Failed to check premium refresh status:", e);
+    if (session?.user) {
+      const identity = await getIdentity().catch(() => null);
+      if (getNeedsPremiumRefresh(identity)) {
+        setNeedsPremiumRefresh(true);
       }
 
       setAuthState({
@@ -173,61 +207,13 @@ export const useAuthInternal = () => {
       return;
     }
 
-    // 2. Check for persistent identity
     try {
       const identity = await getIdentity();
       if (identity) {
-        // Check if we need to refresh premium status later
-        const lastChecked = identity.premiumLastChecked || 0;
-        const fiveHours = 5 * 60 * 60 * 1000;
-        if (Date.now() - lastChecked > fiveHours) {
+        if (getNeedsPremiumRefresh(identity)) {
           setNeedsPremiumRefresh(true);
         }
-
-        try {
-          // If identity exists, perform handshake to get a session
-          const sessionData = await performHandshake(identity);
-          const user: User = { 
-            userId: sessionData.aid, 
-            username: sessionData.username,
-            allowedFeatures: sessionData.allowedFeatures 
-          };
-          setSessionUser(user, sessionData.token);
-          
-          // Update IndexDB with latest handshake data if it's fresh
-          try {
-            identity.allowedFeatures = sessionData.allowedFeatures;
-            // We don't necessarily update premiumLastChecked here because 
-            // handshake might not be the "dedicated" check the user wants.
-            // But we update features anyway.
-            await saveIdentity(identity);
-          } catch (dbError) {
-            console.error("[useAuthInternal] Failed to update identity features in IndexDB:", dbError);
-          }
-
-          setAuthState({
-            user,
-            token: sessionData.token,
-            isAuthenticated: true,
-            loading: false,
-            isInitialCheck: false,
-            error: null,
-            identities: allIdentities,
-            retryCountdown: null,
-            allowedFeatures: sessionData.allowedFeatures,
-          });
-        } catch (handshakeError) {
-          // HANDSHAKE FAILED (e.g. Bad Network)
-          // Start retry countdown
-          setAuthState(prev => ({
-            ...prev,
-            loading: false,
-            isInitialCheck: false,
-            error: 'Authentication failed. Retrying...',
-            identities: allIdentities,
-            retryCountdown: 5,
-          }));
-        }
+        await handleHandshake(identity, allIdentities);
       } else {
         setAuthState(prev => ({ 
           ...prev, 
@@ -238,7 +224,7 @@ export const useAuthInternal = () => {
           retryCountdown: null,
         }));
       }
-    } catch (error: any) {
+    } catch {
       setAuthState(prev => ({ 
         ...prev, 
         loading: false, 
@@ -258,7 +244,6 @@ export const useAuthInternal = () => {
   // Handle premium status refresh if needed (over 5 hours)
   useEffect(() => {
     if (needsPremiumRefresh && authState.isAuthenticated && authState.token) {
-      // console.log("[useAuthInternal] Triggering scheduled premium status refresh...");
       checkPremiumStatus();
       setNeedsPremiumRefresh(false);
     }

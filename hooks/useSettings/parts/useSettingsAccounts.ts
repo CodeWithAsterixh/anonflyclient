@@ -21,7 +21,7 @@ export const useSettingsAccounts = ({
   logout,
   showDialog
 }: UseSettingsAccountsProps) => {
-  const [roomAction, setRoomActionState] = useState<'transfer' | 'delete'>('transfer');
+  const [roomActionState, setRoomActionState] = useState<'transfer' | 'delete'>('transfer');
   const roomActionRef = useRef<'transfer' | 'delete'>('transfer');
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -47,7 +47,7 @@ export const useSettingsAccounts = ({
     if (aid === user?.userId) return;
     try {
       await switchAccount(aid);
-    } catch (error) {
+    } catch {
       showDialog("Error", "Failed to switch account. Please try again.", "error");
     }
   };
@@ -91,7 +91,7 @@ export const useSettingsAccounts = ({
           }
           
           await deleteAccount(aid);
-        } catch (error) {
+        } catch {
           showDialog("Error", "Failed to delete account. Please try again.", "error");
         } finally {
           setIsProcessing(false);
@@ -106,7 +106,7 @@ export const useSettingsAccounts = ({
   return {
     currentIdentity,
     myRooms,
-    roomAction,
+    roomActionState,
     setRoomAction,
     isDeletingAccount,
     setIsDeletingAccount,

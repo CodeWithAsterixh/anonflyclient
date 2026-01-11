@@ -1,5 +1,5 @@
 export const validateUsername = (username: string): boolean => {
-  return username.trim().length >= 3 && username.trim().length <= 30 && /^[a-zA-Z0-9_]+$/.test(username.trim());
+  return username.trim().length >= 3 && username.trim().length <= 30 && /^\w+$/.test(username.trim());
 };
 
 export const validateRoomname = (roomname: string): boolean => {
@@ -26,5 +26,5 @@ export const validatePassword = (password: string): boolean => {
   return password.length >= 6 &&
          /[A-Z]/.test(password) &&
          /[a-z]/.test(password) &&
-         /[0-9]/.test(password);
+         /\d/.test(password);
 };

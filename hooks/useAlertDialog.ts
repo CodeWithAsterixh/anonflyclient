@@ -1,17 +1,5 @@
 import { useState, useCallback } from 'react';
-
-type AlertTypes = "alert" | "confirm" | "error" | "success";
-
-export interface AlertDialogState {
-  isOpen: boolean;
-  title: string;
-  message: string;
-  type: AlertTypes;
-  confirmText?: string;
-  cancelText?: string;
-  onConfirm?: () => void;
-  onCancel?: () => void;
-}
+import type { AlertDialogState, AlertType } from '../components/alertDialog/types';
 
 export const useAlertDialog = () => {
   const [alertDialog, setAlertDialog] = useState<AlertDialogState>({
@@ -26,8 +14,9 @@ export const useAlertDialog = () => {
   const showAlertDialog = useCallback((
     title: string,
     message: string,
-    type: AlertTypes = "alert",
-    onConfirm?: () => void
+    type: AlertType = "alert",
+    onConfirm?: () => void,
+    children?: React.ReactNode
   ) => {
     setAlertDialog(prev => ({
       ...prev,
@@ -36,6 +25,7 @@ export const useAlertDialog = () => {
       message,
       type,
       onConfirm,
+      children,
     }));
   }, []);
 

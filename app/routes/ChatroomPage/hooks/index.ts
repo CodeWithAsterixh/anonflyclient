@@ -1,4 +1,4 @@
-export * from './useAlertDialog';
+export * from '../../../../hooks/useAlertDialog';
 export * from './useParticipantActions';
 export * from './useRoomActions';
 export * from './useAutoJoin';

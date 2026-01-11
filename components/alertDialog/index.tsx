@@ -33,7 +33,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
     if (onConfirm) {
       setIsLoading(true);
       try {
-        await onConfirm();
+        onConfirm();
       } catch (error) {
         console.error("Error during confirm action:", error);
       } finally {
@@ -41,6 +41,25 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
       }
     }
     onClose();
+  };
+
+  const getButtonClasses = () => {
+    const baseClasses = "flex-1 px-4 py-2.5 rounded-xl text-white font-medium transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2";
+    const loadingClasses = isLoading ? 'opacity-70 cursor-not-allowed' : '';
+    
+    let typeClasses = 'bg-blue-600 hover:bg-blue-700';
+    if (type === 'error') {
+      typeClasses = 'bg-red-600 hover:bg-red-700';
+    } else if (type === 'confirm') {
+      typeClasses = 'bg-amber-600 hover:bg-amber-700';
+    }
+
+    return `${baseClasses} ${loadingClasses} ${typeClasses}`;
+  };
+
+  const getButtonText = () => {
+    if (type !== 'confirm') return 'OK';
+    return isLoading ? 'Processing...' : confirmText;
   };
 
   return (
@@ -73,20 +92,12 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
           <button
             onClick={handleConfirm}
             disabled={isLoading}
-            className={`flex-1 px-4 py-2.5 rounded-xl text-white font-medium transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 ${
-              isLoading ? 'opacity-70 cursor-not-allowed' : ''
-            } ${
-              type === 'error' 
-                ? 'bg-red-600 hover:bg-red-700' 
-                : type === 'confirm' 
-                  ? 'bg-amber-600 hover:bg-amber-700'
-                  : 'bg-blue-600 hover:bg-blue-700'
-            }`}
+            className={getButtonClasses()}
           >
             {isLoading && (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             )}
-            {type === 'confirm' ? (isLoading ? 'Processing...' : confirmText) : 'OK'}
+            {getButtonText()}
           </button>
         </div>
       </div>

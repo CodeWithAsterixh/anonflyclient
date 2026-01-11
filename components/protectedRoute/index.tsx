@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router";
-import { useAuth } from "../../hooks/useAuth/index";
+import { useAuth } from "../../hooks";
 import type { ProtectedRouteProps } from "./types";
 import Loader from "../ui/loader";
 

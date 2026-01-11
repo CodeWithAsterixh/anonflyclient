@@ -3,7 +3,7 @@ import {
   removeParticipant, 
   banParticipant, 
   unbanParticipant 
-} from "../../../../lib/controllers/chatroomController";
+} from "../../../lib/controllers/chatroomController";
 
 export const useParticipantActions = (
   chatroomId: string | undefined,

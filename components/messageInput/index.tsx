@@ -1,13 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
-import { useIsMobile } from '../../hooks/useIsMobile/index';
+import { useIsMobile, useTypingStatus, useFormatting, useTextSelection } from '../../hooks';
 import { MessagePreview } from './components/MessagePreview';
 import { InlineFormattedInput } from './components/InlineFormattedInput';
 import type { MessageInputProps } from './types';
-import { useTypingStatus } from './hooks/useTypingStatus';
 import FormattingContextMenu, { type FormattingAction } from '../common/FormattingContextMenu/FormattingContextMenu';
-import { useFormatting } from '../../hooks/useFormatting';
-import { useTextSelection } from '../../hooks/useTextSelection';
 
 /**
  * MessageInput component provides an auto-expanding inline-formatted input 

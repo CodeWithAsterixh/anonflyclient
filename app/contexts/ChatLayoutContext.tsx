@@ -1,7 +1,7 @@
 import { createContext } from 'react';
 import type { User } from '../../types/User';
 import type { Identity } from '../../lib/helpers/identityManager';
-import type { Chatroom } from '../../hooks/useChatroomList/types';
+import type { Chatroom } from '../../hooks';
 
 export interface ChatLayoutContextType {
   user: User | null;

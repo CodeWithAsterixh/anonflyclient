@@ -1,9 +1,18 @@
 import NoChatSelectedFallback from "../../../components/noChatSelectedFallback";
 import React, { useEffect, useRef, useState, useContext } from "react";
 import { useNavigate, useParams, type MetaFunction } from "react-router";
-import { useChatroom } from "../../../hooks/useChatroom/index";
-import { useTheme } from "../../../hooks/useTheme/index";
-import { useTyping } from "../../../components/typingIndicator";
+import {
+  useChatroom,
+  useTheme,
+  useAlertDialog,
+  useAutoJoin,
+  useParticipantActions,
+  useRoomActions,
+  useChatroomAccess,
+  useChatroomLifecycle,
+  useChatroomMessaging,
+  useTyping,
+} from "../../../hooks";
 import { Background } from "../../../components/background";
 import AlertDialog from "../../../components/alertDialog";
 import { ChatLayoutContext } from "../../contexts/ChatLayoutContext";
@@ -17,16 +26,6 @@ import {
   SecuringRoomScreen,
   AccessDeniedScreen,
 } from "./screens";
-
-import {
-  useAlertDialog,
-  useAutoJoin,
-  useParticipantActions,
-  useRoomActions,
-  useChatroomAccess,
-  useChatroomLifecycle,
-  useChatroomMessaging,
-} from "./hooks";
 
 export const meta: MetaFunction = ({ params }) => {
   const chatroomId = params.chatroomId;

@@ -1,4 +1,4 @@
-import { useAlertDialog } from '../../useAlertDialog';
+import { useAlertDialog } from '../../useAlertDialog/index';
 
 export const useSettingsDialog = () => {
   const { 

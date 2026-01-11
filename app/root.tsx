@@ -11,9 +11,8 @@ import { useEffect } from "react";
 
 import type { Route } from "./+types/root";
 import { initializeAPI } from "../lib/constants/api";
-import { ThemeProvider } from "../hooks/useTheme/index";
+import { ThemeProvider, usePWA } from "../hooks";
 import { AuthProvider } from "./contexts/AuthContext";
-import { usePWA } from "../hooks/usePWA";
 import PWAInstallPrompt from "../components/pwaInstallPrompt";
 import "./app.css";
 

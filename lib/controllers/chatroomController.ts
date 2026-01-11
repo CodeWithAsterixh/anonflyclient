@@ -1,4 +1,4 @@
-import { getAPIBaseURL } from "lib/constants/api";
+import { getAPIBaseURL } from "../constants/api";
 import { getSessionUser } from '../helpers/authStorage';
 import { getUserRegion } from '../helpers/location';
 

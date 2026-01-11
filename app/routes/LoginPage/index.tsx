@@ -7,7 +7,7 @@
 
 import React, { useState } from "react";
 import { useNavigate, useLocation, type MetaFunction } from "react-router";
-import { useAuth } from "../../../hooks/useAuth/index";
+import { useAuth } from "../../../hooks";
 import { validateUsername } from "../../../lib/helpers/validation";
 import { Loader2, Users } from "lucide-react";
 import Logo from "../../../components/logo";

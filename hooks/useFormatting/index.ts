@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { type FormattingAction } from '../components/common/FormattingContextMenu/FormattingContextMenu';
+import { type FormattingAction } from '../../components/common/FormattingContextMenu/FormattingContextMenu';
 
 interface UseFormattingProps {
   value: string;

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { createChatroom } from '../../lib/controllers/chatroomController';
 import { validateRoomname, validateDescription, validateRoomPassword } from '../../lib/helpers/validation';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../hooks';
 import { FEATURES } from '../../lib/constants/features';
 import Input from '../ui/input';
 import Modal from '../modal';

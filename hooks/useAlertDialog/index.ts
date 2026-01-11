@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { AlertDialogState, AlertType } from '../components/alertDialog/types';
+import type { AlertDialogState, AlertType } from '../../components/alertDialog/types';
 
 export const useAlertDialog = () => {
   const [alertDialog, setAlertDialog] = useState<AlertDialogState>({

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import type { ChatroomDetail } from "../../../../lib/types/chat";
-import type { User } from '../../../../types/User';
+import type { ChatroomDetail } from "../../../lib/types/chat";
+import type { User } from '../../../types/User';
 
 export interface ChatroomLifecycleOptions {
   chatroomId: string | undefined;

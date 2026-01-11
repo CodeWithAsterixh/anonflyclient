@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import type { ReplyingTo } from '../types';
+import type { ReplyingTo } from '../../../app/routes/ChatroomPage/types';
 
 export const useChatroomMessaging = (
   messages: any[],

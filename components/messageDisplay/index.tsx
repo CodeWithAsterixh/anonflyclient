@@ -1,8 +1,7 @@
 import { Reply } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useAuth } from "../../hooks/useAuth/index";
-import { useIsMobile } from "../../hooks/useIsMobile/index";
+import { useAuth, useIsMobile, useSwipe } from "../../hooks";
 import { type Emoji } from "../../lib/assets/emojis";
 import {
   getUserAvatar,
@@ -11,7 +10,6 @@ import {
 import { MessageFullViewer } from "./components/MessageFullViewer";
 import { MessageRow } from "./components/MessageRow";
 import SystemMessage from "./components/SystemMessage";
-import { useSwipe } from "./hooks/useSwipe";
 import AlertDialog from "../alertDialog";
 import type { MessageDisplayProps } from "./types";
 

@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo } from 'react';
 import { deleteChatroom, leaveChatroom } from '../../../lib/controllers/chatroomController';
-import { type DialogType } from './useSettingsDialog';
+import type { AlertType } from '../../../components/alertDialog/types';
 
 interface UseSettingsAccountsProps {
   user: any;
@@ -9,7 +9,7 @@ interface UseSettingsAccountsProps {
   switchAccount: (aid: string) => Promise<void>;
   deleteAccount: (aid: string) => Promise<void>;
   logout: () => void;
-  showDialog: (title: string, message: string, type?: DialogType, onConfirm?: () => void, children?: React.ReactNode) => void;
+  showDialog: (title: string, message: string, type?: AlertType, onConfirm?: () => void, children?: React.ReactNode) => void;
 }
 
 export const useSettingsAccounts = ({

@@ -1,4 +1,4 @@
-import { getAPIBaseURL } from "lib/constants/api";
+import { getAPIBaseURL } from "../constants/api";
 import { getIdentity, type Identity } from "../helpers/identityManager";
 import { setSessionUser, clearSessionUser } from "../helpers/authStorage";
 

@@ -13,7 +13,7 @@ import ChatListSkeleton from "../../../components/chatListSkeleton";
 import CreateChatroomModal from "../../../components/createChatroomModal";
 import Logo from "../../../components/logo";
 import ErrorDisplay from "./components/errorDisplay";
-import { useTheme } from "../../../hooks/useTheme/index";
+import { useTheme } from "../../../hooks";
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from "@headlessui/react";
 import type { ChatroomListPageProps } from "./types";
 import { ChatLayoutContext } from "../../contexts/ChatLayoutContext";

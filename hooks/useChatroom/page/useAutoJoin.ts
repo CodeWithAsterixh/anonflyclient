@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import type { ChatroomDetail } from "../../../../lib/types/chat";
+import type { ChatroomDetail } from "../../../lib/types/chat";
 
 export interface AutoJoinOptions {
   chatroomId: string | undefined;

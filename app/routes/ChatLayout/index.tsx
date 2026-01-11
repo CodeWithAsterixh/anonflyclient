@@ -4,8 +4,7 @@ import ChatroomListPage from "../ChatroomListPage";
 import NoChatSelectedFallback from "../../../components/noChatSelectedFallback";
 import { requireAuth } from "../../middleware/auth";
 import ProtectedRoute from "../../../components/protectedRoute";
-import { useAuth } from "../../../hooks/useAuth/index";
-import { useChatroomList } from "../../../hooks/useChatroomList/index";
+import { useAuth, useChatroomList } from "../../../hooks";
 import { ChatLayoutContext } from "../../contexts/ChatLayoutContext";
 
 export async function loader({ request }: { request: Request }) {

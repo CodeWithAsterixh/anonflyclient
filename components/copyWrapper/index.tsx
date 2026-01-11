@@ -1,5 +1,5 @@
 import React, { createContext, useContext, type ReactNode } from 'react';
-import { useClipboard } from '../../hooks/useClipboard/index';
+import { useClipboard } from '../../hooks';
 
 interface CopyWrapperContextType {
   hasCopied: boolean;

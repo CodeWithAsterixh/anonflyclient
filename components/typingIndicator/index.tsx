@@ -1,3 +1,3 @@
 export * from './TypingIndicator';
-export * from './useTyping';
+export { useTyping } from '../../hooks';
 export * from './types';

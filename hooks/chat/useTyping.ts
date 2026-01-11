@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import type { TypingUser } from './types';
+import type { TypingUser } from '../../components/typingIndicator/types';
 import { getUserAvatar } from '../../lib/controllers/colorsProcessors/userAvatar';
 
 /**

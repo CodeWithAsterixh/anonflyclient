@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, type MetaFunction } from 'react-router';
 import { validateShareLink } from '../../../lib/controllers/chatroomController';
-import { useAuth } from '../../../hooks/useAuth';
+import { useAuth, useTheme } from '../../../hooks';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Background } from '../../../components/background';
-import { useTheme } from '../../../hooks/useTheme';
 
 export const meta: MetaFunction = () => {
   return [

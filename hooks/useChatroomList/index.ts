@@ -11,6 +11,7 @@ import type { UseChatroomListReturn, Chatroom } from './types';
  *
  * @returns {UseChatroomListReturn} An object containing the list of chatrooms, loading state, and error state.
  */
+export * from './types';
 export const useChatroomList = (): UseChatroomListReturn => {
   const [chatrooms, setChatrooms] = useState<Chatroom[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { generateShareLink } from "../../../../lib/controllers/chatroomController";
-import { getAPIBaseURL } from "../../../../lib/constants/api";
+import { generateShareLink } from "../../../lib/controllers/chatroomController";
+import { getAPIBaseURL } from "../../../lib/constants/api";
 
 export const useRoomActions = (
   chatroomId: string | undefined,

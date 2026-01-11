@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getAPIBaseURL } from "../../../../lib/constants/api";
-import { checkAccess } from "../../../../lib/controllers/chatroomController";
-import type { ChatroomDetail } from "../../../../lib/types/chat";
-import type { User } from '../../../../types/User';
+import { getAPIBaseURL } from "../../../lib/constants/api";
+import { checkAccess } from "../../../lib/controllers/chatroomController";
+import type { ChatroomDetail } from "../../../lib/types/chat";
+import type { User } from '../../../types/User';
 
 export interface AccessState {
   status: 'checking' | 'granted' | 'denied';

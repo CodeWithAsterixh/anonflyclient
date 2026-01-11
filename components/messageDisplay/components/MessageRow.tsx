@@ -68,7 +68,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
       } ${isPreview ? "" : "w-full"}`}
     >
       {/* Avatar */}
-      <div
+      {!isCurrentUser&&<div
         className={`shrink-0 mb-1 transition-opacity duration-300 ${
           showReactions && !isPreview ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
@@ -79,7 +79,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
           size="sm" 
           className="shadow-sm border border-border"
         />
-      </div>
+      </div>}
 
       <button
         type="button"

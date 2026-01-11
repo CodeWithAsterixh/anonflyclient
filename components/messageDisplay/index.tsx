@@ -36,7 +36,6 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
   const [highlight, setHighlight] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
   const [showAllEmojis, setShowAllEmojis] = useState(false);
-  const [isBubbleFocused, setIsBubbleFocused] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const bubbleRef = useRef<HTMLDivElement>(null);
@@ -45,14 +44,13 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
   const closeMenus = () => {
     setShowReactions(false);
     setShowAllEmojis(false);
-    setIsBubbleFocused(false);
   };
 
   // Check if message is editable (within 10 minutes)
   const isEditable = useMemo(() => {
     if (!isCurrentUser || message.type === "system") return false;
     const messageTime = new Date(message.timestamp).getTime();
-    const currentTime = new Date().getTime();
+    const currentTime = Date.now();
     return currentTime - messageTime < 10 * 60 * 1000;
   }, [message.timestamp, isCurrentUser, message.type]);
 
@@ -140,7 +138,6 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
 
   const handleLongPress = () => {
     setShowReactions(true);
-    setIsBubbleFocused(true);
   };
 
   const isReplyToMe =
@@ -193,15 +190,9 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
   const handleDoubleClick = () => {
     if (!isMobile) {
       setShowReactions(true);
-      setIsBubbleFocused(true);
     }
   };
 
-  const handleClick = () => {
-    if (!isMobile) {
-      setIsBubbleFocused((prev) => !prev);
-    }
-  };
 
   const avatarUrl = useMemo(
     () => getUserAvatar(message.senderUsername, message.senderAid, 32),
@@ -234,7 +225,6 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        onClick={handleClick}
       >
         <div
           className={`absolute top-1/2 -translate-y-1/2 transition-opacity duration-200 ${

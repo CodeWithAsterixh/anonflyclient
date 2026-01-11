@@ -11,7 +11,6 @@ const Logo: React.FC<LogoProps> = ({ className = "", size = 40, showText = false
         fill="none" 
         xmlns="http://www.w3.org/2000/svg"
         className="drop-shadow-md"
-        role="img"
         aria-label="Anonfly Logo - Secure and Anonymous Messaging"
       >
         <defs>
@@ -45,7 +44,7 @@ const Logo: React.FC<LogoProps> = ({ className = "", size = 40, showText = false
       </svg>
       {showText && (
         <div className="flex flex-col leading-tight">
-          <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+          <span className="font-bold text-xl tracking-tight bg-linear-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
             Anonfly
           </span>
           <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">

@@ -25,18 +25,19 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     <>
       {/* Reply Preview in Bubble */}
       {message.replyTo && (
-        <div
+        <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             scrollToRepliedMessage(message.replyTo!.messageId);
           }}
-          className="mb-2 p-2 rounded-lg bg-black/10 dark:bg-white/10 border-l-4 border-black/20 dark:border-white/20 text-xs cursor-pointer hover:bg-black/20 dark:hover:bg-white/20 transition-colors"
+          className="w-full text-left mb-2 p-2 rounded-lg bg-black/10 dark:bg-white/10 border-l-4 border-black/20 dark:border-white/20 text-xs cursor-pointer hover:bg-black/20 dark:hover:bg-white/20 transition-colors border-y-0 border-r-0"
         >
           <p className="font-bold opacity-70 truncate">
             {isReplyToMe ? "You" : message.replyTo.senderUsername || "Anonymous"}
           </p>
-          <div className="opacity-60 line-clamp-2 italic">{formatMessage(message.replyTo.content)}</div>
-        </div>
+          <div className="opacity-60 line-clamp-2 italic text-left">{formatMessage(message.replyTo.content)}</div>
+        </button>
       )}
 
       {!isCurrentUser && (
@@ -48,7 +49,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         </div>
       )}
 
-      <div className="break-words text-[15px] leading-relaxed whitespace-pre-wrap px-2">
+      <div className="wrap-break-word text-[15px] leading-relaxed whitespace-pre-wrap px-2">
         {formatMessage(message.content)}
       </div>
 

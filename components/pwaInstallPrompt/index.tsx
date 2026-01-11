@@ -10,7 +10,7 @@ interface PWAInstallPromptProps {
 
 const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({ onInstall, onRemindLater, onCancel }) => {
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-[9999] md:left-auto md:right-8 md:bottom-8 md:max-w-md animate-in fade-in slide-in-from-bottom-8 duration-500">
+    <div className="fixed bottom-4 left-4 right-4 z-9999 md:left-auto md:right-8 md:bottom-8 md:max-w-md animate-in fade-in slide-in-from-bottom-8 duration-500">
       <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
         <div className="p-6">
           <div className="flex items-start justify-between mb-4">

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef } from 'react';
 import { formatInline } from '../../../lib/helpers/markdown';
 
 interface InlineFormattedInputProps {

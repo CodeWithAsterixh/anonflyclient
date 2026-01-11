@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { MessageRow } from "./MessageRow";
 import { ReactionPicker } from "./ReactionPicker";
 import { EmojiGrid } from "./EmojiGrid";
@@ -43,18 +43,38 @@ export const MessageFullViewer: React.FC<MessageFullViewerProps> = ({
   onDelete,
   isEditable,
 }) => {
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeMenus();
+      }
+    };
+
+    globalThis.window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => {
+      globalThis.window.removeEventListener("keydown", handleGlobalKeyDown);
+    };
+  }, [closeMenus]);
+
   return (
-    <div
-      className={`pointer-events-auto absolute top-0 h-full inset-0 z-100 bg-black/10 dark:bg-black/40 backdrop-blur-2xl transition-all duration-300 flex items-center p-4 ${
+    <dialog
+      open
+      className={`pointer-events-auto absolute top-0 inset-0 z-100 bg-black/10 dark:bg-black/40 backdrop-blur-2xl transition-all duration-300 flex items-center p-4 border-none m-0 max-w-none max-h-none w-full h-full outline-none ${
         isCurrentUser ? "justify-end" : "justify-start"
       }`}
-      onClick={closeMenus}
     >
+      {/* Backdrop Button for closing */}
+      <button
+        type="button"
+        className="absolute inset-0 w-full h-full bg-transparent border-none cursor-default"
+        onClick={closeMenus}
+        aria-label="Close viewer"
+      />
+
       <div
-        className={`relative flex flex-col items-center gap-2 animate-in zoom-in-90 fade-in-80 duration-300 ${
+        className={`relative z-10 flex flex-col items-center gap-2 animate-in zoom-in-90 fade-in-80 duration-300 ${
           isCurrentUser ? "items-end" : "items-start"
         }`}
-        onClick={(e) => e.stopPropagation()}
       >
         <MessageRow
           message={message}
@@ -71,7 +91,6 @@ export const MessageFullViewer: React.FC<MessageFullViewerProps> = ({
         <div
           ref={reactionsRef}
           className="flex flex-col items-center gap-4 w-max animate-in zoom-in duration-200"
-          onClick={(e) => e.stopPropagation()}
         >
           <ReactionPicker
             onReact={onReact}
@@ -89,7 +108,7 @@ export const MessageFullViewer: React.FC<MessageFullViewerProps> = ({
           />
         </div>
       </div>
-    </div>
+    </dialog>
   );
 };
 

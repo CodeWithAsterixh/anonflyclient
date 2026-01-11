@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
-import { useIsMobile, useTypingStatus, useFormatting, useTextSelection } from '../../hooks';
-import { MessagePreview } from './components/MessagePreview';
+import React, { useEffect, useRef, useState } from 'react';
+import { useFormatting, useIsMobile, useTextSelection, useTypingStatus } from '../../hooks';
+import FormattingContextMenu from '../common/FormattingContextMenu/FormattingContextMenu';
 import { InlineFormattedInput } from './components/InlineFormattedInput';
+import { MessagePreview } from './components/MessagePreview';
 import type { MessageInputProps } from './types';
-import FormattingContextMenu, { type FormattingAction } from '../common/FormattingContextMenu/FormattingContextMenu';
 
 /**
  * MessageInput component provides an auto-expanding inline-formatted input 
@@ -130,7 +130,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         />
         <button
           onClick={() => handleSubmit()}
-          className="p-2.5 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 focus:outline-none disabled:opacity-50 transition-colors flex-shrink-0"
+          className="p-2.5 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 focus:outline-none disabled:opacity-50 transition-colors shrink-0"
           disabled={isDisabled || !messageInput.trim()}
           title="Send message"
           aria-label="Send message"

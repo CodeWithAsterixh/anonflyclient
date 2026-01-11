@@ -31,7 +31,7 @@ const ReactionList: React.FC<ReactionListProps> = ({ reactions }) => {
     <div className="absolute -bottom-3 flex flex-wrap gap-1 z-20 px-1">
       {groupedReactions.map((reaction, i) => (
         <div
-          key={i}
+          key={i+1}
           title={reaction.users.join(", ")}
           className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-100 dark:border-gray-700 rounded-full px-1.5 py-0.5 shadow-sm text-[10px] flex items-center gap-1 hover:scale-110 transition-transform cursor-default"
         >

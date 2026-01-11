@@ -25,13 +25,41 @@ export const MessageRow: React.FC<MessageRowProps> = ({
   bubbleColors,
   isReplyToMe,
   scrollToRepliedMessage,
-  isFocused=false,
-  showReactions=false,
+  isFocused = false,
+  showReactions = false,
   swipeOffset = 0,
   onDoubleClick,
   bubbleRef,
   isPreview = false,
 }) => {
+  const getBubbleTransform = () => {
+    if (isPreview || showReactions) return "none";
+    return `translateX(${swipeOffset}px)`;
+  };
+
+  const getBubbleClassName = () => {
+    const baseClasses = `min-w-[2rem] w-fit line-break max-w-[70%] md:max-w-[50%] px-2 py-2 rounded-2xl shadow-sm relative transition-all duration-300`;
+    const alignmentClass = isCurrentUser ? "rounded-br-none" : "rounded-bl-none";
+    
+    let stateClass = "";
+    if (isPreview) {
+      stateClass = "shadow-2xl ring-4 ring-black/10 dark:ring-white/10 min-w-[5rem]";
+    } else if (showReactions) {
+      stateClass = "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] max-w-[90%] md:max-w-[60%] w-auto shadow-2xl ring-4 ring-black/10 dark:ring-white/10 scale-110";
+    } else if (isFocused) {
+      stateClass = "shadow-2xl ring-4 ring-black/10 dark:ring-white/10";
+    }
+
+    return `${baseClasses} ${alignmentClass} ${stateClass}`;
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onDoubleClick?.();
+    }
+  };
+
   return (
     <div
       className={`w-full flex items-end gap-2 ${
@@ -40,7 +68,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
     >
       {/* Avatar */}
       <div
-        className={`flex-shrink-0 mb-1 transition-opacity duration-300 ${
+        className={`shrink-0 mb-1 transition-opacity duration-300 ${
           showReactions && !isPreview ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
@@ -52,25 +80,18 @@ export const MessageRow: React.FC<MessageRowProps> = ({
         />
       </div>
 
-      <div
-        ref={bubbleRef}
+      <button
+        type="button"
+        ref={bubbleRef as any}
         onDoubleClick={onDoubleClick}
+        onKeyDown={handleKeyDown}
+        aria-label={`Message from ${message.senderUsername}`}
         style={{
           backgroundColor: bubbleColors.primary,
           color: bubbleColors.text,
-          transform: isPreview ? "none" : showReactions ? "none" : `translateX(${swipeOffset}px)`,
+          transform: getBubbleTransform(),
         }}
-        className={`min-w-[2rem] w-fit line-break max-w-[70%] md:max-w-[50%] px-2 py-2 rounded-2xl shadow-sm relative transition-all duration-300 ${
-          isCurrentUser ? "rounded-br-none" : "rounded-bl-none"
-        } ${
-          isPreview
-            ? "shadow-2xl ring-4 ring-black/10 dark:ring-white/10 min-w-[5rem]"
-            : showReactions
-            ? "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] max-w-[90%] md:max-w-[60%] w-auto shadow-2xl ring-4 ring-black/10 dark:ring-white/10 scale-110"
-            : isFocused
-            ? "shadow-2xl ring-4 ring-black/10 dark:ring-white/10"
-            : ""
-        }`}
+        className={`${getBubbleClassName()} text-left border-none cursor-default`}
       >
         <MessageBubble
           message={message}
@@ -80,7 +101,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
           scrollToRepliedMessage={scrollToRepliedMessage}
           isFocused={isFocused}
         />
-      </div>
+      </button>
     </div>
   );
 };

@@ -45,13 +45,21 @@ const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div 
-      className="isolate fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+    <dialog 
+      open
+      className="isolate fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity duration-300 border-none m-0 max-w-none max-h-none w-full h-full outline-none"
     >
+      {/* Backdrop Button for closing */}
+      <button
+        type="button"
+        className="absolute inset-0 w-full h-full bg-transparent border-none cursor-default"
+        onClick={onClose}
+        aria-label="Close modal"
+      />
+
       <div 
         ref={modalRef}
-        className={`bg-white dark:bg-gray-900 w-full ${maxWidthClasses[maxWidth]} rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden transform transition-all duration-300 animate-in fade-in zoom-in slide-in-from-bottom-4`}
+        className={`relative z-10 bg-white dark:bg-gray-900 w-full ${maxWidthClasses[maxWidth]} rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden transform transition-all duration-300 animate-in fade-in zoom-in slide-in-from-bottom-4`}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-50 dark:border-gray-800">
@@ -74,7 +82,7 @@ const Modal: React.FC<ModalProps> = ({
           {children}
         </div>
       </div>
-    </div>
+    </dialog>
   );
 };
 

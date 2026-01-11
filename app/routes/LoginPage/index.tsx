@@ -59,7 +59,7 @@ const LoginPage: React.FC = () => {
 
     try {
       await joinAnonymously(username, redirectPath);
-    } catch (err) {
+    } catch {
       // Join failed error is handled by useAuth and displayed in the UI
     }
   };
@@ -73,7 +73,7 @@ const LoginPage: React.FC = () => {
       <div className="bg-white dark:bg-gray-900 p-8 rounded-3xl shadow-xl w-full max-w-md border border-gray-100 dark:border-gray-800">
         <div className="flex flex-col items-center mb-8">
           <Logo size={64} className="mb-4" />
-          <h1 className="text-3xl font-extrabold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-extrabold bg-linear-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
             Anonfly
           </h1>
           <div className="flex items-center gap-2 mt-2">

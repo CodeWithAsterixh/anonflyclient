@@ -40,6 +40,13 @@ export const meta: MetaFunction = ({ params }) => {
   ];
 };
 
+import {
+  useAlertDialog,
+  useParticipantActions,
+  useRoomActions,
+  useAutoJoin,
+} from "./hooks";
+
 /**
  * ChatroomPage component displays the messages within a specific chatroom,
  * allows users to send new messages, and handles joining/leaving the chatroom.
@@ -59,7 +66,7 @@ const ChatroomPage: React.FC = () => {
   const [isHost, setIsHost] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
   const [isAlreadyParticipant, setIsAlreadyParticipant] = useState(false);
-  const [chatroomDetail, setChatroomDetails] = useState<ChatroomDetail | null>(
+  const [chatroomDetail, setChatroomDetail] = useState<ChatroomDetail | null>(
     null
   );
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -87,38 +94,7 @@ const ChatroomPage: React.FC = () => {
     accessState.status !== 'granted' || 
     (!hasStoredCredentials && (!chatroomDetail || (chatroomDetail.isLocked && !isCreator && !isAlreadyParticipant)));
 
-  const [alertDialog, setAlertDialog] = useState<{
-    isOpen: boolean;
-    title: string;
-    message: string;
-    type: "alert" | "confirm" | "error" | "success";
-    confirmText?: string;
-    cancelText?: string;
-    onConfirm?: () => void;
-    onCancel?: () => void;
-  }>({
-    isOpen: false,
-    title: "",
-    message: "",
-    type: "alert",
-    confirmText: "Confirm",
-    cancelText: "Cancel",
-  });
-
-  const showAlertDialog = (
-    title: string,
-    message: string,
-    type: "alert" | "confirm" | "error" | "success" = "alert",
-    onConfirm?: () => void
-  ) => {
-    setAlertDialog({
-      isOpen: true,
-      title,
-      message,
-      type,
-      onConfirm,
-    });
-  };
+  const { alertDialog, setAlertDialog, showAlertDialog, closeAlertDialog } = useAlertDialog();
 
   const fetchChatroomDetails = async () => {
     if (!chatroomId || !token || !user) return;
@@ -140,12 +116,12 @@ const ChatroomPage: React.FC = () => {
 
       const data = await response.json();
       if (response.ok && data.data) {
-        setChatroomDetails(data.data);
+        setChatroomDetail(data.data);
         setIsHost(data.data.hostAid === user.userId);
         setIsCreator(data.data.creatorAid === user.userId);
         setIsAlreadyParticipant(data.data.isAlreadyParticipant || false);
       }
-    } catch (error) {
+    } catch{
       // Silently fail
     }
   };
@@ -168,7 +144,7 @@ const ChatroomPage: React.FC = () => {
           message: response.message || 'Access denied. You need a valid invite link to access this private room.' 
         });
       }
-    } catch (error: any) {
+    } catch  {
       setAccessState({ 
         status: 'denied', 
         message: 'Failed to verify access. Please try again later.' 
@@ -198,7 +174,6 @@ const ChatroomPage: React.FC = () => {
     error,
     reconnect,
     clearError,
-    currentChatroomId,
     ws
   } = useChatroom(chatroomId, shouldDeferConnection);
 
@@ -254,73 +229,21 @@ const ChatroomPage: React.FC = () => {
     }
   }, [isJoined, chatroomId]);
 
-  useEffect(() => {
-    if (!isConnected || !chatroomId || isJoined || isRemoved) {
-      return;
-    }
-
-    const performJoin = async (password?: string, linkToken?: string) => {
-      try {
-        isJoiningRef.current = true;
-        lastJoinedRoomRef.current = chatroomId;
-        await joinChatroom(chatroomId, password, linkToken);
-      } catch (err) {
-        console.error("[ChatroomPage] Join failed:", err);
-        isJoiningRef.current = false;
-        lastJoinedRoomRef.current = null;
-        // Clear stored credentials on failure so we don't keep trying and show password prompt
-        if (chatroomId) {
-          sessionStorage.removeItem(`room_access_${chatroomId}`);
-          sessionStorage.removeItem(`room_token_${chatroomId}`);
-        }
-      }
-    };
-
-    // If we are already in the process of joining this specific room, stop
-    if (isJoiningRef.current || lastJoinedRoomRef.current === chatroomId) {
-      return;
-    }
-
-    // If we don't have details yet, we can only join if we have stored credentials
-    if (!displayDetail) {
-      if (hasStoredCredentials) {
-        const storedPassword = sessionStorage.getItem(`room_access_${chatroomId}`);
-        const storedToken = sessionStorage.getItem(`room_token_${chatroomId}`);
-        performJoin(storedPassword || undefined, storedToken || undefined);
-      }
-      return;
-    }
-
-    if ((!displayDetail.isLocked && !displayDetail.isPrivate) || isCreator || isAlreadyParticipant) {
-      // console.log(`[ChatroomPage] Auto-joining room: ${chatroomId}`);
-      performJoin();
-    } else {
-      // Check for stored access password or token (from share link)
-      const storedPassword = sessionStorage.getItem(`room_access_${chatroomId}`);
-      const storedToken = sessionStorage.getItem(`room_token_${chatroomId}`);
-      
-      if (storedToken || (displayDetail.isLocked && storedPassword)) {
-        // console.log(`[ChatroomPage] Auto-joining ${displayDetail.isPrivate ? 'private' : 'locked'} room with stored credentials: ${chatroomId}`);
-        performJoin(storedPassword || undefined, storedToken || undefined);
-      } else if (isSubmitting && joinPassword) {
-        // console.log(`[ChatroomPage] Joining locked room with manual password: ${chatroomId}`);
-        performJoin(joinPassword);
-      }
-    }
-  }, [
-    isConnected,
+  useAutoJoin(
     chatroomId,
-    displayDetail?.isLocked,
-    displayDetail?.isPrivate,
+    isConnected,
     isJoined,
     isRemoved,
-    joinChatroom,
-    joinPassword,
+    displayDetail,
+    hasStoredCredentials,
     isSubmitting,
+    joinPassword,
     isCreator,
     isAlreadyParticipant,
-    hasStoredCredentials,
-  ]);
+    joinChatroom,
+    isJoiningRef,
+    lastJoinedRoomRef
+  );
 
   // Reset joining lock on errors so user can try again
   useEffect(() => {
@@ -398,148 +321,32 @@ const ChatroomPage: React.FC = () => {
     navigate("/");
   };
 
-  const handleGenerateShareLink = async () => {
-    if (!chatroomId) return null;
-    try {
-      const response = await generateShareLink(chatroomId);
-      if (response.success && response.data.token) {
-        const shareUrl = `${window.location.origin}/join/${response.data.token}`;
-        await navigator.clipboard.writeText(shareUrl);
-        return response.data;
-      }
-      return null;
-    } catch (err) {
-      console.error("Failed to generate share link:", err);
-      showAlertDialog("Error", "Failed to generate share link. Please try again.", "error");
-      return null;
-    }
-  };
+  const { handleRemoveParticipant, handleBanParticipant, handleUnbanParticipant } = useParticipantActions(chatroomId, showAlertDialog);
+   const { handleGenerateShareLink, handleDeleteRoom } = useRoomActions(chatroomId, token, showAlertDialog, navigate);
 
-  const handleEditRoom = () => {
-    setIsEditModalOpen(true);
-  };
+   const handleEditRoom = () => {
+     setIsEditModalOpen(true);
+   };
 
-  const handleDeleteRoom = async () => {
-    if (!chatroomId || !token) return;
+   const handleEditSuccess = () => {
+     fetchChatroomDetails();
+   };
 
-    showAlertDialog(
-      "Delete Chatroom",
-      "Are you sure you want to delete this chatroom? This action cannot be undone.",
-      "confirm",
-      async () => {
-        try {
-          const response = await fetch(
-            `${getAPIBaseURL()}/chatrooms/${chatroomId}`,
-            {
-              method: "DELETE",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          if (response.ok) {
-            showAlertDialog(
-              "Success",
-              "Chatroom deleted successfully!",
-              "success",
-              () => navigate("/")
-            );
-          } else {
-            const errorData = await response.json();
-            showAlertDialog(
-              "Error",
-              `Failed to delete chatroom: ${errorData.message}`,
-              "error"
-            );
-          }
-        } catch (error) {
-          showAlertDialog(
-            "Error",
-            "An error occurred while deleting the chatroom.",
-            "error"
-          );
-        }
-      }
-    );
-  };
-
-  const handleEditSuccess = () => {
-    // Refetch chatroom details to get updated values
-    fetchChatroomDetails();
-  };
-
-  const handleJoinChatroom = async () => {
-    if (!chatroomId) return;
-    setPasswordError(null);
-    setIsSubmitting(true);
-    try {
-      // For locked rooms, we might need to connect first if we deferred it
-      if (displayDetail?.isLocked && !isConnected) {
-        reconnect();
-        // The useEffect will handle joinChatroom once isConnected becomes true
-      } else {
-        await joinChatroom(chatroomId, joinPassword);
-      }
-    } catch (err: any) {
-      setPasswordError(err.message || "Failed to join chatroom");
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleRemoveParticipant = async (userAid: string) => {
-    if (!chatroomId) return;
-    try {
-      await removeParticipant(chatroomId, userAid);
-      showAlertDialog(
-        "Success",
-        "Participant removed successfully",
-        "success"
-      );
-    } catch (error: any) {
-      showAlertDialog(
-        "Error",
-        error.message || "Failed to remove participant",
-        "error"
-      );
-    }
-  };
-
-  const handleBanParticipant = async (userAid: string, reason?: string) => {
-    if (!chatroomId) return;
-    try {
-      await banParticipant(chatroomId, userAid, reason);
-      showAlertDialog(
-        "Success",
-        "Participant banned successfully",
-        "success"
-      );
-    } catch (error: any) {
-      showAlertDialog(
-        "Error",
-        error.message || "Failed to ban participant",
-        "error"
-      );
-    }
-  };
-
-  const handleUnbanParticipant = async (userAid: string) => {
-    if (!chatroomId) return;
-    try {
-      await unbanParticipant(chatroomId, userAid);
-      showAlertDialog(
-        "Success",
-        "Participant unbanned successfully",
-        "success"
-      );
-    } catch (error: any) {
-      showAlertDialog(
-        "Error",
-        error.message || "Failed to unban participant",
-        "error"
-      );
-    }
-  };
+   const handleJoinChatroom = async () => {
+     if (!chatroomId) return;
+     setPasswordError(null);
+     setIsSubmitting(true);
+     try {
+       if (displayDetail?.isLocked && !isConnected) {
+         reconnect();
+       } else {
+         joinChatroom(chatroomId, joinPassword);
+       }
+     } catch (err: any) {
+       setPasswordError(err.message || "Failed to join chatroom");
+       setIsSubmitting(false);
+     }
+   };
 
   if (accessState.status === 'checking') {
     return (
@@ -555,7 +362,7 @@ const ChatroomPage: React.FC = () => {
         <AccessDeniedScreen 
           message={accessState.message}
           onNavigateHome={() => navigate("/")}
-          onNavigateToLogin={() => navigate(`/login?redirect_to=${encodeURIComponent(window.location.pathname)}`)}
+          onNavigateToLogin={() => navigate(`/login?redirect_to=${encodeURIComponent(globalThis.window.location.pathname)}`)}
           theme={theme}
         />
       </Background>
@@ -581,7 +388,7 @@ const ChatroomPage: React.FC = () => {
         <JoinScreen
           onNavigateToLogin={() =>
             navigate(
-              `/login?redirect_to=${encodeURIComponent(window.location.pathname)}`
+              `/login?redirect_to=${encodeURIComponent(globalThis.window.location.pathname)}`
             )
           }
         />
@@ -614,7 +421,7 @@ const ChatroomPage: React.FC = () => {
     );
   }
 
-  if (!isConnected && (!displayDetail || !displayDetail.isLocked)) {
+  if (!isConnected && (!displayDetail?.isLocked)) {
     return (
       <Background mode={theme}>
         <ConnectingScreen />
@@ -692,12 +499,7 @@ const ChatroomPage: React.FC = () => {
       />
       <AlertDialog
         isOpen={alertDialog.isOpen}
-        onClose={() => {
-          if (alertDialog.onCancel) {
-            alertDialog.onCancel();
-          }
-          setAlertDialog((prev) => ({ ...prev, isOpen: false }));
-        }}
+        onClose={closeAlertDialog}
         onConfirm={alertDialog.onConfirm}
         title={alertDialog.title}
         message={alertDialog.message}

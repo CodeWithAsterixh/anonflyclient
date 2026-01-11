@@ -1,5 +1,5 @@
+import { Check, LogOut, Settings2, Share2, Trash2 } from 'lucide-react';
 import React from 'react';
-import { LogOut, Settings2, Trash2, Share2, Check, Copy } from 'lucide-react';
 
 interface RoomActionsProps {
   isHost: boolean;
@@ -24,7 +24,7 @@ const RoomActions: React.FC<RoomActionsProps> = ({
     try {
       setIsGenerating(true);
       const data = await onGenerateShareLink();
-      if (data && data.expiresAt) {
+      if (data?.expiresAt) {
         setExpiresAt(data.expiresAt);
       }
       setShowCopied(true);
@@ -45,6 +45,33 @@ const RoomActions: React.FC<RoomActionsProps> = ({
     return `${minutes}m`;
   };
 
+  const getShareButtonContent = () => {
+    if (showCopied) {
+      return (
+        <>
+          <Check size={16} />
+          <span>Copied!</span>
+        </>
+      );
+    }
+    
+    if (isGenerating) {
+      return (
+        <>
+          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          <span>Generating...</span>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <Share2 size={16} />
+        <span>Share Access Link</span>
+      </>
+    );
+  };
+
   return (
     <div className="p-4 space-y-2">
       <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
@@ -59,22 +86,7 @@ const RoomActions: React.FC<RoomActionsProps> = ({
               disabled={isGenerating}
               className="flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800 rounded-xl transition-all disabled:opacity-50"
             >
-              {showCopied ? (
-                <>
-                  <Check size={16} />
-                  <span>Copied!</span>
-                </>
-              ) : isGenerating ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  <span>Generating...</span>
-                </>
-              ) : (
-                <>
-                  <Share2 size={16} />
-                  <span>Share Access Link</span>
-                </>
-              )}
+              {getShareButtonContent()}
             </button>
             {expiresAt && (
               <p className="text-[10px] text-gray-500 dark:text-gray-400 px-3 flex items-center gap-1">

@@ -4,9 +4,9 @@ const ChatListSkeleton: React.FC<{ count?: number }> = ({ count = 6 }) => {
   return (
     <>
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="flex items-center p-3 animate-pulse">
+        <div key={i+1} className="flex items-center p-3 animate-pulse">
           {/* Avatar skeleton */}
-          <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full flex-shrink-0" />
+          <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full shrink-0" />
 
           {/* Name and description skeleton */}
           <div className="flex-1 mx-3 space-y-2">
@@ -16,7 +16,7 @@ const ChatListSkeleton: React.FC<{ count?: number }> = ({ count = 6 }) => {
           </div>
 
           {/* Users skeleton */}
-          <div className="flex items-center space-x-1 flex-shrink-0">
+          <div className="flex items-center space-x-1 shrink-0">
             <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded-full" />
             <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4" />
           </div>

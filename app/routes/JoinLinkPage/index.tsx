@@ -4,6 +4,7 @@ import { validateShareLink } from '../../../lib/controllers/chatroomController';
 import { useAuth, useTheme } from '../../../hooks';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Background } from '../../../components/background';
+import { cryptSessionStorage } from '../../../lib/helpers/cryptSessionStorage';
 
 export const meta: MetaFunction = () => {
   return [
@@ -50,16 +51,16 @@ const JoinLinkPage: React.FC = () => {
           
           // Store the access token/password in sessionStorage so ChatroomPage can pick it up
           if (password) {
-            sessionStorage.setItem(`room_access_${chatroomId}`, password);
+            cryptSessionStorage.setItem(`room_access_${chatroomId}`, password, chatroomId);
           }
           
           // Store the join authorization token
           if (joinAuthToken) {
-            sessionStorage.setItem(`room_join_auth_${chatroomId}`, joinAuthToken);
+            cryptSessionStorage.setItem(`room_join_auth_${chatroomId}`, joinAuthToken, chatroomId);
           }
           
           // Also store the token itself for private room validation
-          sessionStorage.setItem(`room_token_${chatroomId}`, token);
+          cryptSessionStorage.setItem(`room_token_${chatroomId}`, token, chatroomId);
           
           // Navigate to the chatroom
           navigate(`/${chatroomId}`, { replace: true });

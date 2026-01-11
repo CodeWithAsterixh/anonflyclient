@@ -14,6 +14,7 @@ import {
   useTyping,
 } from "../../../hooks";
 import { Background } from "../../../components/background";
+import { cryptSessionStorage } from "../../../lib/helpers/cryptSessionStorage";
 import AlertDialog from "../../../components/alertDialog";
 import { ChatLayoutContext } from "../../contexts/ChatLayoutContext";
 import {
@@ -74,10 +75,10 @@ const ChatroomPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const storedPassword = chatroomId
-    ? sessionStorage.getItem(`room_access_${chatroomId}`)
+    ? cryptSessionStorage.getItem(`room_access_${chatroomId}`, chatroomId)
     : null;
   const storedToken = chatroomId
-    ? sessionStorage.getItem(`room_token_${chatroomId}`)
+    ? cryptSessionStorage.getItem(`room_token_${chatroomId}`, chatroomId)
     : null;
   const hasStoredCredentials = !!(storedToken || storedPassword);
 
@@ -150,9 +151,9 @@ const ChatroomPage: React.FC = () => {
 
   useEffect(() => {
     if (isJoined && chatroomId) {
-      sessionStorage.removeItem(`room_access_${chatroomId}`);
-      sessionStorage.removeItem(`room_token_${chatroomId}`);
-      sessionStorage.removeItem(`room_join_auth_${chatroomId}`);
+      cryptSessionStorage.removeItem(`room_access_${chatroomId}`);
+      cryptSessionStorage.removeItem(`room_token_${chatroomId}`);
+      cryptSessionStorage.removeItem(`room_join_auth_${chatroomId}`);
     }
   }, [isJoined, chatroomId]);
 
@@ -216,7 +217,7 @@ const ChatroomPage: React.FC = () => {
       if (displayDetail?.isLocked && !isConnected) {
         reconnect();
       } else {
-        joinChatroom(chatroomId, joinPassword);
+        await joinChatroom(chatroomId, joinPassword);
       }
     } catch (err: any) {
       setPasswordError(err.message || "Failed to join chatroom");

@@ -11,7 +11,7 @@ export interface ChatroomLifecycleOptions {
   user: User | null;
   setIsHost: (val: boolean) => void;
   setIsCreator: (val: boolean) => void;
-  leaveChatroom: () => void;
+  leaveChatroom: () => Promise<void>;
   showAlertDialog: (title: string, message: string, type?: "alert" | "confirm" | "error" | "success", onConfirm?: () => void) => void
 }
 export const useChatroomLifecycle = (options: ChatroomLifecycleOptions) => {

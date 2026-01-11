@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getAPIBaseURL } from "../../../lib/constants/api";
 import { checkAccess } from "../../../lib/controllers/chatroomController";
+import { cryptSessionStorage } from "../../../lib/helpers/cryptSessionStorage";
 import type { ChatroomDetail } from "../../../lib/types/chat";
 import type { User } from '../../../types/User';
 
@@ -56,7 +57,7 @@ export const useChatroomAccess = (
 
     setAccessState({ status: 'checking' });
     try {
-      const joinAuthToken = sessionStorage.getItem(`room_join_auth_${chatroomId}`) || undefined;
+      const joinAuthToken = cryptSessionStorage.getItem(`room_join_auth_${chatroomId}`, chatroomId) || undefined;
       const response = await checkAccess(chatroomId, joinAuthToken);
       
       if (response.success && response.data?.accessGranted) {

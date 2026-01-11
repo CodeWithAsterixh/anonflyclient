@@ -8,7 +8,6 @@ import { getUserRegion } from '../helpers/location';
  * @returns {Object} Headers object with Content-Type and Authorization.
  */
 const getAuthHeaders = () => {
-  // Get token from sessionStorage
   let token = null;
   const session = getSessionUser();
   if (session?.token) {

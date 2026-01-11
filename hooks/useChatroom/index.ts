@@ -1,13 +1,14 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useAuth } from "../useAuth";
-import { getIdentity } from "../../lib/helpers/identityManager";
+import { useCallback, useEffect, useState } from "react";
 import { type Emoji } from "../../lib/assets/emojis";
-import type { UseChatroomReturn } from "./types";
-import { useChatroomSSE } from "./parts/useChatroomSSE";
+import { cryptSessionStorage } from "../../lib/helpers/cryptSessionStorage";
+import { getIdentity } from "../../lib/helpers/identityManager";
+import { useAuth } from "../useAuth";
+import { useChatroomConnection } from "./parts/useChatroomConnection/index";
 import { useChatroomEncryption } from "./parts/useChatroomEncryption";
 import { useChatroomMessages } from "./parts/useChatroomMessages";
 import { useChatroomParticipants } from "./parts/useChatroomParticipants";
-import { useChatroomConnection } from "./parts/useChatroomConnection/index";
+import { useChatroomSSE } from "./parts/useChatroomSSE";
+import type { UseChatroomReturn } from "./types";
 
 /**
  * Custom hook for managing chatroom state and WebSocket communication.
@@ -112,7 +113,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
         return;
       }
 
-      const joinAuthToken = sessionStorage.getItem(`room_join_auth_${chatroomId}`) || undefined;
+      const joinAuthToken = cryptSessionStorage.getItem(`room_join_auth_${chatroomId}`, chatroomId) || undefined;
 
       if (joiningRef.current === `${chatroomId}:${password || ''}:${linkToken || ''}:${joinAuthToken || ''}` && ws.current?.readyState === WebSocket.OPEN) {
         return;
@@ -144,7 +145,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
           } else {
             setError("Failed to join chatroom: Identity not found. Please try logging in again.");
           }
-        } catch (err) {
+        } catch {
           setError("Failed to join chatroom: Identity error.");
         }
       }
@@ -156,7 +157,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     async (content: string, replyTo?: any) => {
       try {
         await sendMessageAction(ws.current, content, roomKeyRef.current, replyTo);
-      } catch (err) {
+      } catch{
         setError("Failed to secure message");
       }
     },
@@ -167,7 +168,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     async (messageId: string, newContent: string) => {
       try {
         await editMessageAction(ws.current, messageId, newContent, roomKeyRef.current);
-      } catch (err) {
+      } catch {
         setError("Failed to secure edited message");
       }
     },
@@ -178,7 +179,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     async (messageId: string) => {
       try {
         await deleteMessageAction(ws.current, messageId);
-      } catch (err) {
+      } catch {
         setError("Failed to delete message");
       }
     },

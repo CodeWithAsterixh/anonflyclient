@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { ChatroomDetail } from "../../../lib/types/chat";
+import { cryptSessionStorage } from "../../../lib/helpers/cryptSessionStorage";
 
 export interface AutoJoinOptions {
   chatroomId: string | undefined;
@@ -12,7 +13,7 @@ export interface AutoJoinOptions {
   joinPassword: string;
   isCreator: boolean;
   isAlreadyParticipant: boolean;
-  joinChatroom: (chatroomId: string, password?: string, linkToken?: string) => void;
+  joinChatroom: (chatroomId: string, password?: string, linkToken?: string) => Promise<void>;
   isJoiningRef: React.RefObject<boolean>;
   lastJoinedRoomRef: React.RefObject<string | null>;
 }
@@ -43,14 +44,14 @@ export const useAutoJoin = (options: AutoJoinOptions) => {
       try {
         isJoiningRef.current = true;
         lastJoinedRoomRef.current = chatroomId;
-        joinChatroom(chatroomId, password, linkToken);
+        await joinChatroom(chatroomId, password, linkToken);
       } catch (err) {
         console.error("[ChatroomPage] Join failed:", err);
         isJoiningRef.current = false;
         lastJoinedRoomRef.current = null;
         if (chatroomId) {
-          sessionStorage.removeItem(`room_access_${chatroomId}`);
-          sessionStorage.removeItem(`room_token_${chatroomId}`);
+          cryptSessionStorage.removeItem(`room_access_${chatroomId}`);
+          cryptSessionStorage.removeItem(`room_token_${chatroomId}`);
         }
       }
     };
@@ -61,8 +62,8 @@ export const useAutoJoin = (options: AutoJoinOptions) => {
 
     if (!displayDetail) {
       if (hasStoredCredentials) {
-        const storedPassword = sessionStorage.getItem(`room_access_${chatroomId}`);
-        const storedToken = sessionStorage.getItem(`room_token_${chatroomId}`);
+        const storedPassword = cryptSessionStorage.getItem(`room_access_${chatroomId}`, chatroomId);
+        const storedToken = cryptSessionStorage.getItem(`room_token_${chatroomId}`, chatroomId);
         performJoin(storedPassword || undefined, storedToken || undefined);
       }
       return;
@@ -71,8 +72,8 @@ export const useAutoJoin = (options: AutoJoinOptions) => {
     if ((!displayDetail.isLocked && !displayDetail.isPrivate) || isCreator || isAlreadyParticipant) {
       performJoin();
     } else {
-      const storedPassword = sessionStorage.getItem(`room_access_${chatroomId}`);
-      const storedToken = sessionStorage.getItem(`room_token_${chatroomId}`);
+      const storedPassword = cryptSessionStorage.getItem(`room_access_${chatroomId}`, chatroomId);
+      const storedToken = cryptSessionStorage.getItem(`room_token_${chatroomId}`, chatroomId);
       
       if (storedToken || (displayDetail.isLocked && storedPassword)) {
         performJoin(storedPassword || undefined, storedToken || undefined);

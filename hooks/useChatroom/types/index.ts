@@ -6,12 +6,12 @@ export interface UseChatroomReturn {
   messages: Message[];
   participants: Map<string, Participant>;
   chatroomDetail: ChatroomDetail | null;
-  sendMessage: (content: string, replyTo?: { messageId: string; senderUsername: string; content: string; senderAid: string }) => void;
-  editMessage: (messageId: string, newContent: string) => void;
-  deleteMessage: (messageId: string) => void;
+  sendMessage: (content: string, replyTo?: { messageId: string; senderUsername: string; content: string; senderAid: string }) => Promise<void>;
+  editMessage: (messageId: string, newContent: string) => Promise<void>;
+  deleteMessage: (messageId: string) => Promise<void>;
   sendReaction: (messageId: string, emoji: Emoji) => void;
-  joinChatroom: (chatroomId: string, password?: string, linkToken?: string) => void;
-  leaveChatroom: () => void;
+  joinChatroom: (chatroomId: string, password?: string, linkToken?: string) => Promise<void>;
+  leaveChatroom: () => Promise<void>;
   reconnect: () => void;
   clearError: () => void;
   isConnected: boolean;

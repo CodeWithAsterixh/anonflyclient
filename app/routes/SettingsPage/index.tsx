@@ -515,13 +515,28 @@ const SettingsPage: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  {isInstallable && !isInstalled && (
+                  {!isInstalled && (
                     <button
-                      onClick={installApp}
+                      onClick={() => {
+                        if (isInstallable) {
+                          installApp();
+                        } else {
+                          setAlertDialog({
+                            isOpen: true,
+                            title: "How to Install",
+                            type: "alert",
+                            message: "To install Anonfly on your device:\n\n" + 
+                                     "• On iOS (Safari): Tap the 'Share' icon and select 'Add to Home Screen'.\n" +
+                                     "• On Android (Chrome): Tap the three dots menu and select 'Install app'.\n" +
+                                     "• On Desktop: Look for the install icon in your browser's address bar.",
+                            onConfirm: () => setAlertDialog(prev => ({ ...prev, isOpen: false }))
+                          });
+                        }
+                      }}
                       className="flex items-center gap-2 px-4 py-2 bg-primary hover:opacity-90 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary/20"
                     >
                       <Download size={18} />
-                      Install App
+                      {isInstallable ? 'Install App' : 'Manual Install'}
                     </button>
                   )}
                 </div>

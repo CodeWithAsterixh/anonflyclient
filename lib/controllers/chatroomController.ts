@@ -138,7 +138,7 @@ export const joinChatroom = async (chatroomId: string, password?: string, linkTo
   return data;
 };
 
-export const removeParticipant = async (chatroomId: string, userAid: string): Promise<object> => {
+export const removeParticipant = async (chatroomId: string, userAid: string): Promise<any> => {
   const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/participants/${encodeURIComponent(userAid)}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
@@ -153,7 +153,7 @@ export const removeParticipant = async (chatroomId: string, userAid: string): Pr
   return data;
 };
 
-export const banParticipant = async (chatroomId: string, userAid: string, reason?: string): Promise<object> => {
+export const banParticipant = async (chatroomId: string, userAid: string, reason?: string): Promise<any> => {
   const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/participants/${encodeURIComponent(userAid)}/ban`, {
     method: 'POST',
     headers: getAuthHeaders(),
@@ -169,7 +169,7 @@ export const banParticipant = async (chatroomId: string, userAid: string, reason
   return data;
 };
 
-export const unbanParticipant = async (chatroomId: string, userAid: string): Promise<object> => {
+export const unbanParticipant = async (chatroomId: string, userAid: string): Promise<any> => {
   const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/participants/${encodeURIComponent(userAid)}/unban`, {
     method: 'POST',
     headers: getAuthHeaders(),
@@ -184,7 +184,7 @@ export const unbanParticipant = async (chatroomId: string, userAid: string): Pro
   return data;
 };
 
-export const generateShareLink = async (chatroomId: string): Promise<object> => {
+export const generateShareLink = async (chatroomId: string): Promise<any> => {
   const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/share-link`, {
     method: 'POST',
     headers: getAuthHeaders(),
@@ -199,7 +199,7 @@ export const generateShareLink = async (chatroomId: string): Promise<object> => 
   return data;
 };
 
-export const validateShareLink = async (token: string): Promise<object> => {
+export const validateShareLink = async (token: string): Promise<any> => {
   const response = await fetch(`${getAPIBaseURL()}/chatrooms/validate-link`, {
     method: 'POST',
     headers: getAuthHeaders(),
@@ -215,7 +215,7 @@ export const validateShareLink = async (token: string): Promise<object> => {
   return data;
 };
 
-export const leaveChatroom = async (chatroomId: string): Promise<object> => {
+export const leaveChatroom = async (chatroomId: string): Promise<any> => {
   const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/leave`, {
     method: 'POST',
     headers: getAuthHeaders(),
@@ -230,7 +230,7 @@ export const leaveChatroom = async (chatroomId: string): Promise<object> => {
   return data;
 };
 
-export const deleteChatroom = async (chatroomId: string): Promise<object> => {
+export const deleteChatroom = async (chatroomId: string): Promise<any> => {
   const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
@@ -245,7 +245,7 @@ export const deleteChatroom = async (chatroomId: string): Promise<object> => {
   return data;
 };
 
-export const editChatroom = async (chatroomId: string, roomname: string, description?: string): Promise<object> => {
+export const editChatroom = async (chatroomId: string, roomname: string, description?: string): Promise<any> => {
   const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}`, {
     method: 'PATCH',
     headers: getAuthHeaders(),
@@ -264,7 +264,7 @@ export const editChatroom = async (chatroomId: string, roomname: string, descrip
   return data;
 };
 
-export const deleteMessage = async (chatroomId: string, messageId: string): Promise<object> => {
+export const deleteMessage = async (chatroomId: string, messageId: string): Promise<any> => {
   const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/messages/${encodeURIComponent(messageId)}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
@@ -279,7 +279,7 @@ export const deleteMessage = async (chatroomId: string, messageId: string): Prom
   return data;
 };
 
-export const getMyModerationToken = async (): Promise<object> => {
+export const getMyModerationToken = async (): Promise<any> => {
   const response = await fetch(`${getAPIBaseURL()}/user/moderation-token`, {
     method: 'GET',
     headers: getAuthHeaders(),

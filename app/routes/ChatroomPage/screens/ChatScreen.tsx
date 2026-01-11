@@ -158,14 +158,14 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                     {displayDetail?.roomname || "Loading..."}
                   </h1>
                   {displayDetail?.isPrivate && (
-                    <span className="px-1.5 py-0.5 text-[10px] font-bold bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded uppercase tracking-wider">
+                    <span className="px-1.5 py-0.5 text-[10px] font-bold bg-primary/10 text-primary rounded uppercase tracking-wider">
                       Private
                     </span>
                   )}
                 </div>
                 <button
                   onClick={() => setIsOptionsOpen(true)}
-                  className={`text-xs text-gray-500 dark:text-gray-400 transition-colors text-left hover:text-blue-500`}
+                  className={`text-xs text-gray-500 dark:text-gray-400 transition-colors text-left hover:text-primary`}
                 >
                   {participants.length} participant
                   {participants.length === 1 ? "" : "s"} •{" "}
@@ -179,7 +179,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                   {displayDetail?.creatorAid && (
                     <>
                       {" • "}
-                      <span className={`font-medium ${displayDetail.isCreatorOnline ? 'text-blue-500' : 'text-gray-400'}`}>
+                      <span className={`font-medium ${displayDetail.isCreatorOnline ? 'text-primary' : 'text-gray-400'}`}>
                         creator {displayDetail.isCreatorOnline ? 'online' : 'offline'}
                       </span>
                     </>
@@ -193,7 +193,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                 onClick={() => setIsOptionsOpen(!isOptionsOpen)}
                 className={`p-2 rounded-full transition-all ${
                   isOptionsOpen
-                    ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+                    ? "bg-primary/10 text-primary"
                     : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}
                 title="Room Options"
@@ -240,11 +240,11 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
           {hasMore && (
             <div className="flex justify-center py-2">
               {isLoadingMore ? (
-                <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
               ) : (
                 <button
                   onClick={loadMore}
-                  className="text-xs text-gray-500 hover:text-blue-500 transition-colors"
+                  className="text-xs text-gray-500 hover:text-primary transition-colors"
                 >
                   Load older messages
                 </button>
@@ -273,7 +273,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
         {showScrollButton && (
           <button
             onClick={onScrollToBottom}
-            className="absolute bottom-24 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all z-20 animate-in fade-in zoom-in duration-200"
+            className="absolute bottom-24 right-6 p-3 bg-primary text-white rounded-full shadow-lg hover:opacity-90 transition-all z-20 animate-in fade-in zoom-in duration-200 shadow-primary/20"
             aria-label="Scroll to bottom"
           >
             <ChevronDown className="w-6 h-6" />

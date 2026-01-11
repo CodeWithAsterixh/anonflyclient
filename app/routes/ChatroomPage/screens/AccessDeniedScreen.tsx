@@ -39,7 +39,7 @@ const AccessDeniedScreen: React.FC<AccessDeniedScreenProps> = ({
         {onNavigateToLogin && (
           <button
             onClick={onNavigateToLogin}
-            className="flex items-center justify-center gap-2 w-full py-4 px-6 bg-blue-600 text-white rounded-2xl font-semibold hover:bg-blue-700 transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-4 px-6 bg-primary text-white rounded-2xl font-semibold hover:opacity-90 transition-all"
           >
             <LogIn className="w-5 h-5" />
             Sign in with a different account

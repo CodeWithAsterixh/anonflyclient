@@ -18,7 +18,7 @@ const ChatroomCard: React.FC<ChatroomCardProps> = ({
 
   return (
     <Link
-      className={`flex items-center p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors ${isPrivate ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}
+      className={`flex items-center p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors ${isPrivate ? 'bg-primary/5' : ''}`}
       to={`/${id}`}
       onClick={(e) => {
         if (onClick) {
@@ -37,7 +37,7 @@ const ChatroomCard: React.FC<ChatroomCardProps> = ({
         {isLocked && (
           <div className="absolute -bottom-1 -right-1 bg-white dark:bg-gray-800 rounded-full p-1 shadow-sm border border-gray-100 dark:border-gray-700">
             {isPrivate ? (
-              <ShieldCheck size={12} className="text-blue-600 dark:text-blue-400" />
+              <ShieldCheck size={12} className="text-primary" />
             ) : (
               <Lock size={12} className="text-gray-600 dark:text-gray-400" />
             )}
@@ -50,7 +50,7 @@ const ChatroomCard: React.FC<ChatroomCardProps> = ({
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold truncate dark:text-gray-100">{roomname}</h2>
           {isPrivate && (
-            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded uppercase tracking-wider">
+            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-primary/10 text-primary rounded uppercase tracking-wider">
               Private
             </span>
           )}

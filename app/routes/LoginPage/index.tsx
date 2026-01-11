@@ -73,11 +73,11 @@ const LoginPage: React.FC = () => {
       <div className="bg-white dark:bg-gray-900 p-8 rounded-3xl shadow-xl w-full max-w-md border border-gray-100 dark:border-gray-800">
         <div className="flex flex-col items-center mb-8">
           <Logo size={64} className="mb-4" />
-          <h1 className="text-3xl font-extrabold bg-linear-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-extrabold text-primary">
             Anonfly
           </h1>
           <div className="flex items-center gap-2 mt-2">
-            <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-bold rounded-full border border-blue-100 dark:border-blue-800 uppercase tracking-wider">Free</span>
+            <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full border border-primary/20 uppercase tracking-wider">Free</span>
             <span className="px-2 py-0.5 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-bold rounded-full border border-green-100 dark:border-green-800 uppercase tracking-wider">Secure</span>
             <span className="px-2 py-0.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-[10px] font-bold rounded-full border border-purple-100 dark:border-purple-800 uppercase tracking-wider">Anonymous</span>
           </div>
@@ -111,7 +111,7 @@ const LoginPage: React.FC = () => {
           <div className="flex items-center justify-center">
             <button
               type="submit"
-              className="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-blue-200 dark:shadow-blue-900/20"
+              className="w-full bg-primary hover:opacity-90 text-white font-bold py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
               disabled={isLoading || isInitialCheck || !username}
             >
               {isLoading ? (
@@ -136,7 +136,7 @@ const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsAccountModalOpen(true)}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:opacity-80 transition-colors"
             >
               <Users size={18} />
               Sign in to other accounts

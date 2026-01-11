@@ -25,10 +25,10 @@ const Loader: React.FC<LoaderProps> = ({
       <div className="flex flex-col items-center gap-6 max-w-md w-full">
         {/* Spinner */}
         <div className="relative">
-          <div className="w-16 h-16 border-4 border-blue-100 dark:border-blue-900/30 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin"></div>
+          <div className="w-16 h-16 border-4 border-primary/10 border-t-primary rounded-full animate-spin"></div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="size-fit p-2 border border-blue-600/50 dark:border-blue-500/50 rounded-full relative isolate overflow-hidden">
-            <span className="-z-10 size-full block absolute inset-0 bg-blue-600/50 dark:bg-blue-500/50 rounded-full animate-pulse"/>
+            <div className="size-fit p-2 border border-primary/50 rounded-full relative isolate overflow-hidden">
+            <span className="-z-10 size-full block absolute inset-0 bg-primary/50 rounded-full animate-pulse"/>
               <Logo size={32}/>
             </div>
           </div>
@@ -52,12 +52,12 @@ const Loader: React.FC<LoaderProps> = ({
           <div className="w-full flex flex-col items-center gap-2">
             <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
               <div
-                className="bg-blue-600 dark:bg-blue-500 h-full transition-all duration-1000 ease-linear"
+                className="bg-primary h-full transition-all duration-1000 ease-linear"
                 style={{ width: `${(progress / maxProgress) * 100}%` }}
               ></div>
             </div>
             <p className="text-xs text-gray-400 dark:text-gray-500">
-              Retrying in <span className="font-bold text-blue-600 dark:text-blue-400">{Math.ceil(progress)}s</span>...
+              Retrying in <span className="font-bold text-primary">{Math.ceil(progress)}s</span>...
             </p>
           </div>
         )}

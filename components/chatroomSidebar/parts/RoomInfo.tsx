@@ -15,7 +15,7 @@ const RoomInfo: React.FC<RoomInfoProps> = ({ roomName, roomDescription, isPrivat
             Room Name
           </h3>
           {isPrivate && (
-            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded uppercase tracking-wider">
+            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-primary/10 text-primary rounded uppercase tracking-wider">
               Private
             </span>
           )}

@@ -15,16 +15,19 @@ import {
   PlusCircle,
   RefreshCw,
   Shield,
+  Palette,
   Smartphone,
   Trash2,
-  Users
+  Users,
+  Sun,
+  Moon
 } from 'lucide-react';
 import React, { useContext } from 'react';
 import { useNavigate, type MetaFunction } from 'react-router';
 import AlertDialog from '../../../components/alertDialog';
 import Logo from '../../../components/logo';
 import Input from '../../../components/ui/input';
-import { usePWA, useSettings } from '../../../hooks';
+import { usePWA, useSettings, useTheme, colorSchemes, type ColorScheme } from '../../../hooks';
 import { ChatLayoutContext } from '../../contexts/ChatLayoutContext';
 import { requireAuth } from '../../middleware/auth';
 import HideableField from './components/HideableField';
@@ -69,7 +72,7 @@ const SettingsPage: React.FC = () => {
     setAlertDialog,
     currentIdentity,
     myRooms,
-    roomAction,
+    roomActionState,
     setRoomAction,
     isProcessing,
     handleSwitchAccount,
@@ -85,7 +88,10 @@ const SettingsPage: React.FC = () => {
     authLoading
   });
 
-  const { isInstallable, isInstalled, installApp, appVersion, updateAvailable, updateApp } = usePWA();
+  const { isInstallable, isInstalled, installApp, appVersion, updateAvailable, updateApp
+  } = usePWA();
+
+  const { theme, colorScheme, setTheme, setColorScheme } = useTheme();
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Not available';
@@ -142,7 +148,7 @@ const SettingsPage: React.FC = () => {
           <section className="bg-white dark:bg-gray-900 rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-gray-800">
             <div className="flex items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-4 min-w-0 flex-1">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg shadow-blue-500/20 shrink-0">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-primary flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg shadow-primary/20 shrink-0">
                   {user?.username?.[0].toUpperCase() || '?'}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -175,7 +181,7 @@ const SettingsPage: React.FC = () => {
               <button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-xl transition-all disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-primary bg-primary/10 hover:bg-primary/20 rounded-xl transition-all disabled:opacity-50"
               >
                 <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
                 <span>{isRefreshing ? 'Refreshing...' : 'Refresh Info'}</span>
@@ -184,7 +190,7 @@ const SettingsPage: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-gray-50 dark:border-gray-800">
               <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl min-w-0">
-                <Calendar className="text-blue-500 shrink-0" size={20} />
+                <Calendar className="text-primary shrink-0" size={20} />
                 <div className="min-w-0">
                   <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wider truncate whitespace-nowrap">Account Created</p>
                   <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 truncate whitespace-nowrap">
@@ -209,12 +215,12 @@ const SettingsPage: React.FC = () => {
           <section className="space-y-4">
             <div className="flex items-center justify-between px-2">
               <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                <Users size={20} className="text-blue-500" />
+                <Users size={20} className="text-primary" />
                 Linked Identities
               </h3>
               <button 
                 onClick={() => navigate('/login')}
-                className="flex items-center gap-1.5 text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                className="flex items-center gap-1.5 text-sm font-bold text-primary hover:underline"
               >
                 <PlusCircle size={16} />
                 Add Identity
@@ -226,23 +232,23 @@ const SettingsPage: React.FC = () => {
                   key={id.aid} 
                   className={`p-4 flex items-center justify-between gap-3 group transition-colors ${
                     id.aid === user?.userId 
-                      ? 'bg-blue-50/50 dark:bg-blue-900/10' 
+                      ? 'bg-primary/10' 
                       : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shrink-0 ${
-                      id.aid === user?.userId ? 'bg-blue-600 shadow-md shadow-blue-500/20' : 'bg-gray-400 dark:bg-gray-600'
+                      id.aid === user?.userId ? 'bg-primary shadow-md shadow-primary/20' : 'bg-gray-400 dark:bg-gray-600'
                     }`}>
                       {id.username[0].toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 min-w-0">
-                        <p className={`font-bold truncate whitespace-nowrap ${id.aid === user?.userId ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-100'}`}>
+                        <p className={`font-bold truncate whitespace-nowrap ${id.aid === user?.userId ? 'text-primary' : 'text-gray-900 dark:text-gray-100'}`}>
                           {id.username}
                         </p>
                         {id.aid === user?.userId && (
-                          <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-[10px] font-black text-blue-600 dark:text-blue-400 rounded-full uppercase tracking-tighter shrink-0">
+                          <span className="px-2 py-0.5 bg-primary/10 text-[10px] font-black text-primary rounded-full uppercase tracking-tighter shrink-0">
                             Active
                           </span>
                         )}
@@ -259,7 +265,7 @@ const SettingsPage: React.FC = () => {
                       <button 
                         onClick={() => handleSwitchAccount(id.aid)}
                         disabled={authLoading}
-                        className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all disabled:opacity-50"
+                        className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-xl transition-all disabled:opacity-50"
                         title="Switch to this identity"
                       >
                         <RefreshCw size={18} className={authLoading ? 'animate-spin' : ''} />
@@ -272,15 +278,15 @@ const SettingsPage: React.FC = () => {
                             Manage your {myRooms.length} chatroom{myRooms.length > 1 ? 's' : ''}:
                           </p>
                           <div className="space-y-3">
-                            <label className={`flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 transition-colors group ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-blue-500'}`}>
+                            <label className={`flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 transition-colors group ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-primary'}`}>
                               <Input
                                 type="radio"
                                 name="roomAction"
                                 value="transfer"
-                                checked={roomAction === 'transfer'}
+                                checked={roomActionState === 'transfer'}
                                 onChange={() => !isProcessing && setRoomAction('transfer')}
                                 disabled={isProcessing}
-                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 disabled:opacity-50"
+                                className="w-4 h-4 text-primary border-gray-300 focus:ring-primary disabled:opacity-50"
                               />
                               <div className="flex-1">
                                 <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Transfer Authority</p>
@@ -292,7 +298,7 @@ const SettingsPage: React.FC = () => {
                                 type="radio"
                                 name="roomAction"
                                 value="delete"
-                                checked={roomAction === 'delete'}
+                                checked={roomActionState === 'delete'}
                                 onChange={() => !isProcessing && setRoomAction('delete')}
                                 disabled={isProcessing}
                                 className="w-4 h-4 text-red-600 border-gray-300 focus:ring-red-500 disabled:opacity-50"
@@ -320,7 +326,7 @@ const SettingsPage: React.FC = () => {
           {/* Security & Identity Section */}
           <section className="space-y-4">
             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 px-2 flex items-center gap-2">
-              <Shield size={20} className="text-blue-500" />
+              <Shield size={20} className="text-primary" />
               Security & Identity
             </h3>
             <div className="bg-white dark:bg-gray-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 divide-y divide-gray-50 dark:divide-gray-800">
@@ -357,10 +363,83 @@ const SettingsPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="p-4 sm:p-6 bg-blue-50/30 dark:bg-blue-900/10">
-                <div className="flex items-center gap-3 text-blue-700 dark:text-blue-300">
+              <div className="p-4 sm:p-6 bg-primary/5">
+                <div className="flex items-center gap-3 text-primary">
                   <Lock size={18} />
                   <p className="text-sm font-medium">Private keys are never uploaded to the server.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Appearance Section */}
+          <section className="space-y-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 px-2 flex items-center gap-2">
+              <Palette size={20} className="text-primary" />
+              Appearance
+            </h3>
+            <div className="bg-white dark:bg-gray-900 rounded-3xl p-4 sm:p-6 border border-gray-100 dark:border-gray-800 space-y-6">
+              {/* Theme Toggle */}
+              <div>
+                <h4 className="font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                  Color Mode
+                </h4>
+                <div className="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl w-fit">
+                  <button
+                    onClick={() => setTheme('light')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                      theme === 'light' 
+                        ? 'bg-white text-gray-900 shadow-sm' 
+                        : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                    }`}
+                  >
+                    <Sun size={18} />
+                    <span className="font-bold text-sm">Light</span>
+                  </button>
+                  <button
+                    onClick={() => setTheme('dark')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                      theme === 'dark' 
+                        ? 'bg-gray-900 text-white shadow-sm' 
+                        : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                    }`}
+                  >
+                    <Moon size={18} />
+                    <span className="font-bold text-sm">Dark</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Color Schemes */}
+              <div>
+                <h4 className="font-bold text-gray-900 dark:text-gray-100 mb-3">
+                  Color Scheme
+                </h4>
+                <div className="flex flex-wrap gap-3">
+                  {(Object.keys(colorSchemes) as ColorScheme[]).map((schemeKey) => {
+                    const scheme = colorSchemes[schemeKey];
+                    const isActive = colorScheme === schemeKey;
+                    const displayColor = theme === 'dark' ? scheme.dark : scheme.light;
+                    
+                    return (
+                      <button
+                        key={schemeKey}
+                        onClick={() => setColorScheme(schemeKey)}
+                        className={`group relative flex items-center justify-center w-10 h-10 rounded-full transition-all hover:scale-110 active:scale-95 ${
+                          isActive ? 'ring-2 ring-offset-2 ring-primary dark:ring-offset-gray-900' : ''
+                        }`}
+                        style={{ backgroundColor: displayColor }}
+                        title={scheme.name}
+                      >
+                        {isActive && (
+                          <CheckCircle2 size={18} className="text-white drop-shadow-md" />
+                        )}
+                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                          {scheme.name}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -369,7 +448,7 @@ const SettingsPage: React.FC = () => {
           {/* Rooms Section */}
           <section className="space-y-4">
             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 px-2 flex items-center gap-2">
-              <MessageSquare size={20} className="text-blue-500" />
+              <MessageSquare size={20} className="text-primary" />
               My Chatrooms
             </h3>
             
@@ -381,7 +460,7 @@ const SettingsPage: React.FC = () => {
                 <p className="text-gray-500 dark:text-gray-400">You haven't created any chatrooms yet.</p>
                 <button 
                   onClick={() => navigate('/')}
-                  className="mt-4 text-blue-600 dark:text-blue-400 font-bold hover:underline"
+                  className="mt-4 text-primary font-bold hover:underline"
                 >
                   Create your first room
                 </button>
@@ -395,7 +474,7 @@ const SettingsPage: React.FC = () => {
                     className="flex flex-col p-5 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all text-left group"
                   >
                     <div className="flex items-center justify-between gap-2 mb-2 w-full min-w-0">
-                      <h4 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate whitespace-nowrap">
+                      <h4 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors truncate whitespace-nowrap">
                         {room.roomname}
                       </h4>
                       {room.isLocked && <Lock size={14} className="text-gray-400 shrink-0" />}
@@ -408,7 +487,7 @@ const SettingsPage: React.FC = () => {
                         <Globe size={14} className="shrink-0" />
                         <span className="truncate whitespace-nowrap">{room.participantCount} Participants</span>
                       </div>
-                      <ExternalLink size={16} className="text-gray-300 dark:text-gray-700 group-hover:text-blue-500 transition-colors shrink-0" />
+                      <ExternalLink size={16} className="text-gray-300 dark:text-gray-700 group-hover:text-primary transition-colors shrink-0" />
                     </div>
                   </button>
                 ))}
@@ -419,14 +498,14 @@ const SettingsPage: React.FC = () => {
           {/* App Management Section */}
           <section className="space-y-4">
             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 px-2 flex items-center gap-2">
-              <Smartphone size={20} className="text-blue-500" />
+              <Smartphone size={20} className="text-primary" />
               App Management
             </h3>
             <div className="bg-white dark:bg-gray-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 divide-y divide-gray-50 dark:divide-gray-800">
               <div className="p-4 sm:p-6">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400 shrink-0">
+                    <div className="p-3 bg-primary/10 rounded-xl text-primary shrink-0">
                       <Info size={24} />
                     </div>
                     <div>
@@ -439,7 +518,7 @@ const SettingsPage: React.FC = () => {
                   {isInstallable && !isInstalled && (
                     <button
                       onClick={installApp}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20"
+                      className="flex items-center gap-2 px-4 py-2 bg-primary hover:opacity-90 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary/20"
                     >
                       <Download size={18} />
                       Install App

@@ -72,7 +72,7 @@ export const formatMessage = (content: string): React.ReactNode[] => {
             href={href} 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="text-blue-500 hover:underline break-all"
+            className="text-primary hover:underline break-all"
           >
             {text}
           </a>
@@ -90,7 +90,7 @@ export const formatMessage = (content: string): React.ReactNode[] => {
             href={url} 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="text-blue-500 hover:underline break-all"
+            className="text-primary hover:underline break-all"
           >
             {url}
           </a>
@@ -239,7 +239,7 @@ export const formatInline = (content: string): React.ReactNode[] => {
       render: (match, idx) => {
         const [, s1, text, s2, s3, url, s4] = match;
         return (
-          <span key={`link-${idx}`} className="text-blue-500 dark:text-blue-400 underline decoration-blue-500/30">
+          <span key={`link-${idx}`} className="text-primary underline decoration-primary/30">
             <span className="opacity-30 no-underline">{s1}</span>
             {text}
             <span className="opacity-30 no-underline">{s2}{s3}</span>

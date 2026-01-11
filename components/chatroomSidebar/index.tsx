@@ -76,7 +76,7 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
       {!hideHeader && (
         <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
           <h2 className="font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <Info size={18} className="text-blue-500" />
+            <Info size={18} className="text-primary" />
             Room Details
           </h2>
         </div>

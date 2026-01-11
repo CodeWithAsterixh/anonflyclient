@@ -15,7 +15,7 @@ const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({ onInstall, onRemind
         <div className="p-6">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
+              <div className="p-2 bg-primary/10 rounded-xl">
                 <Logo size={32} />
               </div>
               <div>
@@ -38,7 +38,7 @@ const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({ onInstall, onRemind
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               onClick={onInstall}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:opacity-90 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary/20"
             >
               <Download size={18} />
               Install Now

@@ -69,7 +69,7 @@ export const InlineFormattedInput = React.forwardRef<HTMLTextAreaElement, Inline
     };
 
     return (
-      <div className={`relative w-full rounded-xl transition-all duration-200 bg-gray-50 dark:bg-gray-800/50 border ${isFocused ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-gray-200 dark:border-gray-700'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}>
+      <div className={`relative w-full rounded-xl transition-all duration-200 bg-gray-50 dark:bg-gray-800/50 border ${isFocused ? 'border-primary ring-2 ring-primary/20' : 'border-gray-200 dark:border-gray-700'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}>
         {/* Mirror Div (Behind) */}
         <div
           ref={mirrorRef}

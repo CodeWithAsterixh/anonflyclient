@@ -7,7 +7,7 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "react-router";
-import { useEffect } from "react";
+import { useEffect, type JSX } from "react";
 
 import type { Route } from "./+types/root";
 import { initializeAPI } from "../lib/constants/api";
@@ -22,12 +22,17 @@ import "./app.css";
  * @async
  * @param {Object} args - Loader arguments.
  * @param {Request} args.request - The incoming fetch request.
- * @returns {Promise<{ theme: string }>} The initial theme ("dark" or "light").
+ * @returns {Promise<{ theme: string, colorScheme: string }>} The initial theme ("dark" or "light") and color scheme.
  */
-export async function loader({ request }: { request: Request }) {
+export async function loader({ request }: { request: Request }): Promise<{ theme: string; colorScheme: string; }> {
   const cookieHeader = request.headers.get("Cookie");
-  const theme = cookieHeader?.includes("theme=dark") ? "dark" : "light";
-  return { theme };
+  const theme = cookieHeader?.includes("themeState=dark") ? "dark" : "light";
+  
+  // Extract colorScheme from cookie if it exists
+  const colorSchemeMatch = cookieHeader?.match(/colorScheme=([^;]+)/);
+  const colorScheme = colorSchemeMatch ? colorSchemeMatch[1] : "blue";
+  
+  return { theme, colorScheme };
 }
 
 const BASE_URL = "https://anonfly.vercel.app";
@@ -79,7 +84,7 @@ export const links: Route.LinksFunction = () => [
  * @param {React.ReactNode} props.children - The content to render inside the layout.
  * @returns {JSX.Element} The root HTML structure.
  */
-export function Layout({ children }: { children: React.ReactNode }) {
+export function Layout({ children }: Readonly<{ children: React.ReactNode }>): JSX.Element {
   const data = useLoaderData<typeof loader>();
   const theme = data?.theme || "light";
 
@@ -119,11 +124,39 @@ export function Layout({ children }: { children: React.ReactNode }) {
             __html: `
               (function() {
                 try {
-                  var theme = document.cookie.split('; ').find(row => row.startsWith('theme='))?.split('=')[1] || 
-                              localStorage.getItem('theme') || 
-                              (globalThis.window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                  var cookies = document.cookie.split('; ');
+                  var theme = cookies.find(row => row.startsWith('themeState='))?.split('=')[1] || 
+                              localStorage.getItem('themeState') || 
+                              (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                  
+                  var colorScheme = cookies.find(row => row.startsWith('colorScheme='))?.split('=')[1] || 
+                                    localStorage.getItem('colorScheme') || 'blue';
+                  
                   document.documentElement.classList.add(theme);
                   document.body.style.backgroundColor = theme === 'dark' ? '#030712' : '#ffffff';
+                  
+                  var schemes = {
+                    blue: { light: '#3b82f6', dark: '#60a5fa' },
+                    green: { light: '#22c55e', dark: '#4ade80' },
+                    purple: { light: '#a855f7', dark: '#c084fc' },
+                    red: { light: '#ef4444', dark: '#f87171' },
+                    orange: { light: '#f97316', dark: '#fb923c' },
+                    pink: { light: '#ec4899', dark: '#f472b6' }
+                  };
+                  
+                  var scheme = schemes[colorScheme] || schemes.blue;
+                  var primaryColor = theme === 'dark' ? scheme.dark : scheme.light;
+                  
+                  document.documentElement.style.setProperty('--primary-color', primaryColor);
+                  
+                  function hexToRgb(hex) {
+                    var result = /^#?([a-f\\d]{2})([a-f\\d]{2})([a-f\\d]{2})$/i.exec(hex);
+                    return result ? 
+                      parseInt(result[1], 16) + ', ' + parseInt(result[2], 16) + ', ' + parseInt(result[3], 16) : 
+                      '59, 130, 246';
+                  }
+                  
+                  document.documentElement.style.setProperty('--primary-color-rgb', hexToRgb(primaryColor));
                 } catch (e) {}
               })();
             `,
@@ -145,8 +178,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
  * 
  * @returns {JSX.Element} The rendered application with providers.
  */
-export default function App() {
-  const { theme } = useLoaderData<typeof loader>();
+export default function App(): JSX.Element {
+  const { theme, colorScheme } = useLoaderData<typeof loader>();
   const { showInstallPrompt, installApp, remindLater, cancelInstallation } = usePWA();
 
   useEffect(() => {
@@ -168,7 +201,7 @@ export default function App() {
   }, []);
 
   return (
-    <ThemeProvider initialTheme={theme as "light" | "dark"}>
+    <ThemeProvider initialTheme={theme as "light" | "dark"} initialColorScheme={colorScheme as any}>
       <AuthProvider>
         <Outlet />
         {showInstallPrompt && (

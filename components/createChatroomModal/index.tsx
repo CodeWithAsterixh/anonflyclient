@@ -123,7 +123,7 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
             checked={isPrivate}
             onChange={(e) => setIsPrivate(e.target.checked)}
             disabled={loading || !isPremium}
-            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary disabled:opacity-50"
           />
           <label 
             htmlFor="isPrivate" 
@@ -151,7 +151,7 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
           </button>
           <button
             type="submit"
-            className="px-5 py-2.5 text-white bg-blue-600 dark:bg-blue-500 rounded-xl hover:bg-blue-700 dark:hover:bg-blue-600 transition-all font-semibold shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 text-white bg-primary rounded-xl hover:opacity-90 transition-all font-semibold shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={loading}
           >
             {loading ? 'Creating...' : 'Create Room'}

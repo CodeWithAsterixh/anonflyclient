@@ -27,7 +27,7 @@ const ErrorScreen: React.FC<ErrorScreenProps> = ({
         <div className="flex flex-col gap-3">
           <button
             onClick={onReconnect}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium rounded-xl transition-colors shadow-lg shadow-blue-500/20"
+            className="w-full py-3 px-4 bg-primary hover:opacity-90 text-white font-medium rounded-xl transition-all shadow-lg shadow-primary/20"
           >
             Retry Connection
           </button>

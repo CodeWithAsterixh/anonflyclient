@@ -63,7 +63,7 @@ const ParticipantItem: React.FC<ParticipantItemProps> = ({
               </span>
             </div>
             <div className="flex gap-1 mt-0.5">
-              {isParticipantHost && <Badge variant="blue">Host</Badge>}
+              {isParticipantHost && <Badge variant="primary">Host</Badge>}
               {isParticipantCreator && <Badge variant="amber">Creator</Badge>}
             </div>
           </div>

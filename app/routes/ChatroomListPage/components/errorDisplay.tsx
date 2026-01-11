@@ -28,7 +28,7 @@ export default function ErrorDisplay({
         {retryCountdown !== null && (
           <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
             Retrying in{" "}
-            <span className="font-bold text-blue-500">{retryCountdown}s</span>...
+            <span className="font-bold text-primary">{retryCountdown}s</span>...
           </p>
         )}
       </div>
@@ -46,7 +46,7 @@ export default function ErrorDisplay({
         </p>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="mt-4 text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+          className="mt-4 text-primary font-semibold hover:opacity-80 transition-all"
         >
           Create the first one!
         </button>

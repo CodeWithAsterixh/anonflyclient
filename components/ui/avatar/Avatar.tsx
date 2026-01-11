@@ -28,7 +28,7 @@ const Avatar: React.FC<AvatarProps> = ({
   return (
     <div className="relative shrink-0">
       <div 
-        className={`${sizes[size]} rounded-full flex items-center justify-center font-bold text-white ${backgroundColor ? '' : 'bg-blue-600 dark:bg-blue-500'} ${className}`}
+        className={`${sizes[size]} rounded-full flex items-center justify-center font-bold text-white ${backgroundColor ? '' : 'bg-primary'} ${className}`}
         style={backgroundColor ? { backgroundColor } : {}}
       >
         {initial}

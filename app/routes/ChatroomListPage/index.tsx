@@ -60,7 +60,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
             {/* Account Switcher */}
             <Menu as="div" className="relative inline-block text-left">
               <MenuButton className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors group">
-                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-sm border-2 border-white dark:border-gray-700 shadow-sm group-hover:bg-blue-200 dark:group-hover:bg-blue-800 transition-colors">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm border-2 border-white dark:border-gray-700 shadow-sm group-hover:bg-primary/20 transition-colors">
                   {user?.username?.[0].toUpperCase() || "?"}
                 </div>
                 <ChevronDown
@@ -93,7 +93,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                             onClick={() => switchAccount(identity.aid)}
                             className={`flex w-full items-center justify-between px-3 py-2.5 rounded-lg transition-all ${
                               focus
-                                ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                                ? "bg-primary/10 text-primary"
                                 : "text-gray-700 dark:text-gray-300"
                             } ${
                               user?.userId === identity.aid
@@ -105,7 +105,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                               <div
                                 className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
                                   user?.userId === identity.aid
-                                    ? "bg-blue-600 text-white"
+                                    ? "bg-primary text-white"
                                     : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
                                 }`}
                               >
@@ -118,7 +118,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                             {user?.userId === identity.aid && (
                               <Check
                                 size={16}
-                                className="text-blue-600 dark:text-blue-400"
+                                className="text-primary"
                               />
                             )}
                           </button>
@@ -180,11 +180,11 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                           onClick={() => navigate("/settings")}
                           className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                             focus
-                              ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                              ? "bg-primary/10 text-primary"
                               : "text-gray-700 dark:text-gray-300"
                           }`}
                         >
-                          <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                             <Settings size={18} />
                           </div>
                           <span className="font-medium">Settings</span>

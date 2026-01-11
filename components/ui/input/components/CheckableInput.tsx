@@ -9,7 +9,7 @@ export const CheckableInput = forwardRef<HTMLInputElement, InputProps>(
         ref={ref}
         type={type}
         className={`
-          w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 disabled:opacity-50
+          w-4 h-4 text-primary border-gray-300 focus:ring-primary disabled:opacity-50
           ${className}
         `}
       />

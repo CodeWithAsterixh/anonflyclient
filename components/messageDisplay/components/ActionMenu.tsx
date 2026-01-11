@@ -34,7 +34,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
             e.stopPropagation();
             onEdit?.();
           }}
-          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors text-blue-600 dark:text-blue-400 rounded-xl"
+          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors text-primary rounded-xl"
         >
           <Edit2 className="w-4 h-4" />
           <span className="text-sm font-medium">Edit Message</span>

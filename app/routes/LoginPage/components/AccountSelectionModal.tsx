@@ -38,10 +38,10 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
                 onClose();
               }}
               disabled={isLoading}
-              className="w-full flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 border border-transparent hover:border-blue-100 dark:hover:border-blue-800 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform font-bold text-lg">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform font-bold text-lg">
                   {identity.username[0].toUpperCase()}
                 </div>
                 <div className="text-left">
@@ -53,7 +53,7 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
                   </p>
                 </div>
               </div>
-              <ChevronRight size={20} className="text-gray-300 dark:text-gray-600 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors" />
+              <ChevronRight size={20} className="text-gray-300 dark:text-gray-600 group-hover:text-primary transition-colors" />
             </button>
           ))}
         </div>

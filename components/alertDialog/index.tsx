@@ -23,7 +23,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
       case 'confirm':
         return <AlertTriangle className="text-amber-500" size={48} />;
       default:
-        return <Info className="text-blue-500" size={48} />;
+        return <Info className="text-primary" size={48} />;
     }
   };
 
@@ -44,14 +44,14 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
   };
 
   const getButtonClasses = () => {
-    const baseClasses = "flex-1 px-4 py-2.5 rounded-xl text-white font-medium transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2";
+    const baseClasses = "flex-1 px-4 py-2.5 rounded-xl text-white font-medium transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2";
     const loadingClasses = isLoading ? 'opacity-70 cursor-not-allowed' : '';
     
-    let typeClasses = 'bg-blue-600 hover:bg-blue-700';
+    let typeClasses = 'bg-primary hover:opacity-90';
     if (type === 'error') {
-      typeClasses = 'bg-red-600 hover:bg-red-700';
+      typeClasses = 'bg-red-600 hover:bg-red-700 shadow-red-500/20';
     } else if (type === 'confirm') {
-      typeClasses = 'bg-amber-600 hover:bg-amber-700';
+      typeClasses = 'bg-amber-600 hover:bg-amber-700 shadow-amber-500/20';
     }
 
     return `${baseClasses} ${loadingClasses} ${typeClasses}`;

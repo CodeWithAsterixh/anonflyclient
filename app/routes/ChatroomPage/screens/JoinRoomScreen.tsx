@@ -93,7 +93,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
               onClick={() => setIsOptionsOpen(!isOptionsOpen)}
               className={`p-2 rounded-full transition-all ${
                 isOptionsOpen
-                  ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+                  ? "bg-primary/10 text-primary"
                   : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
               }`}
               title="Room Options"
@@ -144,8 +144,8 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
                       disabled={isConnecting}
                       className={`w-full py-3 rounded-xl font-bold text-white transition-all shadow-lg ${
                         isConnecting
-                          ? "bg-blue-400 cursor-not-allowed"
-                          : "bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/20"
+                          ? "bg-primary/50 cursor-not-allowed"
+                          : "bg-primary hover:opacity-90 shadow-primary/20"
                       }`}
                     >
                       {isConnecting ? (
@@ -171,7 +171,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
               ) : (
                 <div className="flex flex-col items-center py-4">
                   <div className="relative">
-                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600/20 border-t-blue-600 mb-6"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary/20 border-t-primary mb-6"></div>
                   </div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     {isConnected

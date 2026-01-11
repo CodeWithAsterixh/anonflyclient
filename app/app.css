@@ -5,6 +5,8 @@
 @theme {
   --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --color-primary: var(--primary-color, #3b82f6);
+  --color-primary-foreground: white;
 }
 
 /* Hide default browser password visibility toggle and other default UI elements */
@@ -19,14 +21,14 @@ input::-webkit-credentials-auto-fill-button {
 input[type="password"]::-ms-reveal {
   display: none;
 }
+
 html,
 body {
   @apply bg-white dark:bg-gray-950 text-gray-950 dark:text-gray-100 transition-colors duration-300;
 }
-*{
-  @apply box-border select-none;
-}
-button:not([disabled]), a[href]{
+
+button:not([disabled]),
+a[href] {
   @apply cursor-pointer;
 }
 
@@ -49,9 +51,11 @@ button:not([disabled]), a[href]{
 }
 
 /* For Firefox */
+
 * {
   scrollbar-width: thin;
   scrollbar-color: theme('colors.gray.300') transparent;
+  @apply box-border select-none;
 }
 
 .dark * {

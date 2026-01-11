@@ -130,7 +130,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         />
         <button
           onClick={() => handleSubmit()}
-          className="p-2.5 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 focus:outline-none disabled:opacity-50 transition-colors shrink-0"
+          className="p-2.5 text-primary hover:opacity-80 focus:outline-none disabled:opacity-50 transition-all shrink-0"
           disabled={isDisabled || !messageInput.trim()}
           title="Send message"
           aria-label="Send message"

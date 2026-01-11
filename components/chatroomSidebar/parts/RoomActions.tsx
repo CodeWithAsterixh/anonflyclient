@@ -84,7 +84,7 @@ const RoomActions: React.FC<RoomActionsProps> = ({
             <button
               onClick={handleShare}
               disabled={isGenerating}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800 rounded-xl transition-all disabled:opacity-50"
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 rounded-xl transition-all disabled:opacity-50"
             >
               {getShareButtonContent()}
             </button>

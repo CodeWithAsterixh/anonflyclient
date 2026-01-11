@@ -221,7 +221,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
         data-message-id={message.id}
         className={`flex items-end gap-2 mb-4 relative transition-all duration-500 ${
           isCurrentUser ? "flex-row-reverse" : "flex-row"
-        } ${highlight ? "bg-blue-400/20 dark:bg-blue-900/40 rounded-lg p-1" : ""}`}
+        } ${highlight ? "bg-primary/20 rounded-lg p-1" : ""}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

@@ -35,7 +35,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
     if (onConfirm) {
       setInternalLoading(true);
       try {
-        await onConfirm();
+        onConfirm();
       } catch (error) {
         console.error("Error during confirm action:", error);
       } finally {

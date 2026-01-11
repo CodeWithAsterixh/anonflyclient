@@ -13,11 +13,12 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
   confirmText = 'Confirm',
   cancelText = 'Cancel',
   children,
+  isLoading: externalLoading,
 }) => {
   const getIcon = () => {
     switch (type) {
       case 'error':
-        return <XCircle className="text-red-500" size={48} />;
+        return <XCircle className="text-destructive" size={48} />;
       case 'success':
         return <CheckCircle2 className="text-green-500" size={48} />;
       case 'confirm':
@@ -27,17 +28,18 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
     }
   };
 
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [internalLoading, setInternalLoading] = React.useState(false);
+  const isLoading = externalLoading || internalLoading;
 
   const handleConfirm = async () => {
     if (onConfirm) {
-      setIsLoading(true);
+      setInternalLoading(true);
       try {
-        onConfirm();
+        await onConfirm();
       } catch (error) {
         console.error("Error during confirm action:", error);
       } finally {
-        setIsLoading(false);
+        setInternalLoading(false);
       }
     }
     onClose();
@@ -49,7 +51,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
     
     let typeClasses = 'bg-primary hover:opacity-90';
     if (type === 'error') {
-      typeClasses = 'bg-red-600 hover:bg-red-700 shadow-red-500/20';
+      typeClasses = 'bg-destructive hover:opacity-90 shadow-destructive/20';
     } else if (type === 'confirm') {
       typeClasses = 'bg-amber-600 hover:bg-amber-700 shadow-amber-500/20';
     }
@@ -69,7 +71,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
           {getIcon()}
         </div>
         
-        <p className="text-gray-600 dark:text-gray-400 mb-8">
+        <p className="text-muted mb-8">
           {message}
         </p>
 
@@ -84,7 +86,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
             <button
               onClick={onClose}
               disabled={isLoading}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2.5 rounded-xl border border-border text-foreground font-medium hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {cancelText}
             </button>

@@ -7,7 +7,7 @@ import type { JoinNotificationProps } from './types';
 const JoinNotification: React.FC<JoinNotificationProps> = ({ username }) => {
   return (
     <div className="flex justify-center my-4">
-      <div className="bg-gray-100 text-gray-600 px-4 py-2 rounded-full text-sm italic">
+      <div className="bg-white/5 text-muted px-4 py-2 rounded-full text-sm italic border border-border/50">
         {username} just joined
       </div>
     </div>

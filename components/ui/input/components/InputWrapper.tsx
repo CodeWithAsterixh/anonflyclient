@@ -18,7 +18,7 @@ export const InputWrapper: React.FC<InputWrapperProps> = ({
   const renderMessage = () => {
     if (error) {
       return (
-        <p className="text-xs text-red-500 dark:text-red-400 mt-0.5">
+        <p className="text-xs text-destructive mt-0.5">
           {error}
         </p>
       );
@@ -26,7 +26,7 @@ export const InputWrapper: React.FC<InputWrapperProps> = ({
     
     if (helperText) {
       return (
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+        <p className="text-xs text-muted mt-0.5">
           {helperText}
         </p>
       );
@@ -40,7 +40,7 @@ export const InputWrapper: React.FC<InputWrapperProps> = ({
       {label && (
         <label
           htmlFor={id}
-          className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${labelClassName}`}
+          className={`text-sm font-medium text-foreground ${labelClassName}`}
         >
           {label}
         </label>

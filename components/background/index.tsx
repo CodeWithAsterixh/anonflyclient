@@ -46,7 +46,7 @@ export const Background: React.FC<BackgroundProps> = ({
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
         }}/>
-        <span className="size-full block bg-gray-100 dark:bg-gray-800 z-0"/>
+        <span className="size-full block bg-background z-0"/>
       </div>
       {children}
     </>

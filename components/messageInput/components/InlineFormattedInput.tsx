@@ -69,7 +69,7 @@ export const InlineFormattedInput = React.forwardRef<HTMLTextAreaElement, Inline
     };
 
     return (
-      <div className={`relative w-full rounded-xl transition-all duration-200 bg-gray-50 dark:bg-gray-800/50 border ${isFocused ? 'border-primary ring-2 ring-primary/20' : 'border-gray-200 dark:border-gray-700'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}>
+      <div className={`relative w-full rounded-xl transition-all duration-200 bg-white/5 border ${isFocused ? 'border-primary ring-2 ring-primary/20' : 'border-border'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}>
         {/* Mirror Div (Behind) */}
         <div
           ref={mirrorRef}
@@ -82,10 +82,10 @@ export const InlineFormattedInput = React.forwardRef<HTMLTextAreaElement, Inline
             overflowY: 'auto',
             zIndex: 0,
           }}
-          className="text-gray-900 dark:text-gray-100"
+          className="text-foreground"
         >
           {value ? formatInline(value) : (
-            <span className="text-gray-400 dark:text-gray-500 absolute left-[14px] top-[8px] pointer-events-none">{placeholder}</span>
+            <span className="text-muted absolute left-[14px] top-[8px] pointer-events-none">{placeholder}</span>
           )}
           {/* Extra space for the cursor at the end of text */}
           {value.endsWith('\n') ? '\n ' : ''}
@@ -114,13 +114,13 @@ export const InlineFormattedInput = React.forwardRef<HTMLTextAreaElement, Inline
             left: 0,
             height: '100%',
             color: 'transparent',
-            caretColor: '#3b82f6', // Bright blue cursor for visibility
+            caretColor: 'var(--primary)', // Use theme primary for caret
             background: 'transparent',
             resize: 'none',
             zIndex: 1,
             overflowY: 'auto',
           }}
-          className="placeholder-transparent dark:text-white"
+          className="placeholder-transparent"
         />
       </div>
     );

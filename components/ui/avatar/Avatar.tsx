@@ -34,7 +34,7 @@ const Avatar: React.FC<AvatarProps> = ({
         {initial}
       </div>
       {isOnline !== undefined && (
-        <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 border-2 border-white dark:border-gray-900 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-400'}`} />
+        <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 border-2 border-background rounded-full ${isOnline ? 'bg-primary' : 'bg-muted'}`} />
       )}
     </div>
   );

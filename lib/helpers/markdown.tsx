@@ -57,7 +57,7 @@ export const formatMessage = (content: string): React.ReactNode[] => {
     {
       name: 'code',
       regex: /`(.*?)`/g,
-      render: (text: string) => <code key={text} className="bg-black/10 dark:bg-white/10 px-1 rounded font-mono text-sm">{text}</code>
+      render: (text: string) => <code key={text} className="bg-white/10 px-1 rounded font-mono text-sm">{text}</code>
     },
     {
       name: 'link',
@@ -225,7 +225,7 @@ export const formatInline = (content: string): React.ReactNode[] => {
       render: (match, idx) => {
         const [, s1, text, s2] = match;
         return (
-          <span key={`code-${idx}`} className="bg-black/10 dark:bg-white/10 px-0.5 rounded font-mono text-sm">
+          <span key={`code-${idx}`} className="bg-white/10 px-0.5 rounded font-mono text-sm">
             <span className="opacity-30 font-normal">{s1}</span>
             {text}
             <span className="opacity-30 font-normal">{s2}</span>

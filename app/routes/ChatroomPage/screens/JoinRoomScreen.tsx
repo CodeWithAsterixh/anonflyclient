@@ -66,24 +66,24 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
     <div className="flex h-dvh bg-transparent relative overflow-hidden transition-colors duration-300 w-full">
       <div className="flex-1 flex flex-col min-w-0 relative h-full">
         {/* Header */}
-        <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
+        <header className="bg-background/80 backdrop-blur-md border-b border-border shadow-sm flex flex-col gap-1 justify-between items-center z-10">
           {isMobile && <Logo showText size={32} className="py-2" />}
-          <div className="w-full flex justify-between items-center bg-neutral-200/30 dark:bg-gray-800/50 px-4 py-3">
+          <div className="w-full flex justify-between items-center bg-white/5 px-4 py-3">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => {
                   onBack();
                   onNavigateHome();
                 }}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors group"
+                className="p-2 hover:bg-white/5 rounded-full transition-colors group"
               >
-                <ChevronDown className="w-5 h-5 rotate-90 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100" />
+                <ChevronDown className="w-5 h-5 rotate-90 text-muted group-hover:text-foreground" />
               </button>
               <div>
-                <h1 className="font-bold text-gray-900 dark:text-gray-100 leading-tight">
+                <h1 className="font-bold text-foreground leading-tight">
                   {displayDetail?.roomname || "Loading..."}
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-muted">
                   {statusText}
                 </p>
               </div>
@@ -94,7 +94,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
               className={`p-2 rounded-full transition-all ${
                 isOptionsOpen
                   ? "bg-primary/10 text-primary"
-                  : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  : "text-muted hover:bg-white/5"
               }`}
               title="Room Options"
             >
@@ -106,12 +106,12 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
         {/* Messages Area - No skeleton for locked rooms until connecting */}
         <div className="flex-1 overflow-y-hidden p-4 space-y-4 relative z-10 flex flex-col">
           {/* Join Overlay - Now contained within the messages area */}
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-50/50 dark:bg-gray-950/50 backdrop-blur-[2px] z-20 transition-colors">
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 max-w-sm w-full mx-4 text-center">
-              <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">
+          <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-[2px] z-20 transition-colors">
+            <div className="bg-background p-8 rounded-3xl shadow-2xl border border-border max-w-sm w-full mx-4 text-center">
+              <h2 className="text-xl font-bold mb-2 text-foreground">
                 {displayDetail?.roomname || "Chatroom"}
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-sm text-muted mb-6">
                 {displayDetail?.description ||
                   "Join the room to see messages and participate."}
               </p>
@@ -121,7 +121,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
                 (passwordError.toLowerCase().includes("password") ||
                   passwordError.toLowerCase().includes("locked"))) ? (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-center gap-2 text-amber-600 dark:text-amber-500 mb-2">
+                  <div className="flex items-center justify-center gap-2 text-amber-500 mb-2">
                     <Lock size={18} />
                     <span className="text-sm font-semibold">
                       Password Protected
@@ -162,7 +162,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
                         onBack();
                         onNavigateHome();
                       }}
-                      className="w-full py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-bold transition-all"
+                      className="w-full py-3 bg-white/5 hover:bg-white/10 text-foreground rounded-xl font-bold transition-all"
                     >
                       Cancel
                     </button>
@@ -173,7 +173,7 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
                   <div className="relative">
                     <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary/20 border-t-primary mb-6"></div>
                   </div>
-                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  <p className="text-sm font-medium text-muted">
                     {isConnected
                       ? "Joining room..."
                       : "Connecting to service..."}

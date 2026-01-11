@@ -9,17 +9,16 @@ export const TextareaInput = forwardRef<HTMLTextAreaElement, TextareaProps>(
         ref={ref}
         className={`
           w-full px-4 py-2.5 
-          bg-gray-50 dark:bg-gray-800/50 
-          border border-gray-200 dark:border-gray-700 
-          rounded-xl text-gray-900 dark:text-gray-100 
-          placeholder:text-gray-400 dark:placeholder:text-gray-500
+          bg-white/5
+          border border-border
+          rounded-xl text-foreground
+          placeholder:text-muted/60
           focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
-          dark:focus:ring-primary/20 dark:focus:border-primary
           disabled:opacity-50 disabled:cursor-not-allowed
           transition-all duration-200
           min-h-[100px]
           resize-none
-          ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500/20 dark:border-red-500" : ""}
+          ${error ? "border-destructive focus:border-destructive focus:ring-destructive/20" : ""}
           ${className}
         `}
       />

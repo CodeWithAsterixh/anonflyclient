@@ -78,7 +78,7 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="p-6 space-y-5">
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-xl text-sm font-medium border border-red-100 dark:border-red-900/50">
+          <div className="bg-destructive/10 text-destructive p-4 rounded-xl text-sm font-medium border border-destructive/20">
             {error}
           </div>
         )}
@@ -123,28 +123,28 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
             checked={isPrivate}
             onChange={(e) => setIsPrivate(e.target.checked)}
             disabled={loading || !isPremium}
-            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary disabled:opacity-50"
+            className="h-4 w-4 rounded border-border text-primary focus:ring-primary disabled:opacity-50"
           />
           <label 
             htmlFor="isPrivate" 
-            className={`text-sm font-medium ${isPremium ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'}`}
+            className={`text-sm font-medium ${isPremium ? 'text-foreground' : 'text-muted'}`}
           >
             Private Room (Premium Only)
-            {!isPremium && <span className="ml-2 text-xs text-yellow-500">(Upgrade required)</span>}
+            {!isPremium && <span className="ml-2 text-xs text-amber-500">(Upgrade required)</span>}
           </label>
         </div>
-        <div className="mt-2 text-xs text-gray-500">
+        <div className="mt-2 text-xs text-muted">
           {isPrivate 
             ? "Private rooms are hidden from search and only accessible via share link. A secure password will be automatically generated if you don't provide one." 
             : "Public rooms are visible to everyone."}
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-50 dark:border-gray-700 mt-2">
+        <div className="flex justify-end gap-3 pt-4 border-t border-border mt-2">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all font-semibold"
+            className="px-5 py-2.5 text-foreground bg-white/5 rounded-xl hover:bg-white/10 transition-all font-semibold"
             disabled={loading}
           >
             Cancel

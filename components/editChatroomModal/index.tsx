@@ -61,7 +61,7 @@ const EditChatroomModal: React.FC<EditChatroomModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="p-6 space-y-5">
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-xl text-sm font-medium border border-red-100 dark:border-red-900/50">
+          <div className="bg-destructive/10 text-destructive p-4 rounded-xl text-sm font-medium border border-destructive/20">
             {error}
           </div>
         )}
@@ -88,11 +88,11 @@ const EditChatroomModal: React.FC<EditChatroomModalProps> = ({
         />
 
         {/* Buttons */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-50 dark:border-gray-700 mt-2">
+        <div className="flex justify-end gap-3 pt-4 border-t border-border mt-2">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all font-semibold"
+            className="px-5 py-2.5 text-foreground bg-white/5 rounded-xl hover:bg-white/10 transition-all font-semibold"
             disabled={loading}
           >
             Cancel

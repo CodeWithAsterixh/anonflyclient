@@ -11,7 +11,7 @@ const RoomInfo: React.FC<RoomInfoProps> = ({ roomName, roomDescription, isPrivat
     <div className="p-4 space-y-3">
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-muted uppercase tracking-wider">
             Room Name
           </h3>
           {isPrivate && (
@@ -20,17 +20,17 @@ const RoomInfo: React.FC<RoomInfoProps> = ({ roomName, roomDescription, isPrivat
             </span>
           )}
         </div>
-        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 wrap-break-word">
+        <p className="text-sm font-semibold text-foreground wrap-break-word">
           {roomName}
         </p>
       </div>
       
       {roomDescription && (
         <div>
-          <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">
+          <h3 className="text-xs font-bold text-muted uppercase tracking-wider mb-2">
             Description
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400 wrap-break-word leading-relaxed">
+          <p className="text-sm text-muted wrap-break-word leading-relaxed">
             {roomDescription}
           </p>
         </div>

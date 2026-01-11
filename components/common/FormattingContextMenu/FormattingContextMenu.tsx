@@ -107,7 +107,7 @@ const FormattingContextMenu: React.FC<FormattingContextMenuProps> = ({
       ref={menuRef}
       open={isOpen}
       aria-label="Text formatting menu"
-      className={`fixed z-9999 bg-white dark:bg-gray-800 border-none rounded-lg shadow-xl py-1 min-w-[160px] transition-all duration-100 block m-0 p-0 outline-none ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+      className={`fixed z-9999 bg-background border-border border rounded-lg shadow-xl py-1 min-w-[160px] transition-all duration-100 block m-0 p-0 outline-none ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
       style={{
         top: Math.max(10, position.top),
         left: Math.max(10, position.left),
@@ -118,7 +118,7 @@ const FormattingContextMenu: React.FC<FormattingContextMenuProps> = ({
           key={action.id}
           role="menuitem"
           onClick={() => handleAction(action.id)}
-          className="w-full flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:bg-gray-100 dark:focus:bg-gray-700 outline-none"
+          className="w-full flex items-center px-3 py-2 text-sm text-foreground hover:bg-white/5 transition-colors focus:bg-white/5 outline-none"
         >
           <action.icon className="w-4 h-4 mr-3" />
           {action.label}
@@ -141,13 +141,13 @@ const FormattingContextMenu: React.FC<FormattingContextMenuProps> = ({
       }}
     >
       {/* Horizontal Bar */}
-      <div className="flex items-center bg-gray-900/95 dark:bg-gray-100/95 backdrop-blur-sm rounded-full px-2 py-1 shadow-2xl border border-white/10 dark:border-black/10">
+      <div className="flex items-center bg-background/95 backdrop-blur-sm rounded-full px-2 py-1 shadow-2xl border border-border">
         {actions.slice(0, 3).map((action) => (
           <button
             key={action.id}
             aria-label={action.label}
             onClick={() => handleAction(action.id)}
-            className="p-3 text-white dark:text-gray-900 active:bg-white/20 dark:active:bg-black/20 rounded-full transition-colors focus:bg-white/20 dark:focus:bg-black/20 outline-none"
+            className="p-3 text-foreground active:bg-white/10 rounded-full transition-colors focus:bg-white/10 outline-none"
           >
             <action.icon className="w-5 h-5" />
           </button>
@@ -156,7 +156,7 @@ const FormattingContextMenu: React.FC<FormattingContextMenuProps> = ({
           aria-label="More options"
           aria-expanded={showOverflow}
           onClick={() => setShowOverflow(!showOverflow)}
-          className={`p-3 text-white dark:text-gray-900 active:bg-white/20 dark:active:bg-black/20 rounded-full transition-colors focus:bg-white/20 dark:focus:bg-black/20 outline-none ${showOverflow ? 'bg-white/20 dark:bg-black/20' : ''}`}
+          className={`p-3 text-foreground active:bg-white/10 rounded-full transition-colors focus:bg-white/10 outline-none ${showOverflow ? 'bg-white/10' : ''}`}
         >
           <MoreHorizontal className="w-5 h-5" />
         </button>
@@ -166,14 +166,14 @@ const FormattingContextMenu: React.FC<FormattingContextMenuProps> = ({
       {showOverflow && (
         <dialog 
           open
-          className="mt-2 bg-gray-900/95 dark:bg-gray-100/95 backdrop-blur-sm rounded-2xl shadow-2xl border-none py-2 min-w-[200px] max-h-[40vh] overflow-y-auto transition-all duration-200 block p-0 outline-none"
+          className="mt-2 bg-background/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-border py-2 min-w-[200px] max-h-[40vh] overflow-y-auto transition-all duration-200 block p-0 outline-none"
         >
           {actions.map((action) => (
             <button
               key={action.id}
               role="menuitem"
               onClick={() => handleAction(action.id)}
-              className="w-full flex items-center px-4 py-3 text-white dark:text-gray-900 active:bg-white/10 dark:active:bg-black/10 transition-colors border-b border-white/5 last:border-0 focus:bg-white/10 dark:focus:bg-black/10 outline-none"
+              className="w-full flex items-center px-4 py-3 text-foreground active:bg-white/10 transition-colors border-b border-border last:border-0 focus:bg-white/10 outline-none"
             >
               <action.icon className="w-5 h-5 mr-4" />
               <span className="text-base font-medium">{action.label}</span>

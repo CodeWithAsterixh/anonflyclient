@@ -57,7 +57,7 @@ export const MessageFullViewer: React.FC<MessageFullViewerProps> = ({
   return (
     <dialog
       open
-      className={`pointer-events-auto absolute top-0 inset-0 z-100 bg-black/10 dark:bg-black/40 backdrop-blur-2xl transition-all duration-300 flex items-center p-4 border-none m-0 max-w-none max-h-none w-full h-full outline-none ${
+      className={`pointer-events-auto absolute top-0 inset-0 z-100 bg-black/40 backdrop-blur-2xl transition-all duration-300 flex items-center p-4 border-none m-0 max-w-none max-h-none w-full h-full outline-none ${
         isCurrentUser ? "justify-end" : "justify-start"
       }`}
     >

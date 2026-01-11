@@ -16,7 +16,7 @@ const SystemMessage: React.FC<SystemMessageProps> = ({ id, content, highlight })
         highlight ? "bg-primary/20 rounded-lg p-1" : ""
       }`}
     >
-      <div className="bg-gray-100/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 px-4 py-2 rounded-full text-sm italic backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
+      <div className="bg-white/5 text-muted px-4 py-2 rounded-full text-sm italic backdrop-blur-sm border border-border/50">
         {formatMessage(content)}
       </div>
     </div>

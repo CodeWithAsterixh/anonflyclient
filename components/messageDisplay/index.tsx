@@ -225,7 +225,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
             Math.abs(swipeOffset) > 20 ? "opacity-100" : "opacity-0"
           } ${isCurrentUser ? "left-4" : "right-4"}`}
         >
-          <Reply className="w-5 h-5 text-gray-400" />
+          <Reply className="w-5 h-5 text-muted" />
         </div>
 
         <MessageRow

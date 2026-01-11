@@ -124,7 +124,7 @@ const ChatLayout: React.FC = () => {
   return (
     <ProtectedRoute>
       <ChatLayoutContext.Provider value={contextValue}>
-        <div className="flex h-dvh overflow-hidden bg-white dark:bg-gray-950 transition-colors duration-300">
+        <div className="flex h-dvh overflow-hidden bg-background text-foreground transition-colors duration-300">
           {/* Left Column: Chatroom List 
               - Desktop: Always visible (md:block)
               - Mobile: Shows based on JavaScript state or Tailwind hidden state
@@ -132,7 +132,7 @@ const ChatLayout: React.FC = () => {
           <div
             className={`${
               isHydrated ? showCLnonMobile : "block md:block"
-            } w-full md:w-80 lg:w-1/4 border-r h-full border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col transition-all duration-300 ease-in-out`}
+            } w-full md:w-80 lg:w-1/4 border-r h-full border-border overflow-hidden flex flex-col transition-all duration-300 ease-in-out`}
           >
             <ChatroomListPage onChatroomSelect={handleSelectChatroom} />
           </div>
@@ -144,7 +144,7 @@ const ChatLayout: React.FC = () => {
           <div
             className={`${
               isHydrated ? showCLonMobile : "hidden md:flex"
-            } flex-1 flex-col overflow-hidden relative isolate w-full md:w-auto bg-gray-50 dark:bg-gray-900 transition-colors duration-300`}
+            } flex-1 flex-col overflow-hidden relative isolate w-full md:w-auto bg-background transition-colors duration-300`}
           >
             {chatroomId || isSettingsPage ? (
               <Outlet context={{ onBack: handleBackFromChat, isMobile }} />

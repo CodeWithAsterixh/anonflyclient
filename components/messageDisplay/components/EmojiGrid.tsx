@@ -6,7 +6,7 @@ interface EmojiGridProps {
 }
 
 export const EmojiGrid: React.FC<EmojiGridProps> = ({ onReact }) => (
-  <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl p-3 shadow-2xl w-64 grid grid-cols-5 gap-2 animate-in slide-in-from-top-2 duration-200">
+  <div className="bg-background/95 backdrop-blur-md border border-border rounded-2xl p-3 shadow-2xl w-64 grid grid-cols-5 gap-2 animate-in slide-in-from-top-2 duration-200">
     {allEmojis.map((emoji) => (
       <button
         key={emoji.id}
@@ -14,7 +14,7 @@ export const EmojiGrid: React.FC<EmojiGridProps> = ({ onReact }) => (
           e.stopPropagation();
           onReact(emoji);
         }}
-        className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-xl transition-all hover:scale-110 active:scale-90"
+        className="w-10 h-10 flex items-center justify-center hover:bg-white/5 rounded-xl text-xl transition-all hover:scale-110 active:scale-90"
       >
         {emoji.value}
       </button>

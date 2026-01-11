@@ -5,8 +5,20 @@
 @theme {
   --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --color-primary: var(--primary-color, #3b82f6);
-  --color-primary-foreground: white;
+  --color-primary: var(--primary-color, #6B4EFF);
+  --color-primary-foreground: #E2E2E2;
+  
+  --color-background: #0B0B0F;
+  --color-foreground: #E2E2E2;
+  
+  --color-muted: #A1A1A1;
+  --color-muted-foreground: #6B7280;
+  
+  --color-border: #1F1F23;
+  --color-input: #1F1F23;
+  
+  --color-destructive: #991B1B;
+  --color-destructive-foreground: #E2E2E2;
 }
 
 /* Hide default browser password visibility toggle and other default UI elements */
@@ -24,7 +36,8 @@ input[type="password"]::-ms-reveal {
 
 html,
 body {
-  @apply bg-white dark:bg-gray-950 text-gray-950 dark:text-gray-100 transition-colors duration-300;
+  @apply bg-background text-foreground transition-colors duration-300;
+  background-color: #0B0B0F;
 }
 
 button:not([disabled]),
@@ -43,23 +56,23 @@ a[href] {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-gray-700 rounded-full transition-colors;
+  @apply bg-white/10 rounded-full transition-colors;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-gray-600;
+  @apply bg-white/20;
 }
 
 /* For Firefox */
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: theme('colors.gray.300') transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
   @apply box-border select-none;
 }
 
 .dark * {
-  scrollbar-color: theme('colors.gray.700') transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 
 .no-scrollbar::-webkit-scrollbar {

@@ -21,12 +21,12 @@ export default function ErrorDisplay({
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
-        <div className="w-16 h-16 bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 rounded-full flex items-center justify-center mb-4">
+        <div className="w-16 h-16 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mb-4">
           <Users size={32} />
         </div>
-        <p className="text-gray-600 dark:text-gray-400 font-medium">{error}</p>
+        <p className="text-muted font-medium">{error}</p>
         {retryCountdown !== null && (
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+          <p className="text-sm text-muted mt-2">
             Retrying in{" "}
             <span className="font-bold text-primary">{retryCountdown}s</span>...
           </p>
@@ -38,10 +38,10 @@ export default function ErrorDisplay({
   if (chatrooms.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
-        <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 rounded-full flex items-center justify-center mb-4">
+        <div className="w-16 h-16 bg-white/5 text-muted rounded-full flex items-center justify-center mb-4">
           <Users size={32} />
         </div>
-        <p className="text-gray-500 dark:text-gray-400 font-medium">
+        <p className="text-muted font-medium">
           No chatrooms found
         </p>
         <button

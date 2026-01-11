@@ -14,7 +14,7 @@ const Loader: React.FC<LoaderProps> = ({
 }) => {
   const containerClasses = `
     ${fullScreen ? "min-h-dvh" : "w-full py-12"} 
-    bg-gray-50 dark:bg-gray-950 flex items-center justify-center px-4 transition-colors duration-300
+    bg-background flex items-center justify-center px-4 transition-colors duration-300
     ${className}
   `.trim();
 
@@ -36,12 +36,12 @@ const Loader: React.FC<LoaderProps> = ({
 
         {/* Text Content */}
         <div className="text-center space-y-2">
-          <p className={`text-gray-500 dark:text-gray-400 font-medium ${textPulseClass}`}>
+          <p className={`text-muted font-medium ${textPulseClass}`}>
             {message}
           </p>
           
           {(description || error) && (
-            <p className={`text-sm ${error ? "text-red-500 dark:text-red-400" : "text-gray-400 dark:text-gray-500"}`}>
+            <p className={`text-sm ${error ? "text-destructive" : "text-muted"}`}>
               {error || description}
             </p>
           )}
@@ -50,13 +50,13 @@ const Loader: React.FC<LoaderProps> = ({
         {/* Progress Bar (if provided) */}
         {progress !== undefined && (
           <div className="w-full flex flex-col items-center gap-2">
-            <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
+            <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
               <div
                 className="bg-primary h-full transition-all duration-1000 ease-linear"
                 style={{ width: `${(progress / maxProgress) * 100}%` }}
               ></div>
             </div>
-            <p className="text-xs text-gray-400 dark:text-gray-500">
+            <p className="text-xs text-muted">
               Retrying in <span className="font-bold text-primary">{Math.ceil(progress)}s</span>...
             </p>
           </div>

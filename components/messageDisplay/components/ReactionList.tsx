@@ -33,10 +33,10 @@ const ReactionList: React.FC<ReactionListProps> = ({ reactions }) => {
         <div
           key={i+1}
           title={reaction.users.join(", ")}
-          className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-100 dark:border-gray-700 rounded-full px-1.5 py-0.5 shadow-sm text-[10px] flex items-center gap-1 hover:scale-110 transition-transform cursor-default"
+          className="bg-background/90 backdrop-blur-sm border border-border rounded-full px-1.5 py-0.5 shadow-sm text-[10px] flex items-center gap-1 hover:scale-110 transition-transform cursor-default"
         >
           <span>{reaction.emoji}</span>
-          <span className="font-bold text-gray-600 dark:text-gray-300">{reaction.count}</span>
+          <span className="font-bold text-muted">{reaction.count}</span>
         </div>
       ))}
     </div>

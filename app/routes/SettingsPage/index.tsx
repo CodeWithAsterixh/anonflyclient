@@ -121,9 +121,9 @@ const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+    <div className="h-full overflow-y-auto bg-background transition-colors duration-300">
         {/* Header */}
-        <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-4 py-4">
+        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button 
@@ -133,11 +133,11 @@ const SettingsPage: React.FC = () => {
                   }
                   navigate('/');
                 }}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-600 dark:text-gray-400"
+                className="p-2 hover:bg-white/5 rounded-full transition-colors text-muted"
               >
                 <ArrowLeft size={20} />
               </button>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Settings</h1>
+              <h1 className="text-xl font-bold text-foreground">Settings</h1>
             </div>
             <Logo size={32} />
           </div>
@@ -145,7 +145,7 @@ const SettingsPage: React.FC = () => {
 
         <main className="max-w-4xl mx-auto p-4 md:p-8 space-y-8">
           {/* User Profile Section */}
-          <section className="bg-white dark:bg-gray-900 rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-gray-800">
+          <section className="bg-background rounded-3xl p-4 sm:p-6 shadow-sm border border-border">
             <div className="flex items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-4 min-w-0 flex-1">
                 <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-primary flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg shadow-primary/20 shrink-0">
@@ -153,7 +153,7 @@ const SettingsPage: React.FC = () => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 truncate whitespace-nowrap">{user?.username}</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold text-foreground truncate whitespace-nowrap">{user?.username}</h2>
                     {isPremium && (
                       <div className="flex items-center gap-1 px-2 py-0.5 bg-linear-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black rounded-full uppercase tracking-wider shadow-sm shadow-orange-500/20">
                         <Crown size={10} fill="currentColor" />
@@ -170,7 +170,7 @@ const SettingsPage: React.FC = () => {
               </div>
               <button 
                 onClick={handleLogout}
-                className="flex shrink-0 items-center gap-2 px-4 py-2 text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+                className="flex shrink-0 items-center gap-2 px-4 py-2 text-sm font-bold text-destructive hover:bg-destructive/10 rounded-xl transition-colors"
               >
                 <LogOut size={18} />
                 <span className="hidden sm:inline">Logout</span>
@@ -188,23 +188,23 @@ const SettingsPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-gray-50 dark:border-gray-800">
-              <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl min-w-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-border">
+              <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl min-w-0">
                 <Calendar className="text-primary shrink-0" size={20} />
                 <div className="min-w-0">
-                  <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wider truncate whitespace-nowrap">Account Created</p>
-                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 truncate whitespace-nowrap">
+                  <p className="text-xs text-muted font-medium uppercase tracking-wider truncate whitespace-nowrap">Account Created</p>
+                  <p className="text-sm font-semibold text-foreground truncate whitespace-nowrap">
                     {formatDate(currentIdentity?.createdAt)}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl min-w-0">
-                <Activity className="text-green-500 shrink-0" size={20} />
+              <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl min-w-0">
+                <Activity className="text-primary shrink-0" size={20} />
                 <div className="min-w-0">
-                  <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wider truncate whitespace-nowrap">Online Status</p>
+                  <p className="text-xs text-muted font-medium uppercase tracking-wider truncate whitespace-nowrap">Online Status</p>
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0"></span>
-                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 truncate whitespace-nowrap">Active Session</p>
+                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0"></span>
+                    <p className="text-sm font-semibold text-foreground truncate whitespace-nowrap">Active Session</p>
                   </div>
                 </div>
               </div>
@@ -214,7 +214,7 @@ const SettingsPage: React.FC = () => {
           {/* Accounts Management Section */}
           <section className="space-y-4">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <Users size={20} className="text-primary" />
                 Linked Identities
               </h3>
@@ -226,25 +226,25 @@ const SettingsPage: React.FC = () => {
                 Add Identity
               </button>
             </div>
-            <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 divide-y divide-gray-50 dark:divide-gray-800 overflow-hidden">
+            <div className="bg-background rounded-3xl border border-border divide-y divide-border overflow-hidden">
               {identities.map((id) => (
                 <div 
                   key={id.aid} 
                   className={`p-4 flex items-center justify-between gap-3 group transition-colors ${
                     id.aid === user?.userId 
                       ? 'bg-primary/10' 
-                      : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                      : 'hover:bg-white/5'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shrink-0 ${
-                      id.aid === user?.userId ? 'bg-primary shadow-md shadow-primary/20' : 'bg-gray-400 dark:bg-gray-600'
+                      id.aid === user?.userId ? 'bg-primary shadow-md shadow-primary/20' : 'bg-muted'
                     }`}>
                       {id.username[0].toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 min-w-0">
-                        <p className={`font-bold truncate whitespace-nowrap ${id.aid === user?.userId ? 'text-primary' : 'text-gray-900 dark:text-gray-100'}`}>
+                        <p className={`font-bold truncate whitespace-nowrap ${id.aid === user?.userId ? 'text-primary' : 'text-foreground'}`}>
                           {id.username}
                         </p>
                         {id.aid === user?.userId && (
@@ -265,7 +265,7 @@ const SettingsPage: React.FC = () => {
                       <button 
                         onClick={() => handleSwitchAccount(id.aid)}
                         disabled={authLoading}
-                        className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-xl transition-all disabled:opacity-50"
+                        className="p-2 text-muted hover:text-primary hover:bg-primary/10 rounded-xl transition-all disabled:opacity-50"
                         title="Switch to this identity"
                       >
                         <RefreshCw size={18} className={authLoading ? 'animate-spin' : ''} />
@@ -273,12 +273,12 @@ const SettingsPage: React.FC = () => {
                     )}
                     <button 
                       onClick={() => handleDeleteAccount(id.aid, id.username, id.aid === user?.userId && myRooms.length > 0 && (
-                        <div className="space-y-4 mt-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800">
-                          <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
+                        <div className="space-y-4 mt-4 p-4 bg-white/5 rounded-2xl border border-border">
+                          <p className="text-sm font-bold text-foreground mb-3">
                             Manage your {myRooms.length} chatroom{myRooms.length > 1 ? 's' : ''}:
                           </p>
                           <div className="space-y-3">
-                            <label className={`flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 transition-colors group ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-primary'}`}>
+                            <label className={`flex items-center gap-3 p-3 bg-background rounded-xl border border-border transition-colors group ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-primary'}`}>
                               <Input
                                 type="radio"
                                 name="roomAction"
@@ -286,14 +286,14 @@ const SettingsPage: React.FC = () => {
                                 checked={roomActionState === 'transfer'}
                                 onChange={() => !isProcessing && setRoomAction('transfer')}
                                 disabled={isProcessing}
-                                className="w-4 h-4 text-primary border-gray-300 focus:ring-primary disabled:opacity-50"
+                                className="w-4 h-4 text-primary border-border focus:ring-primary disabled:opacity-50"
                               />
                               <div className="flex-1">
-                                <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Transfer Authority</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">Pass ownership to the next earliest member</p>
+                                <p className="text-sm font-bold text-foreground">Transfer Authority</p>
+                                <p className="text-xs text-muted">Pass ownership to the next earliest member</p>
                               </div>
                             </label>
-                            <label className={`flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 transition-colors group ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-red-500'}`}>
+                            <label className={`flex items-center gap-3 p-3 bg-background rounded-xl border border-border transition-colors group ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-destructive'}`}>
                               <Input
                                 type="radio"
                                 name="roomAction"
@@ -301,18 +301,18 @@ const SettingsPage: React.FC = () => {
                                 checked={roomActionState === 'delete'}
                                 onChange={() => !isProcessing && setRoomAction('delete')}
                                 disabled={isProcessing}
-                                className="w-4 h-4 text-red-600 border-gray-300 focus:ring-red-500 disabled:opacity-50"
+                                className="w-4 h-4 text-destructive border-border focus:ring-destructive disabled:opacity-50"
                               />
                               <div className="flex-1">
-                                <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Delete All Rooms</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">Completely remove all rooms you created</p>
+                                <p className="text-sm font-bold text-foreground">Delete All Rooms</p>
+                                <p className="text-xs text-muted">Completely remove all rooms you created</p>
                               </div>
                             </label>
                           </div>
                         </div>
                       ))}
                       disabled={authLoading}
-                      className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all disabled:opacity-50"
+                      className="p-2 text-muted hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all disabled:opacity-50"
                       title="Delete this identity"
                     >
                       <Trash2 size={18} />
@@ -325,37 +325,37 @@ const SettingsPage: React.FC = () => {
 
           {/* Security & Identity Section */}
           <section className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 px-2 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-foreground px-2 flex items-center gap-2">
               <Shield size={20} className="text-primary" />
               Security & Identity
             </h3>
-            <div className="bg-white dark:bg-gray-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 divide-y divide-gray-50 dark:divide-gray-800">
+            <div className="bg-background rounded-3xl overflow-hidden border border-border divide-y divide-border">
               <div className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row items-start gap-4">
-                  <div className="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl text-purple-600 dark:text-purple-400 shrink-0">
+                  <div className="p-3 bg-primary/10 rounded-xl text-primary shrink-0">
                     <Key size={24} />
                   </div>
                   <div className="flex-1 min-w-0 w-full">
-                    <h4 className="font-bold text-gray-900 dark:text-gray-100">Identity Keys</h4>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-4">
+                    <h4 className="font-bold text-foreground">Identity Keys</h4>
+                    <p className="text-sm text-muted mt-1 mb-4">
                       Your unique cryptographic keys are stored locally in your browser's IndexedDB.
                     </p>
                     <div className="space-y-3">
-                      <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl min-w-0">
+                      <div className="p-3 bg-white/5 rounded-xl min-w-0">
                         <HideableField 
                           label="Public Identity Key (Ed25519)" 
                           value={currentIdentity?.identityKeyPair.publicKey || ''} 
                           className="flex-col items-start! gap-1.5!"
-                          labelClassName="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500"
+                          labelClassName="text-[10px] uppercase tracking-wider font-bold text-muted"
                           showLabelOnHidden={true}
                         />
                       </div>
-                      <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl min-w-0">
+                      <div className="p-3 bg-white/5 rounded-xl min-w-0">
                         <HideableField 
                           label="Public Exchange Key (X25519)" 
                           value={currentIdentity?.exchangeKeyPair.publicKey || ''} 
                           className="flex-col items-start! gap-1.5!"
-                          labelClassName="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500"
+                          labelClassName="text-[10px] uppercase tracking-wider font-bold text-muted"
                           showLabelOnHidden={true}
                         />
                       </div>
@@ -374,34 +374,34 @@ const SettingsPage: React.FC = () => {
 
           {/* Appearance Section */}
           <section className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 px-2 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-foreground px-2 flex items-center gap-2">
               <Palette size={20} className="text-primary" />
               Appearance
             </h3>
-            <div className="bg-white dark:bg-gray-900 rounded-3xl p-4 sm:p-6 border border-gray-100 dark:border-gray-800 space-y-6">
+            <div className="bg-background rounded-3xl p-4 sm:p-6 border border-border space-y-6">
               {/* Theme Toggle */}
               <div>
-                <h4 className="font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                <h4 className="font-bold text-foreground mb-3 flex items-center gap-2">
                   Color Mode
                 </h4>
-                <div className="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl w-fit">
+                <div className="flex p-1 bg-white/5 rounded-2xl w-fit">
                   <button
-                    onClick={() => setTheme('light')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
-                      theme === 'light' 
-                        ? 'bg-white text-gray-900 shadow-sm' 
-                        : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                    }`}
-                  >
-                    <Sun size={18} />
-                    <span className="font-bold text-sm">Light</span>
-                  </button>
+            onClick={() => setTheme('light')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+              theme === 'light' 
+                ? 'bg-foreground text-background shadow-sm' 
+                : 'text-muted hover:text-foreground'
+            }`}
+          >
+            <Sun size={18} />
+            <span className="font-bold text-sm">Light</span>
+          </button>
                   <button
                     onClick={() => setTheme('dark')}
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
                       theme === 'dark' 
-                        ? 'bg-gray-900 text-white shadow-sm' 
-                        : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                        ? 'bg-primary text-foreground shadow-sm' 
+                        : 'text-muted hover:text-foreground'
                     }`}
                   >
                     <Moon size={18} />
@@ -412,7 +412,7 @@ const SettingsPage: React.FC = () => {
 
               {/* Color Schemes */}
               <div>
-                <h4 className="font-bold text-gray-900 dark:text-gray-100 mb-3">
+                <h4 className="font-bold text-foreground mb-3">
                   Color Scheme
                 </h4>
                 <div className="flex flex-wrap gap-3">
@@ -426,7 +426,7 @@ const SettingsPage: React.FC = () => {
                         key={schemeKey}
                         onClick={() => setColorScheme(schemeKey)}
                         className={`group relative flex items-center justify-center w-10 h-10 rounded-full transition-all hover:scale-110 active:scale-95 ${
-                          isActive ? 'ring-2 ring-offset-2 ring-primary dark:ring-offset-gray-900' : ''
+                          isActive ? 'ring-2 ring-offset-2 ring-primary ring-offset-background' : ''
                         }`}
                         style={{ backgroundColor: displayColor }}
                         title={scheme.name}
@@ -434,7 +434,7 @@ const SettingsPage: React.FC = () => {
                         {isActive && (
                           <CheckCircle2 size={18} className="text-white drop-shadow-md" />
                         )}
-                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-background text-foreground text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-border whitespace-nowrap">
                           {scheme.name}
                         </span>
                       </button>
@@ -447,146 +447,162 @@ const SettingsPage: React.FC = () => {
 
           {/* Rooms Section */}
           <section className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 px-2 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-foreground px-2 flex items-center gap-2">
               <MessageSquare size={20} className="text-primary" />
-              My Chatrooms
+              Your Chatrooms
             </h3>
-            
-            {myRooms.length === 0 ? (
-              <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 text-center border border-gray-100 dark:border-gray-800">
-                <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 dark:text-gray-500">
-                  <MessageSquare size={32} />
-                </div>
-                <p className="text-gray-500 dark:text-gray-400">You haven't created any chatrooms yet.</p>
-                <button 
-                  onClick={() => navigate('/')}
-                  className="mt-4 text-primary font-bold hover:underline"
-                >
-                  Create your first room
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {myRooms.map(room => (
-                  <button
-                    key={room.id}
-                    onClick={() => navigate(`/${room.id}`)}
-                    className="flex flex-col p-5 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all text-left group"
-                  >
-                    <div className="flex items-center justify-between gap-2 mb-2 w-full min-w-0">
-                      <h4 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors truncate whitespace-nowrap">
-                        {room.roomname}
-                      </h4>
-                      {room.isLocked && <Lock size={14} className="text-gray-400 shrink-0" />}
-                    </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate whitespace-nowrap mb-4 flex-1">
-                      {room.description || "No description provided."}
-                    </p>
-                    <div className="flex items-center justify-between mt-auto">
-                      <div className="flex items-center gap-2 text-xs font-medium text-gray-400 dark:text-gray-500 min-w-0">
-                        <Globe size={14} className="shrink-0" />
-                        <span className="truncate whitespace-nowrap">{room.participantCount} Participants</span>
+            <div className="bg-background rounded-3xl border border-border overflow-hidden">
+              {myRooms.length > 0 ? (
+                <div className="divide-y divide-border">
+                  {myRooms.map((room) => (
+                    <div 
+                      key={room.id} 
+                      className="p-4 flex items-center justify-between gap-4 hover:bg-white/5 transition-colors group"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-bold text-foreground truncate">{room.roomname}</p>
+                          <span className="px-2 py-0.5 bg-green-500/10 text-green-500 text-[10px] font-black rounded-full uppercase tracking-tighter shrink-0">
+                            Active
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted truncate">
+                          Created {formatDate(room.createdAt)}
+                        </p>
                       </div>
-                      <ExternalLink size={16} className="text-gray-300 dark:text-gray-700 group-hover:text-primary transition-colors shrink-0" />
+                      <button 
+                        onClick={() => navigate(`/${room.id}`)}
+                        className="p-2 text-muted hover:text-primary hover:bg-primary/10 rounded-xl transition-all"
+                        title="Go to room"
+                      >
+                        <ExternalLink size={18} />
+                      </button>
                     </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </section>
-
-          {/* App Management Section */}
-          <section className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 px-2 flex items-center gap-2">
-              <Smartphone size={20} className="text-primary" />
-              App Management
-            </h3>
-            <div className="bg-white dark:bg-gray-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 divide-y divide-gray-50 dark:divide-gray-800">
-              <div className="p-4 sm:p-6">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-primary/10 rounded-xl text-primary shrink-0">
-                      <Info size={24} />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 dark:text-gray-100">App Status</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {isInstalled ? 'App is installed on your device' : 'App is running in browser'}
-                      </p>
-                    </div>
-                  </div>
-                  {!isInstalled && (
-                    <button
-                      onClick={() => {
-                        if (isInstallable) {
-                          installApp();
-                        } else {
-                          setAlertDialog({
-                            isOpen: true,
-                            title: "How to Install",
-                            type: "alert",
-                            message: "To install Anonfly on your device:\n\n" + 
-                                     "• On iOS (Safari): Tap the 'Share' icon and select 'Add to Home Screen'.\n" +
-                                     "• On Android (Chrome): Tap the three dots menu and select 'Install app'.\n" +
-                                     "• On Desktop: Look for the install icon in your browser's address bar.",
-                            onConfirm: () => setAlertDialog(prev => ({ ...prev, isOpen: false }))
-                          });
-                        }
-                      }}
-                      className="flex items-center gap-2 px-4 py-2 bg-primary hover:opacity-90 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary/20"
-                    >
-                      <Download size={18} />
-                      {isInstallable ? 'Install App' : 'Manual Install'}
-                    </button>
-                  )}
+                  ))}
                 </div>
-              </div>
-
-              {updateAvailable && (
-                <div className="p-4 sm:p-6 bg-green-50/30 dark:bg-green-900/10">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3 text-green-700 dark:text-green-300">
-                      <CheckCircle2 size={18} />
-                      <p className="text-sm font-medium">A new version of Anonfly is available!</p>
-                    </div>
-                    <button
-                      onClick={updateApp}
-                      className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-green-500/20"
-                    >
-                      Update Now
-                    </button>
+              ) : (
+                <div className="p-8 text-center">
+                  <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-muted mx-auto mb-4">
+                    <MessageSquare size={32} />
                   </div>
+                  <p className="text-foreground font-bold">No rooms yet</p>
+                  <p className="text-sm text-muted mt-1">Chatrooms you create will appear here.</p>
                 </div>
               )}
+            </div>
+          </section>
 
-              <div className="p-4 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Current Version</span>
-                  <span className="text-sm font-bold text-gray-900 dark:text-gray-100">v{appVersion}</span>
+          {/* Device & PWA Section */}
+          <section className="space-y-4">
+            <h3 className="text-lg font-bold text-foreground px-2 flex items-center gap-2">
+              <Smartphone size={20} className="text-primary" />
+              Device & Application
+            </h3>
+            <div className="bg-background rounded-3xl border border-border overflow-hidden divide-y divide-border">
+              <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/5 rounded-xl text-foreground shrink-0">
+                    <Smartphone size={24} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-foreground">PWA Installation</h4>
+                    <p className="text-sm text-muted mt-0.5">
+                      {isInstalled ? 'App is installed on your device' : 'Install for a better experience'}
+                    </p>
+                  </div>
                 </div>
+                {isInstallable && !isInstalled && (
+                  <button 
+                    onClick={installApp}
+                    className="flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+                  >
+                    <Download size={18} />
+                    Install App
+                  </button>
+                )}
+                {isInstalled && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 text-green-500 font-bold rounded-xl text-sm">
+                    <CheckCircle2 size={16} />
+                    Installed
+                  </div>
+                )}
+              </div>
+              
+              <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/5 rounded-xl text-foreground shrink-0">
+                    <Info size={24} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-foreground">App Version</h4>
+                    <p className="text-sm text-muted mt-0.5">Current version: {appVersion}</p>
+                  </div>
+                </div>
+                {updateAvailable && (
+                  <button 
+                    onClick={updateApp}
+                    className="flex items-center justify-center gap-2 px-6 py-2.5 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
+                  >
+                    <RefreshCw size={18} />
+                    Update Now
+                  </button>
+                )}
               </div>
             </div>
           </section>
 
-          {/* Privacy & App Info */}
-          <section className="pt-8 border-t border-gray-200 dark:border-gray-800">
-            <div className="text-center space-y-2">
-              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Anonfly v{appVersion}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-                Anonfly is built with privacy in mind. All your chat data is encrypted and identities are managed locally. 
-                We don't track your IP address or store any personal information.
-              </p>
+          {/* About Section */}
+          <section className="space-y-4">
+            <h3 className="text-lg font-bold text-foreground px-2 flex items-center gap-2">
+              <Info size={20} className="text-primary" />
+              About Anonfly
+            </h3>
+            <div className="bg-background rounded-3xl border border-border p-4 sm:p-6 space-y-4">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-white/5 rounded-xl text-primary shrink-0">
+                  <Globe size={24} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-foreground">Decentralized & Secure</h4>
+                  <p className="text-sm text-muted mt-1 leading-relaxed">
+                    Anonfly uses end-to-end encryption and doesn't store your personal data. 
+                    Your identity is tied to your local browser storage.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4 border-t border-border">
+                <a 
+                  href="https://anonfly.com/privacy" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm font-bold text-primary hover:underline flex items-center gap-1"
+                >
+                  Privacy Policy
+                  <ExternalLink size={12} />
+                </a>
+                <span className="text-border">•</span>
+                <a 
+                  href="https://anonfly.com/terms" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm font-bold text-primary hover:underline flex items-center gap-1"
+                >
+                  Terms of Service
+                  <ExternalLink size={12} />
+                </a>
+              </div>
             </div>
           </section>
         </main>
 
         <AlertDialog
           isOpen={alertDialog.isOpen}
+          onClose={() => setAlertDialog({ ...alertDialog, isOpen: false })}
+          onConfirm={alertDialog.onConfirm}
           title={alertDialog.title}
           message={alertDialog.message}
           type={alertDialog.type}
-          onConfirm={alertDialog.onConfirm}
-          onClose={() => setAlertDialog(prev => ({ ...prev, isOpen: false }))}
+          isLoading={isProcessing}
         >
           {alertDialog.children}
         </AlertDialog>

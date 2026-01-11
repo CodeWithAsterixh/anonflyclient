@@ -139,22 +139,22 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
     <div className="isolate flex h-dvh bg-transparent relative overflow-hidden transition-colors duration-300 w-full">
       <div className="flex-1 flex flex-col min-w-0 relative h-full">
         {/* Header */}
-        <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm flex flex-col gap-1 justify-between items-center z-10">
+        <header className="bg-background/80 backdrop-blur-md border-b border-border shadow-sm flex flex-col gap-1 justify-between items-center z-10">
           {isMobile && <Logo showText size={32} className="py-2" />}
-          <div className="w-full flex justify-between items-center bg-neutral-200/30 dark:bg-gray-800/50 px-4 py-3">
+          <div className="w-full flex justify-between items-center bg-white/5 px-4 py-3">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => {
                   onBack();
                   onNavigateHome();
                 }}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors group"
+                className="p-2 hover:bg-white/5 rounded-full transition-colors group"
               >
-                <ChevronDown className="w-5 h-5 rotate-90 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100" />
+                <ChevronDown className="w-5 h-5 rotate-90 text-muted group-hover:text-foreground" />
               </button>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="font-bold text-gray-900 dark:text-gray-100 leading-tight">
+                  <h1 className="font-bold text-foreground leading-tight">
                     {displayDetail?.roomname || "Loading..."}
                   </h1>
                   {displayDetail?.isPrivate && (
@@ -165,12 +165,12 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                 </div>
                 <button
                   onClick={() => setIsOptionsOpen(true)}
-                  className={`text-xs text-gray-500 dark:text-gray-400 transition-colors text-left hover:text-primary`}
+                  className={`text-xs text-muted transition-colors text-left hover:text-primary`}
                 >
                   {participants.length} participant
                   {participants.length === 1 ? "" : "s"} •{" "}
                   {isConnected ? (
-                    <span className="text-green-500 dark:text-green-400 font-medium">
+                    <span className="text-primary font-medium">
                       connected
                     </span>
                   ) : (
@@ -179,7 +179,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                   {displayDetail?.creatorAid && (
                     <>
                       {" • "}
-                      <span className={`font-medium ${displayDetail.isCreatorOnline ? 'text-primary' : 'text-gray-400'}`}>
+                      <span className={`font-medium ${displayDetail.isCreatorOnline ? 'text-primary' : 'text-muted'}`}>
                         creator {displayDetail.isCreatorOnline ? 'online' : 'offline'}
                       </span>
                     </>
@@ -194,7 +194,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                 className={`p-2 rounded-full transition-all ${
                   isOptionsOpen
                     ? "bg-primary/10 text-primary"
-                    : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    : "text-muted hover:bg-white/5"
                 }`}
                 title="Room Options"
               >
@@ -204,7 +204,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
               {isMobile ? (
                 <button
                   onClick={onLeaveRoom}
-                  className={`p-2 rounded-full transition-all text-red-500 hover:bg-red-100 dark:hover:bg-red-800`}
+                  className={`p-2 rounded-full transition-all text-destructive hover:bg-destructive/10`}
                   title="Leave Room"
                 >
                   <LogOutIcon size={20} />
@@ -213,7 +213,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                 !isOptionsOpen && (
                   <button
                     onClick={onLeaveRoom}
-                    className={`p-2 rounded-full transition-all text-red-500 hover:bg-red-100 dark:hover:bg-red-800`}
+                    className={`p-2 rounded-full transition-all text-destructive hover:bg-destructive/10`}
                     title="Leave Room"
                   >
                     <LogOutIcon size={20} />
@@ -244,7 +244,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
               ) : (
                 <button
                   onClick={loadMore}
-                  className="text-xs text-gray-500 hover:text-primary transition-colors"
+                  className="text-xs text-muted hover:text-primary transition-colors"
                 >
                   Load older messages
                 </button>

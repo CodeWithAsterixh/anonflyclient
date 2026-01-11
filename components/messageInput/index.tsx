@@ -87,7 +87,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <div className="bg-white/80 dark:bg-gray-900/80 sticky bottom-0 left-0 backdrop-blur-md p-3 border-t border-gray-200 dark:border-gray-800 flex flex-col gap-2 z-10 transition-colors duration-300">
+    <div className="bg-background/80 sticky bottom-0 left-0 backdrop-blur-md p-3 border-t border-border flex flex-col gap-2 z-10 transition-colors duration-300">
       {/* Editing Preview */}
       {editingMessage && onCancelEdit && (
         <MessagePreview 

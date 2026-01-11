@@ -95,10 +95,10 @@ const JoinLinkPage: React.FC = () => {
           <div className="flex justify-center">
             <Loader2 className="w-12 h-12 text-primary animate-spin" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <h2 className="text-2xl font-bold text-foreground">
             Validating Access Link...
           </h2>
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-muted">
             Please wait while we verify your invitation.
           </p>
         </>
@@ -109,19 +109,19 @@ const JoinLinkPage: React.FC = () => {
       return (
         <>
           <div className="flex justify-center">
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-full">
-              <AlertCircle className="w-12 h-12 text-red-500" />
+            <div className="p-4 bg-destructive/10 rounded-full">
+              <AlertCircle className="w-12 h-12 text-destructive" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <h2 className="text-2xl font-bold text-foreground">
             Access Denied
           </h2>
-          <p className="text-red-600 dark:text-red-400">
+          <p className="text-destructive">
             {error}
           </p>
           <button
             onClick={() => navigate('/')}
-            className="w-full py-3 px-4 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            className="w-full py-3 px-4 bg-white/5 text-foreground rounded-xl font-semibold hover:bg-white/10 transition-colors"
           >
             Go to Homepage
           </button>
@@ -135,7 +135,7 @@ const JoinLinkPage: React.FC = () => {
   return (
     <Background mode={theme} className="flex flex-col items-center justify-center min-h-screen p-4">
       <main className="w-full h-dvh px-4 flex items-center justify-center">
-        <div className="max-w-md w-full bg-white dark:bg-gray-900 rounded-3xl shadow-xl p-8 border border-gray-100 dark:border-gray-800 text-center space-y-6">
+        <div className="max-w-md w-full bg-background rounded-3xl shadow-xl p-8 border border-border text-center space-y-6">
           {renderContent()}
         </div>
       </main>

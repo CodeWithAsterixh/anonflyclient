@@ -29,7 +29,7 @@ const HideableField: React.FC<HideableFieldProps> = ({
 
   if (!isVisible) {
     return (
-      <div className={`flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 ${mono ? 'font-mono' : ''} ${className}`}>
+      <div className={`flex items-center gap-1.5 text-xs sm:text-sm text-muted ${mono ? 'font-mono' : ''} ${className}`}>
         {showLabelOnHidden && labelElement}
         <span className="truncate tracking-widest opacity-50">••••••••••••••••</span>
         <button 
@@ -37,7 +37,7 @@ const HideableField: React.FC<HideableFieldProps> = ({
             e.stopPropagation();
             setIsVisible(true);
           }}
-          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors text-gray-400 hover:text-primary shrink-0"
+          className="p-1 hover:bg-white/5 rounded-md transition-colors text-muted hover:text-primary shrink-0"
           title="Show"
         >
           <Eye size={14} />
@@ -49,7 +49,7 @@ const HideableField: React.FC<HideableFieldProps> = ({
   return (
     <div className={`flex items-center gap-2 min-w-0 w-full ${className}`}>
       <CopyWrapper className="min-w-0 flex-1">
-        <CopyWrapper.Trigger text={value} className={`flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 ${mono ? 'font-mono' : ''} hover:text-primary transition-colors group min-w-0 w-full`}>
+        <CopyWrapper.Trigger text={value} className={`flex items-center gap-1.5 text-xs sm:text-sm text-muted ${mono ? 'font-mono' : ''} hover:text-primary transition-colors group min-w-0 w-full`}>
           {labelElement}
           <span className="truncate text-primary">{value}</span>
           <CopyWrapper.Content>
@@ -64,7 +64,7 @@ const HideableField: React.FC<HideableFieldProps> = ({
           e.stopPropagation();
           setIsVisible(false);
         }}
-        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors text-gray-400 hover:text-primary shrink-0"
+        className="p-1 hover:bg-white/5 rounded-md transition-colors text-muted hover:text-primary shrink-0"
         title="Hide"
       >
         <EyeOff size={14} />

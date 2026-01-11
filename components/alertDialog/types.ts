@@ -12,6 +12,7 @@ export interface AlertDialogProps {
   confirmText?: string;
   cancelText?: string;
   children?: React.ReactNode;
+  isLoading?: boolean;
 }
 
 export interface AlertDialogState {

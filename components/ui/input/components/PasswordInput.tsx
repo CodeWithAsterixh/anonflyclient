@@ -13,7 +13,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, InputProps>(
     return (
       <>
         {leftIcon && (
-          <div className="absolute left-3 text-gray-400 dark:text-gray-500 pointer-events-none">
+          <div className="absolute left-3 text-muted pointer-events-none">
             {leftIcon}
           </div>
         )}
@@ -24,17 +24,16 @@ export const PasswordInput = forwardRef<HTMLInputElement, InputProps>(
           type={showPassword ? "text" : "password"}
           className={`
             w-full px-4 py-2.5 
-            bg-gray-50 dark:bg-gray-800/50 
-            border border-gray-200 dark:border-gray-700 
-            rounded-xl text-gray-900 dark:text-gray-100 
-            placeholder:text-gray-400 dark:placeholder:text-gray-500
+            bg-white/5
+            border border-border
+            rounded-xl text-foreground
+            placeholder:text-muted/60
             focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
-            dark:focus:ring-primary/20 dark:focus:border-primary
             disabled:opacity-50 disabled:cursor-not-allowed
             transition-all duration-200
             ${leftIcon ? "pl-10" : ""}
             pr-10
-            ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500/20 dark:border-red-500" : ""}
+            ${error ? "border-destructive focus:border-destructive focus:ring-destructive/20" : ""}
             ${className}
           `}
         />
@@ -42,7 +41,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, InputProps>(
         <button
           type="button"
           onClick={togglePasswordVisibility}
-          className="absolute right-3 p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors focus:outline-none"
+          className="absolute right-3 p-1 text-muted hover:text-foreground transition-colors focus:outline-none"
           tabIndex={-1}
         >
           {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}

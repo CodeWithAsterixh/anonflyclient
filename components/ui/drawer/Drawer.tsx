@@ -60,7 +60,7 @@ const DrawerRoot: React.FC<DrawerProps> = ({
 
       {/* Drawer Content */}
       <div
-        className={`absolute bg-white dark:bg-gray-900 shadow-2xl transition-transform duration-300 ease-in-out border-gray-200 dark:border-gray-800 flex flex-col ${
+        className={`absolute bg-background shadow-2xl transition-transform duration-300 ease-in-out border-border flex flex-col ${
           sideStyles[side]
         } ${size || defaultSizes[side]} ${className}`}
         style={side === "bottom" && height ? { height } : {}}
@@ -72,12 +72,12 @@ const DrawerRoot: React.FC<DrawerProps> = ({
 };
 
 const DrawerHeader: React.FC<{ title?: string; onClose: () => void; children?: React.ReactNode }> = ({ title, onClose, children }) => (
-  <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
-    {title && <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{title}</h2>}
+  <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
+    {title && <h2 className="text-lg font-bold text-foreground">{title}</h2>}
     {children}
     <button
       onClick={onClose}
-      className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all ml-auto"
+      className="p-2 text-muted hover:text-foreground hover:bg-white/5 rounded-full transition-all ml-auto"
       aria-label="Close drawer"
     >
       <X size={20} />
@@ -92,7 +92,7 @@ const DrawerContent: React.FC<{ children: React.ReactNode; className?: string }>
 );
 
 const DrawerFooter: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => (
-  <div className={`p-4 border-t border-gray-100 dark:border-gray-800 shrink-0 ${className}`}>
+  <div className={`p-4 border-t border-border shrink-0 ${className}`}>
     {children}
   </div>
 );

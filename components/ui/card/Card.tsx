@@ -20,7 +20,7 @@ const Card: React.FC<CardProps> = ({ children, className = "", onClick }) => {
         type="button"
         onClick={onClick}
         onKeyDown={handleKeyDown}
-        className={`w-full text-left bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm rounded-2xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${className}`}
+        className={`w-full text-left bg-background border border-border shadow-sm rounded-2xl cursor-pointer hover:bg-white/5 transition-colors ${className}`}
       >
         {children}
       </button>
@@ -29,7 +29,7 @@ const Card: React.FC<CardProps> = ({ children, className = "", onClick }) => {
 
   return (
     <div
-      className={`bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm rounded-2xl ${className}`}
+      className={`bg-background border border-border shadow-sm rounded-2xl ${className}`}
     >
       {children}
     </div>

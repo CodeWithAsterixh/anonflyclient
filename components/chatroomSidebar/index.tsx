@@ -71,11 +71,11 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
   };
 
   return (
-    <div className={`flex flex-col h-full bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 shrink-0 overflow-hidden transition-colors duration-300 ${hideHeader ? 'w-full' : 'w-80 border-l'}`}>
+    <div className={`flex flex-col h-full bg-background border-border shrink-0 overflow-hidden transition-colors duration-300 ${hideHeader ? 'w-full' : 'w-80 border-l'}`}>
       {/* Sidebar Header */}
       {!hideHeader && (
-        <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
-          <h2 className="font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+        <div className="p-4 border-b border-border bg-white/5">
+          <h2 className="font-bold text-foreground flex items-center gap-2">
             <Info size={18} className="text-primary" />
             Room Details
           </h2>
@@ -85,7 +85,7 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         <RoomInfo roomName={roomName} roomDescription={roomDescription} isPrivate={isPrivate} />
 
-        <div className="h-px bg-gray-100 dark:bg-gray-800 mx-4" />
+        <div className="h-px bg-border mx-4" />
 
         <RoomActions 
           isHost={isHost}
@@ -95,18 +95,18 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
           onGenerateShareLink={onGenerateShareLink}
         />
 
-        <div className="h-px bg-gray-100 dark:bg-gray-800 mx-4" />
+        <div className="h-px bg-border mx-4" />
 
         {/* Participants Section */}
         <div className="p-4 space-y-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-muted uppercase tracking-wider">
               Participants ({participants.length})
             </h3>
           </div>
 
           {error && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-xl text-xs text-red-600 dark:text-red-400">
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-xl text-xs text-destructive">
               {error}
             </div>
           )}
@@ -134,10 +134,10 @@ const ChatroomSidebar: React.FC<ChatroomSidebarProps> = ({
       </div>
 
       {/* Connection Status */}
-      <div className="p-4 border-t border-gray-100 rounded-md md:rounded-none dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+      <div className="p-4 border-t border-border rounded-md md:rounded-none bg-white/5">
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-amber-500'}`} />
-          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-primary animate-pulse' : 'bg-amber-500'}`} />
+          <span className="text-xs font-medium text-muted">
             {isConnected ? 'Live Connection' : 'Reconnecting...'}
           </span>
         </div>

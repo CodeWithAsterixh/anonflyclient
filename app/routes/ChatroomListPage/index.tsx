@@ -52,20 +52,20 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
 
   return (
     <>
-      <div className="isolate p-4 h-full overflow-y-auto flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
-        <div className="flex justify-between items-center mb-4 sticky top-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-20 border-b border-gray-100 dark:border-gray-800 pb-3">
+      <div className="isolate p-4 h-full overflow-y-auto flex flex-col bg-background transition-colors duration-300">
+        <div className="flex justify-between items-center mb-4 sticky top-0 bg-background/80 backdrop-blur-md z-20 border-b border-border pb-3">
           <Logo showText size={32} />
 
           <div className="flex items-center gap-2">
             {/* Account Switcher */}
             <Menu as="div" className="relative inline-block text-left">
-              <MenuButton className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors group">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm border-2 border-white dark:border-gray-700 shadow-sm group-hover:bg-primary/20 transition-colors">
+              <MenuButton className="flex items-center gap-2 p-1.5 hover:bg-white/5 rounded-lg transition-colors group">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm border-2 border-border shadow-sm group-hover:bg-primary/20 transition-colors">
                   {user?.username?.[0].toUpperCase() || "?"}
                 </div>
                 <ChevronDown
                   size={16}
-                  className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300"
+                  className="text-muted group-hover:text-foreground"
                 />
               </MenuButton>
 
@@ -78,9 +78,9 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
               >
-                <MenuItems className="absolute right-0 mt-2 w-64 origin-top-right rounded-xl bg-white dark:bg-gray-800 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none z-30 p-1.5 border border-gray-100 dark:border-gray-700">
-                  <div className="px-3 py-2 border-b border-gray-50 dark:border-gray-700 mb-1">
-                    <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                <MenuItems className="absolute right-0 mt-2 w-64 origin-top-right rounded-xl bg-background shadow-2xl ring-1 ring-border focus:outline-none z-30 p-1.5 border border-border">
+                  <div className="px-3 py-2 border-b border-border mb-1">
+                    <p className="text-xs font-semibold text-muted uppercase tracking-wider">
                       Switch Account
                     </p>
                   </div>
@@ -94,10 +94,10 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                             className={`flex w-full items-center justify-between px-3 py-2.5 rounded-lg transition-all ${
                               focus
                                 ? "bg-primary/10 text-primary"
-                                : "text-gray-700 dark:text-gray-300"
+                                : "text-foreground"
                             } ${
                               user?.userId === identity.aid
-                                ? "bg-gray-50 dark:bg-gray-700/50"
+                                ? "bg-white/5"
                                 : ""
                             }`}
                           >
@@ -106,7 +106,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                                 className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
                                   user?.userId === identity.aid
                                     ? "bg-primary text-white"
-                                    : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                                    : "bg-white/10 text-muted"
                                 }`}
                               >
                                 {identity.username[0].toUpperCase()}
@@ -127,18 +127,18 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                     ))}
                   </div>
 
-                  <div className="mt-1 pt-1 border-t border-gray-50 dark:border-gray-700 flex flex-col gap-1">
+                  <div className="mt-1 pt-1 border-t border-border flex flex-col gap-1">
                     <MenuItem>
                       {({ focus }) => (
                         <button
                           onClick={() => setIsModalOpen(true)}
                           className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                             focus
-                              ? "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300"
-                              : "text-gray-700 dark:text-gray-300"
+                              ? "bg-primary/10 text-primary"
+                              : "text-foreground"
                           }`}
                         >
-                          <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center text-green-600 dark:text-green-400">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                             <Plus size={18} />
                           </div>
                           <span className="font-medium">Create Chatroom</span>
@@ -151,16 +151,12 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                           onClick={toggleTheme}
                           className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                             focus
-                              ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
-                              : "text-gray-700 dark:text-gray-300"
+                              ? "bg-primary/10 text-primary"
+                              : "text-foreground"
                           }`}
                         >
                           <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                              theme === "dark"
-                                ? "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400"
-                                : "bg-orange-100 text-orange-600"
-                            }`}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center bg-primary/10 text-primary`}
                           >
                             {theme === "dark" ? (
                               <Moon size={18} />
@@ -181,7 +177,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                           className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                             focus
                               ? "bg-primary/10 text-primary"
-                              : "text-gray-700 dark:text-gray-300"
+                              : "text-foreground"
                           }`}
                         >
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
@@ -197,11 +193,11 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                           onClick={logout}
                           className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                             focus
-                              ? "bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300"
-                              : "text-gray-700 dark:text-gray-300"
+                              ? "bg-destructive/10 text-destructive"
+                              : "text-foreground"
                           }`}
                         >
-                          <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 dark:text-red-400">
+                          <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center text-destructive">
                             <LogOut size={18} />
                           </div>
                           <span className="font-medium">Logout</span>

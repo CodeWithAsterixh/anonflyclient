@@ -26,11 +26,11 @@ import "./app.css";
  */
 export async function loader({ request }: { request: Request }): Promise<{ theme: string; colorScheme: string; }> {
   const cookieHeader = request.headers.get("Cookie");
-  const theme = cookieHeader?.includes("themeState=dark") ? "dark" : "light";
+  const theme = cookieHeader?.includes("themeState=light") ? "light" : "dark";
   
   // Extract colorScheme from cookie if it exists
   const colorSchemeMatch = cookieHeader?.match(/colorScheme=([^;]+)/);
-  const colorScheme = colorSchemeMatch ? colorSchemeMatch[1] : "blue";
+  const colorScheme = colorSchemeMatch ? colorSchemeMatch[1] : "purple";
   
   return { theme, colorScheme };
 }
@@ -58,7 +58,7 @@ export const meta: Route.MetaFunction = () => [
   { name: "twitter:image", content: `${BASE_URL}/logo.svg` },
   
   // Theme Color for mobile browsers
-  { name: "theme-color", content: "#2563eb" },
+  { name: "theme-color", content: "#0B0B0F" },
 ];
 
 export const links: Route.LinksFunction = () => [
@@ -126,25 +126,24 @@ export function Layout({ children }: Readonly<{ children: React.ReactNode }>): J
                 try {
                   var cookies = document.cookie.split('; ');
                   var theme = cookies.find(row => row.startsWith('themeState='))?.split('=')[1] || 
-                              localStorage.getItem('themeState') || 
-                              (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                              localStorage.getItem('themeState') || 'dark';
                   
                   var colorScheme = cookies.find(row => row.startsWith('colorScheme='))?.split('=')[1] || 
-                                    localStorage.getItem('colorScheme') || 'blue';
+                                    localStorage.getItem('colorScheme') || 'purple';
                   
                   document.documentElement.classList.add(theme);
-                  document.body.style.backgroundColor = theme === 'dark' ? '#030712' : '#ffffff';
+                  document.body.style.backgroundColor = theme === 'dark' ? '#0B0B0F' : '#ffffff';
                   
                   var schemes = {
+                    purple: { light: '#6B4EFF', dark: '#6B4EFF' },
                     blue: { light: '#3b82f6', dark: '#60a5fa' },
                     green: { light: '#22c55e', dark: '#4ade80' },
-                    purple: { light: '#a855f7', dark: '#c084fc' },
                     red: { light: '#ef4444', dark: '#f87171' },
                     orange: { light: '#f97316', dark: '#fb923c' },
                     pink: { light: '#ec4899', dark: '#f472b6' }
                   };
                   
-                  var scheme = schemes[colorScheme] || schemes.blue;
+                  var scheme = schemes[colorScheme] || schemes.purple;
                   var primaryColor = theme === 'dark' ? scheme.dark : scheme.light;
                   
                   document.documentElement.style.setProperty('--primary-color', primaryColor);
@@ -153,7 +152,7 @@ export function Layout({ children }: Readonly<{ children: React.ReactNode }>): J
                     var result = /^#?([a-f\\d]{2})([a-f\\d]{2})([a-f\\d]{2})$/i.exec(hex);
                     return result ? 
                       parseInt(result[1], 16) + ', ' + parseInt(result[2], 16) + ', ' + parseInt(result[3], 16) : 
-                      '59, 130, 246';
+                      '107, 78, 255';
                   }
                   
                   document.documentElement.style.setProperty('--primary-color-rgb', hexToRgb(primaryColor));
@@ -163,7 +162,7 @@ export function Layout({ children }: Readonly<{ children: React.ReactNode }>): J
           }}
         />
       </head>
-      <body className="bg-white dark:bg-gray-950 isolate relative min-h-dvh transition-colors duration-300">
+      <body className="bg-background text-foreground isolate relative min-h-dvh transition-colors duration-300">
         {children}
         <ScrollRestoration />
         <Scripts />

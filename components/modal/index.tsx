@@ -59,18 +59,18 @@ const Modal: React.FC<ModalProps> = ({
 
       <div 
         ref={modalRef}
-        className={`relative z-10 bg-white dark:bg-gray-900 w-full ${maxWidthClasses[maxWidth]} rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden transform transition-all duration-300 animate-in fade-in zoom-in slide-in-from-bottom-4`}
+        className={`relative z-10 bg-background w-full ${maxWidthClasses[maxWidth]} rounded-3xl shadow-2xl border border-border overflow-hidden transform transition-all duration-300 animate-in fade-in zoom-in slide-in-from-bottom-4`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-50 dark:border-gray-800">
+        <div className="flex items-center justify-between p-6 border-b border-border">
           {title && (
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <h2 className="text-xl font-bold text-foreground">
               {title}
             </h2>
           )}
           <button
             onClick={onClose}
-            className="p-2 ml-auto text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all"
+            className="p-2 ml-auto text-muted hover:text-foreground hover:bg-white/5 rounded-full transition-all"
             aria-label="Close modal"
           >
             <X size={20} />

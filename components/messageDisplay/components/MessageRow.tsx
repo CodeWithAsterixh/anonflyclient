@@ -40,7 +40,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
     const alignmentClass = isCurrentUser ? "rounded-br-none" : "rounded-bl-none";
     const colorClass = isCurrentUser 
       ? "bg-primary text-white" 
-      : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100";
+      : "bg-white/5 text-foreground";
     
     let stateClass = "";
     if (isPreview) {
@@ -77,7 +77,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
           name={message.senderUsername} 
           userAid={message.senderAid} 
           size="sm" 
-          className="shadow-sm border border-gray-100 dark:border-gray-800"
+          className="shadow-sm border border-border"
         />
       </div>
 

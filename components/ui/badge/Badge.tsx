@@ -15,11 +15,11 @@ const Badge: React.FC<BadgeProps> = ({
 }) => {
   const variants = {
     primary: 'bg-primary/20 text-primary',
-    blue: 'bg-blue-300/30 text-blue-500',
-    amber: 'bg-amber-300/30 text-amber-500',
-    green: 'bg-green-300/30 text-green-500',
-    red: 'bg-red-300/30 text-red-500',
-    gray: 'bg-gray-300/30 text-gray-500',
+    blue: 'bg-blue-500/20 text-blue-500',
+    amber: 'bg-amber-500/20 text-amber-500',
+    green: 'bg-green-500/20 text-green-500',
+    red: 'bg-destructive/20 text-destructive',
+    gray: 'bg-white/10 text-muted',
   };
 
   return (

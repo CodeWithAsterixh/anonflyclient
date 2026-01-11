@@ -69,8 +69,8 @@ const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-dvh flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4 transition-colors duration-300">
-      <div className="bg-white dark:bg-gray-900 p-8 rounded-3xl shadow-xl w-full max-w-md border border-gray-100 dark:border-gray-800">
+    <div className="min-h-dvh flex items-center justify-center bg-background px-4 transition-colors duration-300">
+      <div className="bg-background p-8 rounded-3xl shadow-xl w-full max-w-md border border-border">
         <div className="flex flex-col items-center mb-8">
           <Logo size={64} className="mb-4" />
           <h1 className="text-3xl font-extrabold text-primary">
@@ -78,16 +78,16 @@ const LoginPage: React.FC = () => {
           </h1>
           <div className="flex items-center gap-2 mt-2">
             <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full border border-primary/20 uppercase tracking-wider">Free</span>
-            <span className="px-2 py-0.5 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-bold rounded-full border border-green-100 dark:border-green-800 uppercase tracking-wider">Secure</span>
-            <span className="px-2 py-0.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-[10px] font-bold rounded-full border border-purple-100 dark:border-purple-800 uppercase tracking-wider">Anonymous</span>
+            <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full border border-primary/20 uppercase tracking-wider">Secure</span>
+            <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full border border-primary/20 uppercase tracking-wider">Anonymous</span>
           </div>
         </div>
         
         <div className="space-y-1 mb-8 text-center">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+          <h2 className="text-xl font-bold text-foreground">
             Join the Conversation
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+          <p className="text-sm text-muted leading-relaxed">
             Choose a temporary username. No registration, no tracking, just 100% free and private messaging.
           </p>
         </div>
@@ -111,7 +111,7 @@ const LoginPage: React.FC = () => {
           <div className="flex items-center justify-center">
             <button
               type="submit"
-              className="w-full bg-primary hover:opacity-90 text-white font-bold py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+              className="w-full bg-primary hover:opacity-90 text-white font-bold py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
               disabled={isLoading || isInitialCheck || !username}
             >
               {isLoading ? (
@@ -126,13 +126,13 @@ const LoginPage: React.FC = () => {
           </div>
         </form>
         {error && (
-          <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm text-center">
+          <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-xl text-destructive text-sm text-center">
             {error}
           </div>
         )}
 
         {identities.length > 0 && (
-          <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
+          <div className="mt-8 pt-6 border-t border-border text-center">
             <button
               type="button"
               onClick={() => setIsAccountModalOpen(true)}

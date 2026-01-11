@@ -5,6 +5,12 @@ type Theme = 'light' | 'dark';
 export type ColorScheme = 'blue' | 'green' | 'purple' | 'red' | 'orange' | 'pink';
 
 export const colorSchemes: Record<ColorScheme, { name: string; light: string; dark: string; primary: string }> = {
+  purple: {
+    name: 'Purple',
+    light: '#6B4EFF',
+    dark: '#6B4EFF',
+    primary: '#6B4EFF',
+  },
   blue: {
     name: 'Blue',
     light: '#3b82f6',
@@ -16,12 +22,6 @@ export const colorSchemes: Record<ColorScheme, { name: string; light: string; da
     light: '#22c55e',
     dark: '#4ade80',
     primary: '#22c55e',
-  },
-  purple: {
-    name: 'Purple',
-    light: '#a855f7',
-    dark: '#c084fc',
-    primary: '#a855f7',
   },
   red: {
     name: 'Red',
@@ -66,9 +66,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode; initialTheme?:
     if (globalThis.window !== undefined) {
       const savedTheme = Cookies.get('themeState') as Theme || localStorage.getItem('themeState') as Theme;
       if (savedTheme) return savedTheme;
-      return globalThis.window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      // Default to dark for anonymity and focus
+      return 'dark';
     }
-    return 'light';
+    return 'dark';
   });
 
   const [colorSchemeState, setColorSchemeState] = useState<ColorScheme>(() => {
@@ -77,7 +78,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode; initialTheme?:
       const savedScheme = Cookies.get('colorScheme') as ColorScheme || localStorage.getItem('colorScheme') as ColorScheme;
       if (savedScheme && colorSchemes[savedScheme]) return savedScheme;
     }
-    return 'blue';
+    return 'purple';
   });
 
   useEffect(() => {
@@ -91,7 +92,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode; initialTheme?:
       Cookies.set('themeState', themeState, { expires: 365, path: '/' });
       
       // Update body background to prevent flashes
-      document.body.style.backgroundColor = themeState === 'dark' ? '#030712' : '#ffffff';
+      document.body.style.backgroundColor = themeState === 'dark' ? '#0B0B0F' : '#ffffff';
     }
   }, [themeState]);
 

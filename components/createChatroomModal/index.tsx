@@ -57,7 +57,8 @@ const CreateChatroomModal: React.FC<CreateChatroomModalProps> = ({
       // Redirect to the newly created room
       if (response?.data?.id) {
         const { id, isPrivate, token } = response.data;
-        const redirectPath = isPrivate && token ? `/join/${token}` : `/${id}`;
+        const encodedToken = token ? encodeURIComponent(token) : "";
+        const redirectPath = isPrivate && encodedToken ? `/join/${encodedToken}` : `/${id}`;
         navigate(redirectPath);
       }
       

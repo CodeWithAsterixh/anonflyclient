@@ -13,7 +13,8 @@ export const useRoomActions = (
     try {
       const response = await generateShareLink(chatroomId);
       if (response.success && response.data.token) {
-        const shareUrl = `${globalThis.window.location.origin}/join/${response.data.token}`;
+        const encodedToken = encodeURIComponent(response.data.token);
+        const shareUrl = `${globalThis.window.location.origin}/join/${encodedToken}`;
         await navigator.clipboard.writeText(shareUrl);
         return response.data;
       }

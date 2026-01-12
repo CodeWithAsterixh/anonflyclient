@@ -17,7 +17,8 @@ export const meta: MetaFunction = () => {
 };
 
 const JoinLinkPage: React.FC = () => {
-  const { token } = useParams<{ token: string }>();
+  const params = useParams();
+  const token = params["*"];
   const navigate = useNavigate();
   const { user, token: authToken, isLoading: authLoading } = useAuth();
   const { theme } = useTheme();

@@ -91,6 +91,15 @@ export const useAuthInternal = () => {
           const user: User = { userId: sessionData.aid, username: sessionData.username };
           setSessionUser(user, sessionData.token);
           
+          setAuthState(prev => ({
+            ...prev,
+            user,
+            token: sessionData.token,
+            isAuthenticated: true,
+            loading: false,
+            error: null,
+          }));
+          
           // Force a full page reload to clear all states and redirect
           globalThis.window.location.href = redirectTo;
         } catch {
@@ -284,6 +293,16 @@ export const useAuthInternal = () => {
       
       // Store session
       setSessionUser(user, sessionData.token);
+      
+      // Update local state so UI can react immediately if needed
+      setAuthState(prev => ({
+        ...prev,
+        user,
+        token: sessionData.token,
+        isAuthenticated: true,
+        loading: false,
+        error: null,
+      }));
       
       // Force a full page reload to clear all states and redirect
       globalThis.window.location.href = redirectTo;

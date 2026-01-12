@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 import type { User } from '../../types/User';
 
-const SESSION_KEY = import.meta.env.VITE_SESSION_COOKIE_KEY as string;
+const SESSION_KEY = import.meta.env.VITE_SESSION_COOKIE_KEY;
 
 export interface SessionPayload {
   user: User;

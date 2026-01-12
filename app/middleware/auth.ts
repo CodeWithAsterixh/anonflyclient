@@ -7,7 +7,8 @@ import { redirect } from "react-router";
 export async function requireAuth(request: Request) {
   const cookieHeader = request.headers.get("Cookie");
   const cookies = parseCookies(cookieHeader);
-  const sessionCookie = cookies["anonfly_session_user"];
+  const sessionKey = import.meta.env.VITE_SESSION_COOKIE_KEY;
+  const sessionCookie = cookies[sessionKey];
 
   if (!sessionCookie) {
     const url = new URL(request.url);

@@ -5,7 +5,7 @@
  * It uses the `useAuth` hook for authentication logic and `validation` helpers for form input validation.
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, type MetaFunction } from "react-router";
 import { useAuth } from "../../../hooks";
 import { validateUsername } from "../../../lib/helpers/validation";
@@ -36,14 +36,17 @@ const LoginPage: React.FC = () => {
     new URLSearchParams(location.search).get("redirect_to") || "/";
 
   // Redirect if already authenticated
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isInitialCheck && isAuthenticated) {
       navigate(redirectPath, { replace: true });
     }
-  }, [isInitialCheck, isAuthenticated, navigate, redirectPath]);
+  }, [isAuthenticated, isInitialCheck, navigate, redirectPath]);
+
 
   /**
    * Handles the form submission for anonymous join.
+   * Validates the username and attempts to join anonymously.
+   * Redirects to the specified path on successful join.
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +68,7 @@ const LoginPage: React.FC = () => {
   };
 
   if (isInitialCheck || isAuthenticated) {
-    return <Loader message="Loading..." />;
+    return <Loader message={isAuthenticated ? "Redirecting..." : "Loading..."} />;
   }
 
   return (

@@ -118,8 +118,8 @@ const ChatLayout: React.FC = () => {
     ]
   );
 
-  const showCLnonMobile = showChatList || !isMobile ? "block" : "hidden";
-  const showCLonMobile = showChatList || isMobile ? "hidden" : "flex";
+  const showLeftColumn = !isMobile || showChatList ? "block" : "hidden";
+  const showRightColumn = !isMobile || !showChatList ? "flex" : "hidden";
 
   return (
     <ProtectedRoute>
@@ -131,7 +131,7 @@ const ChatLayout: React.FC = () => {
           */}
           <div
             className={`${
-              isHydrated ? showCLnonMobile : "block md:block"
+              isHydrated ? showLeftColumn : "block md:block"
             } w-full md:w-80 lg:w-1/4 border-r h-full border-border overflow-hidden flex flex-col transition-all duration-300 ease-in-out`}
           >
             <ChatroomListPage onChatroomSelect={handleSelectChatroom} />
@@ -143,7 +143,7 @@ const ChatLayout: React.FC = () => {
           */}
           <div
             className={`${
-              isHydrated ? showCLonMobile : "hidden md:flex"
+              isHydrated ? showRightColumn : "hidden md:flex"
             } flex-1 flex-col overflow-hidden relative isolate w-full md:w-auto bg-background transition-colors duration-300`}
           >
             {chatroomId || isSettingsPage ? (

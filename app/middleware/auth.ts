@@ -7,7 +7,9 @@ import { redirect } from "react-router";
 export async function requireAuth(request: Request) {
   const cookieHeader = request.headers.get("Cookie");
   const cookies = parseCookies(cookieHeader);
-  const sessionKey = import.meta.env.VITE_SESSION_COOKIE_KEY;
+  
+  // Be resilient to missing env vars
+  const sessionKey = (import.meta.env?.VITE_SESSION_COOKIE_KEY);
   const sessionCookie = cookies[sessionKey];
 
   if (!sessionCookie) {
@@ -17,8 +19,11 @@ export async function requireAuth(request: Request) {
   }
 
   try {
-    // Decode and parse the session cookie
-    const session = JSON.parse(decodeURIComponent(sessionCookie));
+    // Decode the session cookie value
+    // js-cookie encodes JSON values, so we need to decode it
+    const decoded = decodeURIComponent(sessionCookie);
+    const session = JSON.parse(decoded);
+    
     if (session?.user) {
       return {
         user: session.user,
@@ -27,8 +32,8 @@ export async function requireAuth(request: Request) {
     } else {
       throw redirect("/login");
     }
-  } catch{
-    // If parsing fails, the cookie is invalid
+  } catch (error) {
+    console.error("[requireAuth] Cookie parsing failed:", error);
     throw redirect("/login");
   }
 }

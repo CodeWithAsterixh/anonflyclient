@@ -74,7 +74,6 @@ export const useAuthInternal = () => {
       loading: false,
       retryCountdown: null,
     }));
-    globalThis.window.location.href = '/login';
   }, []);
 
   const switchAccount = useCallback(async (aid: string, redirectTo: string = '/') => {
@@ -99,17 +98,20 @@ export const useAuthInternal = () => {
             loading: false,
             error: null,
           }));
-          
-          // Force a full page reload to clear all states and redirect
-          globalThis.window.location.href = redirectTo;
         } catch {
           // If handshake fails (bad network), we still "switch" but without a token
           // This prevents being locked out
           const user: User = { userId: identity.aid, username: identity.username };
           setSessionUser(user, ""); // Empty token for offline mode
           
-          // Force a full page reload to clear all states and redirect
-          globalThis.window.location.href = redirectTo;
+          setAuthState(prev => ({
+            ...prev,
+            user,
+            token: null,
+            isAuthenticated: true,
+            loading: false,
+            error: 'Handshake failed: Working in offline mode.',
+          }));
         }
       }
     } catch {
@@ -125,8 +127,7 @@ export const useAuthInternal = () => {
       // If we deleted the currently active account, we must logout
       const currentSession = getSessionUser();
       if (currentSession?.user?.userId === aid) {
-        clearSessionUser();
-        globalThis.window.location.href = '/login';
+        logout();
       } else {
         // Just refresh the identity list
         const allIdentities = await getAllIdentities();
@@ -259,10 +260,10 @@ export const useAuthInternal = () => {
   }, [needsPremiumRefresh, authState.isAuthenticated, authState.token, checkPremiumStatus]);
 
   useEffect(() => {
-    if (authState.isAuthenticated && authState.token && !authState.allowedFeatures) {
+    if (authState.isAuthenticated && authState.token && authState.allowedFeatures === undefined && !authState.loading) {
       checkPremiumStatus();
     }
-  }, [authState.isAuthenticated, authState.token, authState.allowedFeatures, checkPremiumStatus]);
+  }, [authState.isAuthenticated, authState.token, authState.allowedFeatures, authState.loading, checkPremiumStatus]);
 
   useEffect(() => {
     if (authState.retryCountdown === null) return;
@@ -303,9 +304,6 @@ export const useAuthInternal = () => {
         loading: false,
         error: null,
       }));
-      
-      // Force a full page reload to clear all states and redirect
-      globalThis.window.location.href = redirectTo;
     } catch (error: any) {
       setAuthState(prev => ({
         ...prev,

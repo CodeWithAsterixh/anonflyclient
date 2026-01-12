@@ -17,7 +17,7 @@ export function setSessionUser(user: User, token: string) {
     // Set cookie with 1 week expiration (7 days)
     Cookies.set(SESSION_KEY, JSON.stringify(payload), { 
       expires: 7, 
-      sameSite: 'strict', 
+      sameSite: 'lax', 
       secure: isSecure 
     });
   } catch {

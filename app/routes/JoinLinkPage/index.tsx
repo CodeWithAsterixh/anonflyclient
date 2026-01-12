@@ -63,7 +63,7 @@ const JoinLinkPage: React.FC = () => {
           cryptSessionStorage.setItem(`room_token_${chatroomId}`, token, chatroomId);
           
           // Navigate to the chatroom
-          navigate(`/${chatroomId}`, { replace: true });
+          navigate(`/${chatroomId}`);
         } else {
           setError(response.message || 'Failed to validate access link');
           setLoading(false);
@@ -79,7 +79,7 @@ const JoinLinkPage: React.FC = () => {
         validateToken();
       } else if (!user) {
         // If not logged in, redirect to login with this URL as redirect
-        navigate(`/login?redirect_to=${encodeURIComponent(globalThis.window.location.pathname)}`, { replace: true });
+        navigate(`/login?redirect_to=${encodeURIComponent(globalThis.window.location.pathname)}`);
       } else if (user && !authToken) {
         // We have a user but no token (handshake failed or in progress)
         setError('Connection issue: Please wait while we reconnect or try refreshing the page.');

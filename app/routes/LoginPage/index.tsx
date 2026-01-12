@@ -38,7 +38,7 @@ const LoginPage: React.FC = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (!isInitialCheck && isAuthenticated) {
-      navigate(redirectPath, { replace: true });
+      navigate(redirectPath);
     }
   }, [isAuthenticated, isInitialCheck, navigate, redirectPath]);
 

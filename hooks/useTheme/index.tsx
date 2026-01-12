@@ -7,37 +7,37 @@ export type ColorScheme = 'blue' | 'green' | 'purple' | 'red' | 'orange' | 'pink
 export const colorSchemes: Record<ColorScheme, { name: string; light: string; dark: string; primary: string }> = {
   purple: {
     name: 'Purple',
-    light: '#6B4EFF',
+    light: '#8B5CF6', // Vibrant Purple (Violet 500)
     dark: '#6B4EFF',
     primary: '#6B4EFF',
   },
   blue: {
     name: 'Blue',
-    light: '#3b82f6',
+    light: '#2563EB', // Vibrant Blue (Blue 600)
     dark: '#60a5fa',
     primary: '#3b82f6',
   },
   green: {
     name: 'Green',
-    light: '#22c55e',
+    light: '#16A34A', // Vibrant Green (Green 600)
     dark: '#4ade80',
     primary: '#22c55e',
   },
   red: {
     name: 'Red',
-    light: '#ef4444',
+    light: '#DC2626', // Vibrant Red (Red 600)
     dark: '#f87171',
     primary: '#ef4444',
   },
   orange: {
     name: 'Orange',
-    light: '#f97316',
+    light: '#EA580C', // Vibrant Orange (Orange 600)
     dark: '#fb923c',
     primary: '#f97316',
   },
   pink: {
     name: 'Pink',
-    light: '#ec4899',
+    light: '#DB2777', // Vibrant Pink (Pink 600)
     dark: '#f472b6',
     primary: '#ec4899',
   },

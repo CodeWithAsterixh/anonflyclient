@@ -119,7 +119,7 @@ const ChatLayout: React.FC = () => {
   );
 
   const showCLnonMobile = showChatList || !isMobile ? "block" : "hidden";
-  const showCLonMobile = showChatList || !isMobile ? "hidden" : "flex";
+  const showCLonMobile = showChatList || isMobile ? "hidden" : "flex";
 
   return (
     <ProtectedRoute>

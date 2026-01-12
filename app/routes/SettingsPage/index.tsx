@@ -91,7 +91,7 @@ const SettingsPage: React.FC = () => {
   const { isInstallable, isInstalled, installApp, appVersion, updateAvailable, updateApp
   } = usePWA();
 
-  const { theme, colorScheme, setTheme, setColorScheme } = useTheme();
+  const { theme, colorScheme, setColorScheme, toggleTheme } = useTheme();
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Not available';
@@ -384,30 +384,20 @@ const SettingsPage: React.FC = () => {
                 <h4 className="font-bold text-foreground mb-3 flex items-center gap-2">
                   Color Mode
                 </h4>
-                <div className="flex p-1 bg-white/5 rounded-2xl w-fit">
-                  <button
-            onClick={() => setTheme('light')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
-              theme === 'light' 
-                ? 'bg-foreground text-background shadow-sm' 
-                : 'text-muted hover:text-foreground'
-            }`}
-          >
-            <Sun size={18} />
-            <span className="font-bold text-sm">Light</span>
-          </button>
-                  <button
-                    onClick={() => setTheme('dark')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
-                      theme === 'dark' 
-                        ? 'bg-primary text-foreground shadow-sm' 
-                        : 'text-muted hover:text-foreground'
-                    }`}
-                  >
-                    <Moon size={18} />
-                    <span className="font-bold text-sm">Dark</span>
-                  </button>
-                </div>
+                <button
+                  onClick={toggleTheme}
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-2xl transition-all bg-white/5 hover:bg-white/10 text-foreground group"
+                >
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+                    {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
+                  </div>
+                  <div className="text-left">
+                    <p className="font-bold text-sm">
+                      {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                    </p>
+                    <p className="text-[10px] text-muted font-medium">Click to switch</p>
+                  </div>
+                </button>
               </div>
 
               {/* Color Schemes */}
@@ -507,46 +497,37 @@ const SettingsPage: React.FC = () => {
                   <div>
                     <h4 className="font-bold text-foreground">PWA Installation</h4>
                     <p className="text-sm text-muted mt-0.5">
-                      {isInstalled ? 'App is installed on your device' : 'Install for a better experience'}
+                      {isInstalled ? `App is installed (v${appVersion})` : 'Install for a better experience'}
                     </p>
                   </div>
                 </div>
-                {isInstallable && !isInstalled && (
-                  <button 
-                    onClick={installApp}
-                    className="flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
-                  >
-                    <Download size={18} />
-                    Install App
-                  </button>
-                )}
-                {isInstalled && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 text-green-500 font-bold rounded-xl text-sm">
-                    <CheckCircle2 size={16} />
-                    Installed
-                  </div>
-                )}
-              </div>
-              
-              <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-white/5 rounded-xl text-foreground shrink-0">
-                    <Info size={24} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-foreground">App Version</h4>
-                    <p className="text-sm text-muted mt-0.5">Current version: {appVersion}</p>
-                  </div>
+                <div className="flex flex-wrap gap-2">
+                  {!isInstalled && (
+                    <button 
+                      onClick={installApp}
+                      disabled={!isInstallable}
+                      className={`flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white font-bold rounded-xl transition-all shadow-lg shadow-primary/20 ${isInstallable ? 'hover:bg-primary/90' : 'opacity-50 cursor-not-allowed'}`}
+                    >
+                      <Download size={18} />
+                      Install App
+                    </button>
+                  )}
+                  {updateAvailable && (
+                    <button 
+                      onClick={updateApp}
+                      className="flex items-center justify-center gap-2 px-6 py-2.5 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
+                    >
+                      <RefreshCw size={18} />
+                      Update Now
+                    </button>
+                  )}
+                  {isInstalled && !updateAvailable && (
+                    <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 text-green-500 font-bold rounded-xl text-sm">
+                      <CheckCircle2 size={16} />
+                      Up to Date
+                    </div>
+                  )}
                 </div>
-                {updateAvailable && (
-                  <button 
-                    onClick={updateApp}
-                    className="flex items-center justify-center gap-2 px-6 py-2.5 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
-                  >
-                    <RefreshCw size={18} />
-                    Update Now
-                  </button>
-                )}
               </div>
             </div>
           </section>

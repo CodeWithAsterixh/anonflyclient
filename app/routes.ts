@@ -4,6 +4,8 @@ import Home from "./routes/Home";
 import LoginPage from "./routes/LoginPage";
 import JoinLinkPage from "./routes/JoinLinkPage";
 import SettingsPage from "./routes/SettingsPage";
+import PrivacyPage from "./routes/PrivacyPage";
+import TermsPage from "./routes/TermsPage";
 
 export default [
   {
@@ -30,6 +32,16 @@ export default [
         path: "/settings",
         file: "./routes/SettingsPage/index.tsx",
         Component: SettingsPage,
+      },
+      {
+        path: "/privacy",
+        file: "./routes/PrivacyPage/index.tsx",
+        Component: PrivacyPage,
+      },
+      {
+        path: "/terms",
+        file: "./routes/TermsPage/index.tsx",
+        Component: TermsPage,
       },
       {
         path: "/:chatroomId",

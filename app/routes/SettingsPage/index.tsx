@@ -23,7 +23,7 @@ import {
   Moon
 } from 'lucide-react';
 import React, { useContext } from 'react';
-import { useNavigate, type MetaFunction } from 'react-router';
+import { useNavigate, Link, type MetaFunction } from 'react-router';
 import AlertDialog from '../../../components/alertDialog';
 import Logo from '../../../components/logo';
 import Input from '../../../components/ui/input';
@@ -552,25 +552,21 @@ const SettingsPage: React.FC = () => {
                 </div>
               </div>
               <div className="flex gap-3 pt-4 border-t border-border">
-                <a 
-                  href="https://anonfly.com/privacy" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
+                <Link 
+                  to="/privacy" 
                   className="text-sm font-bold text-primary hover:underline flex items-center gap-1"
                 >
                   Privacy Policy
                   <ExternalLink size={12} />
-                </a>
+                </Link>
                 <span className="text-border">•</span>
-                <a 
-                  href="https://anonfly.com/terms" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
+                <Link 
+                  to="/terms" 
                   className="text-sm font-bold text-primary hover:underline flex items-center gap-1"
                 >
                   Terms of Service
                   <ExternalLink size={12} />
-                </a>
+                </Link>
               </div>
             </div>
           </section>

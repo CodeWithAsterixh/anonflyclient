@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Outlet, useParams, useLoaderData, useLocation } from "react-router";
 import ChatroomListPage from "../ChatroomListPage";
-import NoChatSelectedFallback from "../../../components/noChatSelectedFallback";
 import { requireAuth } from "../../middleware/auth";
-import ProtectedRoute from "../../../components/protectedRoute";
 import { useAuth, useChatroomList } from "../../../hooks";
 import { ChatLayoutContext } from "../../contexts/ChatLayoutContext";
 
@@ -13,8 +11,6 @@ export async function loader({ request }: { request: Request }) {
 }
 
 const ChatLayout: React.FC = () => {
-  const location = useLocation();
-  const isSettingsPage = location.pathname === "/settings";
   const { user: serverUser, token: serverToken } =
     useLoaderData<typeof loader>();
   const {
@@ -39,10 +35,16 @@ const ChatLayout: React.FC = () => {
   const user = clientUser || serverUser;
   const token = clientToken || serverToken;
 
+  const location = useLocation();
+  const isSettingsPage = location.pathname === "/settings";
+  const isPrivacyPage = location.pathname === "/privacy";
+  const isTermsPage = location.pathname === "/terms";
+  const isFullPage = isSettingsPage || isPrivacyPage || isTermsPage;
+
   const { chatroomId } = useParams<{ chatroomId: string }>();
   const [isMobile, setIsMobile] = useState(false);
   const [showChatList, setShowChatList] = useState(
-    !chatroomId && !isSettingsPage
+    !chatroomId && !isFullPage
   );
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -52,7 +54,7 @@ const ChatLayout: React.FC = () => {
     // Set initial mobile state after hydration
     const mobile = globalThis.window.innerWidth < 768;
     setIsMobile(mobile);
-    setShowChatList(!chatroomId && !isSettingsPage);
+    setShowChatList(!chatroomId && !isFullPage);
 
     // Handle globalThis.window resize to detect mobile/desktop
     const handleResize = () => {
@@ -66,14 +68,14 @@ const ChatLayout: React.FC = () => {
 
     globalThis.window.addEventListener("resize", handleResize);
     return () => globalThis.window.removeEventListener("resize", handleResize);
-  }, [chatroomId, isSettingsPage]);
+  }, [chatroomId, isFullPage]);
 
   // Auto-hide list on mobile when chatroom or settings is selected
   useEffect(() => {
-    if (isHydrated && isMobile && (chatroomId || isSettingsPage)) {
+    if (isHydrated && isMobile && (chatroomId || isFullPage)) {
       setShowChatList(false);
     }
-  }, [chatroomId, isSettingsPage, isMobile, isHydrated]);
+  }, [chatroomId, isFullPage, isMobile, isHydrated]);
 
   const handleSelectChatroom = (chatroomId: string) => {
     setShowChatList(false); // Hide list on mobile after selection
@@ -114,47 +116,27 @@ const ChatLayout: React.FC = () => {
       logout,
       refreshUserInfo,
       isMobile,
-      handleBackFromChat,
     ]
   );
 
-  const showLeftColumn = !isMobile || showChatList ? "block" : "hidden";
-  const showRightColumn = !isMobile || !showChatList ? "flex" : "hidden";
-
   return (
-    <ProtectedRoute>
-      <ChatLayoutContext.Provider value={contextValue}>
-        <div className="flex h-dvh overflow-hidden bg-background text-foreground transition-colors duration-300">
-          {/* Left Column: Chatroom List 
-              - Desktop: Always visible (md:block)
-              - Mobile: Shows based on JavaScript state or Tailwind hidden state
-          */}
-          <div
-            className={`${
-              isHydrated ? showLeftColumn : "block md:block"
-            } w-full md:w-80 lg:w-1/4 border-r h-full border-border overflow-hidden flex flex-col transition-all duration-300 ease-in-out`}
-          >
-            <ChatroomListPage onChatroomSelect={handleSelectChatroom} />
-          </div>
-
-          {/* Right Column: Chatroom View or Fallback 
-              - Desktop: Always visible (md:flex)
-              - Mobile: Shows based on JavaScript state or Tailwind hidden state
-          */}
-          <div
-            className={`${
-              isHydrated ? showRightColumn : "hidden md:flex"
-            } flex-1 flex-col overflow-hidden relative isolate w-full md:w-auto bg-background transition-colors duration-300`}
-          >
-            {chatroomId || isSettingsPage ? (
-              <Outlet context={{ onBack: handleBackFromChat, isMobile }} />
-            ) : (
-              <NoChatSelectedFallback />
-            )}
-          </div>
+    <ChatLayoutContext.Provider value={contextValue}>
+      <div className="flex h-screen bg-background overflow-hidden">
+        {/* Sidebar - Hidden on mobile when chat is active */}
+        <div 
+          className={`${
+            showChatList ? 'flex' : 'hidden'
+          } md:flex w-full md:w-80 lg:w-96 border-r border-border flex-col shrink-0`}
+        >
+          <ChatroomListPage onChatroomSelect={handleSelectChatroom} />
         </div>
-      </ChatLayoutContext.Provider>
-    </ProtectedRoute>
+
+        {/* Main Content */}
+        <div className={`flex-1 flex flex-col min-w-0 ${showChatList ? 'hidden md:flex' : 'flex'}`}>
+          <Outlet />
+        </div>
+      </div>
+    </ChatLayoutContext.Provider>
   );
 };
 

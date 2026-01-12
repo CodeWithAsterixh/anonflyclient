@@ -133,7 +133,7 @@ const SettingsPage: React.FC = () => {
                   }
                   navigate('/');
                 }}
-                className="p-2 hover:bg-white/5 rounded-full transition-colors text-muted"
+                className="p-2 hover:bg-muted-bg rounded-full transition-colors text-muted"
               >
                 <ArrowLeft size={20} />
               </button>
@@ -189,7 +189,7 @@ const SettingsPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-border">
-              <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl min-w-0">
+              <div className="flex items-center gap-3 p-4 bg-muted-bg rounded-2xl min-w-0">
                 <Calendar className="text-primary shrink-0" size={20} />
                 <div className="min-w-0">
                   <p className="text-xs text-muted font-medium uppercase tracking-wider truncate whitespace-nowrap">Account Created</p>
@@ -198,7 +198,7 @@ const SettingsPage: React.FC = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl min-w-0">
+              <div className="flex items-center gap-3 p-4 bg-muted-bg rounded-2xl min-w-0">
                 <Activity className="text-primary shrink-0" size={20} />
                 <div className="min-w-0">
                   <p className="text-xs text-muted font-medium uppercase tracking-wider truncate whitespace-nowrap">Online Status</p>
@@ -233,7 +233,7 @@ const SettingsPage: React.FC = () => {
                   className={`p-4 flex items-center justify-between gap-3 group transition-colors ${
                     id.aid === user?.userId 
                       ? 'bg-primary/10' 
-                      : 'hover:bg-white/5'
+                      : 'hover:bg-muted-bg'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -273,7 +273,7 @@ const SettingsPage: React.FC = () => {
                     )}
                     <button 
                       onClick={() => handleDeleteAccount(id.aid, id.username, id.aid === user?.userId && myRooms.length > 0 && (
-                        <div className="space-y-4 mt-4 p-4 bg-white/5 rounded-2xl border border-border">
+                        <div className="space-y-4 mt-4 p-4 bg-muted-bg rounded-2xl border border-border">
                           <p className="text-sm font-bold text-foreground mb-3">
                             Manage your {myRooms.length} chatroom{myRooms.length > 1 ? 's' : ''}:
                           </p>
@@ -341,7 +341,7 @@ const SettingsPage: React.FC = () => {
                       Your unique cryptographic keys are stored locally in your browser's IndexedDB.
                     </p>
                     <div className="space-y-3">
-                      <div className="p-3 bg-white/5 rounded-xl min-w-0">
+                      <div className="p-3 bg-muted-bg rounded-xl min-w-0">
                         <HideableField 
                           label="Public Identity Key (Ed25519)" 
                           value={currentIdentity?.identityKeyPair.publicKey || ''} 
@@ -350,7 +350,7 @@ const SettingsPage: React.FC = () => {
                           showLabelOnHidden={true}
                         />
                       </div>
-                      <div className="p-3 bg-white/5 rounded-xl min-w-0">
+                      <div className="p-3 bg-muted-bg rounded-xl min-w-0">
                         <HideableField 
                           label="Public Exchange Key (X25519)" 
                           value={currentIdentity?.exchangeKeyPair.publicKey || ''} 
@@ -386,7 +386,7 @@ const SettingsPage: React.FC = () => {
                 </h4>
                 <button
                   onClick={toggleTheme}
-                  className="flex items-center gap-3 px-4 py-2.5 rounded-2xl transition-all bg-white/5 hover:bg-white/10 text-foreground group"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-2xl transition-all bg-muted-bg hover:bg-muted-bg/80 text-foreground group"
                 >
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-primary/10 text-primary group-hover:scale-110 transition-transform">
                     {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
@@ -447,7 +447,7 @@ const SettingsPage: React.FC = () => {
                   {myRooms.map((room) => (
                     <div 
                       key={room.id} 
-                      className="p-4 flex items-center justify-between gap-4 hover:bg-white/5 transition-colors group"
+                      className="p-4 flex items-center justify-between gap-4 hover:bg-muted-bg transition-colors group"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -472,7 +472,7 @@ const SettingsPage: React.FC = () => {
                 </div>
               ) : (
                 <div className="p-8 text-center">
-                  <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-muted mx-auto mb-4">
+                  <div className="w-16 h-16 bg-muted-bg rounded-2xl flex items-center justify-center text-muted mx-auto mb-4">
                     <MessageSquare size={32} />
                   </div>
                   <p className="text-foreground font-bold">No rooms yet</p>
@@ -491,7 +491,7 @@ const SettingsPage: React.FC = () => {
             <div className="bg-background rounded-3xl border border-border overflow-hidden divide-y divide-border">
               <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-white/5 rounded-xl text-foreground shrink-0">
+                  <div className="p-3 bg-muted-bg rounded-xl text-foreground shrink-0">
                     <Smartphone size={24} />
                   </div>
                   <div>
@@ -540,7 +540,7 @@ const SettingsPage: React.FC = () => {
             </h3>
             <div className="bg-background rounded-3xl border border-border p-4 sm:p-6 space-y-4">
               <div className="flex items-start gap-4">
-                <div className="p-3 bg-white/5 rounded-xl text-primary shrink-0">
+                <div className="p-3 bg-muted-bg rounded-xl text-primary shrink-0">
                   <Globe size={24} />
                 </div>
                 <div>

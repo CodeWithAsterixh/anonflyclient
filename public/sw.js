@@ -48,6 +48,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Handle navigation requests
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).then((response) => {
+        // If it's a redirect, we need to handle it properly for navigation
+        if (response.type === 'opaqueredirect' || (response.status >= 300 && response.status < 400)) {
+          // Returning the redirect response directly might cause "redirect mode not follow"
+          // We can try to fetch the destination if we have it, or just let the browser handle it
+          // by not calling respondWith, but since we already did, we return it.
+          // However, a better way is to fetch with follow.
+          return fetch(event.request.url); 
+        }
+        return response;
+      }).catch(() => {
+        return caches.match('/');
+      })
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -63,11 +83,6 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return response;
-      }).catch(() => {
-        // Offline fallback for navigation requests
-        if (event.request.mode === 'navigate') {
-          return caches.match('/');
-        }
       });
     })
   );

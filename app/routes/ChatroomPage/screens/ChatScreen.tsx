@@ -197,6 +197,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
                     : "text-muted hover:bg-white/5"
                 }`}
                 title="Room Options"
+                aria-label="Room options"
               >
                 <Settings size={20} />
               </button>
@@ -236,6 +237,10 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
           ref={messagesContainerRef}
           onScroll={handleScroll}
           className="flex-1 overflow-y-auto p-4 space-y-4 relative z-10 scroll-smooth"
+          role="log"
+          aria-live="polite"
+          aria-atomic="false"
+          aria-label="Message list"
         >
           {hasMore && (
             <div className="flex justify-center py-2">

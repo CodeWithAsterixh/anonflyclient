@@ -1,5 +1,5 @@
-import React from "react";
-import { ChevronDown, Lock } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { ChevronDown, Lock, RefreshCw } from "lucide-react";
 import Logo from "../../../../components/logo";
 import type { ChatroomDetail } from "../../../../lib/types/chat";
 
@@ -16,6 +16,19 @@ const SecuringRoomScreen: React.FC<SecuringRoomScreenProps> = ({
   onNavigateHome,
   displayDetail,
 }) => {
+  const [timeoutReached, setTimeoutReached] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setTimeoutReached(true);
+    }, 15000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleRetry = () => {
+    window.location.reload();
+  };
+
   return (
     <div className="flex flex-col h-dvh bg-transparent relative overflow-hidden transition-colors duration-300">
       <header className="bg-background/80 backdrop-blur-md border-b border-border shadow-sm flex flex-col gap-1 justify-between items-center z-10">
@@ -28,6 +41,7 @@ const SecuringRoomScreen: React.FC<SecuringRoomScreenProps> = ({
                 onNavigateHome();
               }}
               className="p-2 hover:bg-white/5 rounded-full transition-colors group"
+              aria-label="Back to home"
             >
               <ChevronDown className="w-5 h-5 rotate-90 text-muted group-hover:text-foreground" />
             </button>
@@ -35,7 +49,7 @@ const SecuringRoomScreen: React.FC<SecuringRoomScreenProps> = ({
               <h1 className="font-bold text-foreground leading-tight">
                 {displayDetail?.roomname || "Loading..."}
               </h1>
-              <p className="text-xs text-muted">
+              <p className="text-xs text-muted" aria-live="polite">
                 {displayDetail?.participantCount === undefined
                   ? "Securing room..."
                   : `${displayDetail.participantCount} participants • Securing room...`}
@@ -51,10 +65,22 @@ const SecuringRoomScreen: React.FC<SecuringRoomScreenProps> = ({
         <h2 className="text-xl font-bold text-foreground mb-2">
           Establishing Secure Connection
         </h2>
-        <p className="text-muted max-w-xs">
-          Waiting for other participants to securely share the room key.
-          This ensures your messages remain private.
+        <p className="text-muted max-w-xs mb-6" aria-live="polite">
+          {timeoutReached 
+            ? "Connection is taking longer than expected." 
+            : "Waiting for other participants to securely share the room key. This ensures your messages remain private."}
         </p>
+        
+        {timeoutReached && (
+          <button 
+            onClick={handleRetry}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors"
+            aria-label="Retry connection"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Retry Connection
+          </button>
+        )}
       </div>
     </div>
   );

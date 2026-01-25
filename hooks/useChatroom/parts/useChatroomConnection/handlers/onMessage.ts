@@ -34,7 +34,11 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
     joiningRef.current = null;
     setIsJoined(true);
     setCurrentChatroomId(message.chatroomId);
-    setMessages([]);
+    
+    // Initialize messages from cachedMessages
+    const initialMessages = message.cachedMessages || [];
+    setMessages(initialMessages);
+
     setChatroomDetail((prev: any) => ({
       ...prev,
       hostAid: message.hostAid,
@@ -56,13 +60,13 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
       await saveRoomKey(message.chatroomId, message.encryptedRoomKey);
       roomKeyRef.current = key;
       setHasRoomKey(true);
-      const updated = await decryptStoredMessages(key, messagesRef.current);
+      const updated = await decryptStoredMessages(key, initialMessages);
       setMessages(updated);
     } else if (existingKeyBase64) {
       const key = await importRoomKey(existingKeyBase64);
       roomKeyRef.current = key;
       setHasRoomKey(true);
-      const updated = await decryptStoredMessages(key, messagesRef.current);
+      const updated = await decryptStoredMessages(key, initialMessages);
       setMessages(updated);
       ws.current?.send(JSON.stringify({
         type: 'saveRoomKey',

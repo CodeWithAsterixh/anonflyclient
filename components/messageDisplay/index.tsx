@@ -219,6 +219,8 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        role="article"
+        aria-label={`Message from ${isCurrentUser ? "me" : message.senderUsername} at ${new Date(message.timestamp).toLocaleTimeString()}`}
       >
         <div
           className={`absolute top-1/2 -translate-y-1/2 transition-opacity duration-200 ${

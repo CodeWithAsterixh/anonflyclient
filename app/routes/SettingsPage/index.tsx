@@ -458,6 +458,7 @@ const SettingsPage: React.FC = () => {
                     const scheme = colorSchemes[schemeKey];
                     const isActive = colorScheme === schemeKey;
                     const displayColor = theme === 'dark' ? scheme.dark : scheme.light;
+                    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', displayColor)
                     
                     return (
                       <button

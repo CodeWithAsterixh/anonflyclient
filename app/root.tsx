@@ -52,13 +52,14 @@ export const meta: Route.MetaFunction = () => [
 
   // Twitter
   { name: "twitter:card", content: "summary_large_image" },
+
   { name: "twitter:url", content: BASE_URL },
   { name: "twitter:title", content: "Anonfly | Secure, Anonymous & Free Messaging" },
   { name: "twitter:description", content: "Join anonymous chatrooms instantly. No tracking, no sign-ups. 100% secure and free." },
   { name: "twitter:image", content: `${BASE_URL}/logo.svg` },
   
   // Theme Color for mobile browsers
-  { name: "theme-color", content: "#0B0B0F" },
+  { name: "theme-color", content: "#2563eb" },
 ];
 
 export const links: Route.LinksFunction = () => [

@@ -26,7 +26,7 @@ const SecuringRoomScreen: React.FC<SecuringRoomScreenProps> = ({
   }, []);
 
   const handleRetry = () => {
-    window.location.reload();
+    globalThis.location.reload();
   };
 
   return (

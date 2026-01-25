@@ -1,4 +1,7 @@
 {
+  "id": "/",
+  "scope": "/",
+  "lang": "en",
   "name": "Anonfly",
   "short_name": "Anonfly",
   "description": "Secure, Anonymous & Free Messaging Platform",
@@ -6,6 +9,7 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
+  "categories": ["social", "communication", "security"],
   "icons": [
     {
       "src": "/logo.svg",

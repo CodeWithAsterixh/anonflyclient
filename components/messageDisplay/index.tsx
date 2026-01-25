@@ -210,7 +210,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
 
   return (
     <>
-      <div
+      <article
         id={`message-${message.id}`}
         data-message-id={message.id}
         className={`flex items-end gap-2 mb-4 relative transition-all duration-500 ${
@@ -219,7 +219,6 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        role="article"
         aria-label={`Message from ${isCurrentUser ? "me" : message.senderUsername} at ${new Date(message.timestamp).toLocaleTimeString()}`}
       >
         <div
@@ -240,7 +239,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
           onDoubleClick={handleDoubleClick}
           bubbleRef={bubbleRef}
         />
-      </div>
+      </article>
       {showReactions &&
         portalRoot &&
         createPortal(

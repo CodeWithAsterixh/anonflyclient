@@ -26,20 +26,17 @@ export const useChatroomSSE = (currentChatroomId: string | null, token: string |
       return;
     }
     
-    // console.log(`[useChatroom] [SSE] Connecting to: ${sseUrl.substring(0, 50)}...`);
     activeSSERef.current = sseUrl;
     
     const eventSource = new EventSource(sseUrl);
 
     eventSource.onopen = () => {
-      // console.log(`[useChatroom] [SSE] Connection opened for room: ${currentChatroomId}`);
     };
 
     eventSource.addEventListener("removed", (event: any) => {
-      // console.log("[useChatroom] [SSE] User removed event received", event.data);
       const reason = event.data || 'removed';
-      isRemovedRef.current = reason as any;
-      setIsRemoved(reason as any);
+      isRemovedRef.current = reason;
+      setIsRemoved(reason);
       eventSource.close();
     });
 
@@ -47,7 +44,7 @@ export const useChatroomSSE = (currentChatroomId: string | null, token: string |
       try {
         const data = JSON.parse(event.data);
         setChatroomDetail((prev) => ({
-          ...(prev || {}),
+          ...prev,
           ...data,
         }));
       } catch (err) {
@@ -62,7 +59,6 @@ export const useChatroomSSE = (currentChatroomId: string | null, token: string |
     };
 
     return () => {
-      // console.log(`[useChatroom] [SSE] Cleaning up connection for room: ${currentChatroomId}`);
       if (activeSSERef.current === sseUrl) {
         activeSSERef.current = null;
       }

@@ -8,6 +8,7 @@ import { useChatroomEncryption } from "./parts/useChatroomEncryption";
 import { useChatroomMessages } from "./parts/useChatroomMessages";
 import { useChatroomParticipants } from "./parts/useChatroomParticipants";
 import { useChatroomSSE } from "./parts/useChatroomSSE";
+import { useChatroomRotation } from "./parts/useChatroomRotation";
 import type { UseChatroomReturn } from "./types";
 
 /**
@@ -22,6 +23,9 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
   const [currentChatroomId, setCurrentChatroomId] = useState<string | null>(initialChatroomId || null);
 
   // Initialize room ID if provided
+  // Rotation logic
+
+
   useEffect(() => {
     if (initialChatroomId && initialChatroomId !== currentChatroomId) {
       setCurrentChatroomId(initialChatroomId);
@@ -94,6 +98,15 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     setError,
     setChatroomDetail,
   });
+
+  // Rotation logic
+  const { rotateKey } = useChatroomRotation(
+    ws,
+    participantsRef,
+    currentChatroomId,
+    setHasRoomKey,
+    roomKeyRef
+  );
 
   useEffect(() => {
     if (!deferConnection) {
@@ -219,6 +232,7 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     sendReaction,
     joinChatroom,
     leaveChatroom,
+    rotateKey,
     reconnect,
     clearError,
     isConnected,

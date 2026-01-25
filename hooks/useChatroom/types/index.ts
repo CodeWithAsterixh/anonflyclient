@@ -19,6 +19,7 @@ export interface UseChatroomReturn {
   isRemoved: boolean | 'removed' | 'banned';
   setIsRemoved: (val: boolean | 'removed' | 'banned') => void;
   hasRoomKey: boolean;
+  rotateKey: () => Promise<void>;
   error: string | null;
   currentChatroomId: string | null;
   ws: React.RefObject<WebSocket | null>;

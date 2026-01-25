@@ -64,6 +64,7 @@ export const meta: Route.MetaFunction = () => [
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   { rel: "icon", href: "/logo.svg" },
+  { rel: "apple-touch-icon", href: "/logo.svg" },
   { rel: "manifest", href: "/manifest.json" },
   {
     rel: "preconnect",

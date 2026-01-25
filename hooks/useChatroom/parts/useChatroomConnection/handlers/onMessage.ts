@@ -306,6 +306,41 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
     }));
   };
 
+  const handleRotateKey = async (message: any) => {
+    const identityForShare = await getIdentity();
+    if (identityForShare) {
+      const host = participantsRef.current.get(message.hostAid);
+      if (host?.exchangePublicKey) {
+        const sharedSecret = await deriveSharedSecret(
+          identityForShare.exchangeKeyPair.privateKey,
+          host.exchangePublicKey
+        );
+        
+        try {
+          const { ciphertext, iv } = message.encryptedKey;
+          const decryptedKeyBase64 = await decryptMessage(ciphertext, iv, sharedSecret);
+          const key = await importRoomKey(decryptedKeyBase64);
+          
+          await saveRoomKey(message.chatroomId, decryptedKeyBase64);
+          roomKeyRef.current = key;
+          setHasRoomKey(true);
+          
+          setMessages((prev) => [...prev, {
+            id: `system-rotate-${Date.now()}`,
+            senderAid: 'system',
+            senderUsername: 'System',
+            content: 'Room key rotated by host.',
+            timestamp: new Date().toISOString(),
+            type: 'system',
+            isEncrypted: false,
+          }]);
+        } catch (err) {
+          console.error("Failed to process key rotation:", err);
+        }
+      }
+    }
+  };
+
   return async (event: MessageEvent) => {
     try {
       const message = JSON.parse(event.data);
@@ -335,6 +370,10 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
 
         case "roomKeyShare":
           await handleRoomKeyShare(message);
+          break;
+
+        case "rotateKey":
+          await handleRotateKey(message);
           break;
 
         case "masterKeyUpdate":

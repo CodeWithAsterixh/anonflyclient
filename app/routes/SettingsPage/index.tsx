@@ -31,6 +31,7 @@ import { usePWA, useSettings, useTheme, colorSchemes, type ColorScheme } from '.
 import { ChatLayoutContext } from '../../contexts/ChatLayoutContext';
 import { requireAuth } from '../../middleware/auth';
 import HideableField from './components/HideableField';
+import { getAllIdentities } from '../../../lib/helpers/identityManager';
 
 export const meta: MetaFunction = () => {
   return [
@@ -117,6 +118,36 @@ const SettingsPage: React.FC = () => {
       console.error("Failed to refresh user info:", error);
     } finally {
       setIsRefreshing(false);
+    }
+  };
+
+  const handleBackupIdentity = async () => {
+    try {
+      const password = prompt("Enter a password to encrypt your identity backup (Required):");
+      if (!password) return;
+
+      const allIds = await getAllIdentities();
+      const backupData = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        identities: allIds
+      };
+      
+      const jsonString = JSON.stringify(backupData);
+      const encrypted = CryptoJS.AES.encrypt(jsonString, password).toString();
+      
+      const blob = new Blob([encrypted], { type: 'application/text' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `anonfly-backup-${new Date().toISOString().split('T')[0]}.anonfly`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Backup failed:", error);
+      alert("Backup failed. Please try again.");
     }
   };
 
@@ -340,6 +371,15 @@ const SettingsPage: React.FC = () => {
                     <p className="text-sm text-muted mt-1 mb-4">
                       Your unique cryptographic keys are stored locally in your browser's IndexedDB.
                     </p>
+                    
+                    {/* Data Loss Warning */}
+                    <div className="mb-4 p-3 bg-orange-500/10 border border-orange-500/20 rounded-xl flex gap-3">
+                      <Info className="text-orange-500 shrink-0" size={18} />
+                      <div className="text-xs text-orange-600 dark:text-orange-400">
+                        <span className="font-bold block mb-1">Warning: Data Permanence</span> If you clear your browser cache/history, these keys will be lost forever. We cannot recover them. Please backup regularly.
+                      </div>
+                    </div>
+
                     <div className="space-y-3">
                       <div className="p-3 bg-muted-bg rounded-xl min-w-0">
                         <HideableField 
@@ -359,6 +399,14 @@ const SettingsPage: React.FC = () => {
                           showLabelOnHidden={true}
                         />
                       </div>
+                      
+                      <button 
+          onClick={handleBackupIdentity}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary/10 text-primary font-bold rounded-xl hover:bg-primary/20 transition-colors mt-2"
+        >
+          <Download size={18} />
+          Export Encrypted Identity Backup
+        </button>
                     </div>
                   </div>
                 </div>

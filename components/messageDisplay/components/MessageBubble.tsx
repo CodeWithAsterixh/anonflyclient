@@ -1,7 +1,7 @@
 import React from "react";
 import { ShieldCheck } from "lucide-react";
 import { type Message } from "../../../lib/types/chat";
-import ReactionList from "./ReactionList";
+import ReactionList, { type Reaction } from "./ReactionList";
 import { formatMessage } from "../../../lib/helpers/markdown";
 
 interface MessageBubbleProps {
@@ -10,6 +10,7 @@ interface MessageBubbleProps {
   isReplyToMe: boolean;
   scrollToRepliedMessage: (id: string) => void;
   isFocused?: boolean;
+  onShowReactionDetails?: (reactions: Reaction[], messageId: string) => void;
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
@@ -18,6 +19,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   isReplyToMe,
   scrollToRepliedMessage,
   isFocused,
+  onShowReactionDetails,
 }) => {
   return (
     <>
@@ -66,7 +68,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       </div>
 
       {/* Reactions List */}
-      <ReactionList reactions={message.reactions || []} />
+      <ReactionList 
+        reactions={message.reactions || []} 
+        onShowDetails={onShowReactionDetails}
+        messageId={message.id || ""}
+      />
     </>
   );
 };

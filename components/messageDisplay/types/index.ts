@@ -1,5 +1,6 @@
 import { type Emoji } from "../../../lib/assets/emojis";
 import { type Message } from "../../../lib/types/chat";
+import { type Reaction } from "../components/ReactionList";
 
 export interface MessageDisplayProps {
   message: Message;
@@ -12,5 +13,6 @@ export interface MessageDisplayProps {
   onReact?: (messageId: string, emoji: Emoji) => void;
   onEdit?: (messageId: string, content: string) => void;
   onDelete?: (messageId: string) => void;
+  onShowReactionDetails?: (reactions: Reaction[], messageId: string) => void;
   portalRoot?: HTMLElement | null;
 }

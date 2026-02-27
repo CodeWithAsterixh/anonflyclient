@@ -22,6 +22,7 @@ interface MessageFullViewerProps {
   onEdit: () => void;
   onDelete: () => void;
   isEditable: boolean;
+  userAid?: string | null;
 }
 
 export const MessageFullViewer: React.FC<MessageFullViewerProps> = ({
@@ -40,7 +41,15 @@ export const MessageFullViewer: React.FC<MessageFullViewerProps> = ({
   onEdit,
   onDelete,
   isEditable,
+  userAid,
 }) => {
+  const userReactions = React.useMemo(() => {
+    if (!userAid || !message.reactions) return [];
+    return message.reactions
+      .filter((r) => r.userAid === userAid)
+      .map((r) => (r as any).emojiId);
+  }, [message.reactions, userAid]);
+
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -93,9 +102,10 @@ export const MessageFullViewer: React.FC<MessageFullViewerProps> = ({
             onReact={onReact}
             onShowAll={onShowAllEmojis}
             showAllEmojis={showAllEmojis}
+            userReactions={userReactions}
           />
 
-          {showAllEmojis && <EmojiGrid onReact={onReact} />}
+          {showAllEmojis && <EmojiGrid onReact={onReact} userReactions={userReactions} />}
 
           <ActionMenu
             onReply={onReply}

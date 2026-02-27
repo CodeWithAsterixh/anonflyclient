@@ -1,6 +1,7 @@
 import React, { useRef, useState, useMemo, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import MessageDisplay from "../../../../../components/messageDisplay";
+import { type Reaction } from "../../../../../components/messageDisplay/components/ReactionList";
 import {
   TypingIndicator,
   type TypingUser,
@@ -16,6 +17,7 @@ interface ChatMessageListProps {
   onSetEditingMessage: (edit: EditingMessage | null) => void;
   onDeleteMessage: (id: string) => void;
   onSendReaction: (id: string, emoji: any) => void;
+  onShowReactionDetails?: (reactions: Reaction[], messageId: string) => void;
   messagesContainerRef: React.RefObject<HTMLDivElement | null>;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   messagePortalRootRef: React.RefObject<HTMLDivElement | null>;
@@ -29,6 +31,7 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
   onSetEditingMessage,
   onDeleteMessage,
   onSendReaction,
+  onShowReactionDetails,
   messagesContainerRef,
   messagesEndRef,
   messagePortalRootRef,
@@ -132,6 +135,7 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
           }
           onDelete={onDeleteMessage}
           onReact={onSendReaction}
+          onShowReactionDetails={(reactions) => onShowReactionDetails?.(reactions, msg.id || "")}
           portalRoot={messagePortalRootRef.current}
         />
       ))}

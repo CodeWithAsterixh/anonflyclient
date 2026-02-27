@@ -1,15 +1,20 @@
 import React from 'react';
 
-interface Reaction {
+export interface Reaction {
   emojiValue: string;
   username: string;
+  userAid: string;
+  emojiId: string;
+  emojiType: string;
 }
 
-interface ReactionListProps {
+export interface ReactionListProps {
   reactions: Reaction[];
+  onShowDetails?: (reactions: Reaction[], messageId: string) => void;
+  messageId: string;
 }
 
-const ReactionList: React.FC<ReactionListProps> = ({ reactions }) => {
+const ReactionList: React.FC<ReactionListProps> = ({ reactions, onShowDetails, messageId }) => {
   if (!reactions || reactions.length === 0) return null;
 
   const groupedReactions = reactions.reduce((acc: { emoji: string; count: number; users: string[] }[], curr) => {
@@ -27,18 +32,30 @@ const ReactionList: React.FC<ReactionListProps> = ({ reactions }) => {
     return acc;
   }, []);
 
+  // Display max 3 emojis individually, then the total count
+  const displayEmojis = groupedReactions.slice(0, 3).map(r => r.emoji);
+  const totalCount = reactions.length;
+
   return (
-    <div className="absolute -bottom-3 flex flex-wrap gap-1 z-20 px-1">
-      {groupedReactions.map((reaction, i) => (
-        <div
-          key={i+1}
-          title={reaction.users.join(", ")}
-          className="bg-background/90 backdrop-blur-sm border border-border rounded-full px-1.5 py-0.5 shadow-sm text-[10px] flex items-center gap-1 hover:scale-110 transition-transform cursor-default"
-        >
-          <span>{reaction.emoji}</span>
-          <span className="font-bold text-muted">{reaction.count}</span>
+    <div 
+      className="absolute -bottom-3 flex items-center z-20"
+      onClick={(e) => {
+        e.stopPropagation();
+        if (onShowDetails) onShowDetails(reactions, messageId);
+      }}
+    >
+      <div className="bg-background/90 backdrop-blur-sm border border-border rounded-full px-2 py-0.5 shadow-sm text-[11px] flex items-center gap-1.5 hover:scale-105 transition-transform cursor-pointer active:scale-95 group">
+        <div className="flex -space-x-1">
+          {displayEmojis.map((emoji, i) => (
+            <span key={i} className="relative z-1 group-hover:scale-110 transition-transform">
+              {emoji}
+            </span>
+          ))}
         </div>
-      ))}
+        <span className="font-bold text-muted/80 text-[10px] ml-0.5">
+          {totalCount > 0 ? totalCount : ""}
+        </span>
+      </div>
     </div>
   );
 };

@@ -35,8 +35,12 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
     setIsJoined(true);
     setCurrentChatroomId(message.chatroomId);
     
-    // Initialize messages from cachedMessages
-    const initialMessages = message.cachedMessages || [];
+    // Initialize messages from cachedMessages, ensuring they have an 'id' and correct 'type'
+    const initialMessages = (message.cachedMessages || []).map((msg: any) => ({
+      ...msg,
+      id: msg.id || msg.messageId,
+      type: msg.type === "chatMessage" ? "message" : msg.type,
+    }));
     setMessages(initialMessages);
 
     setChatroomDetail((prev: any) => ({
@@ -142,21 +146,24 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
 
   const handleChatMessage = async (message: any) => {
     const messageId = message.messageId || `msg-${message.timestamp || Date.now()}-${message.senderAid}`;
-    if (messagesRef.current.some((m) => m.id === messageId)) return;
+    // Use both id and messageId for checking duplicates
+    if (messagesRef.current.some((m) => (m.id || (m as any).messageId) === messageId)) return;
     
     let chatContent = message.content;
     let isMsgEncrypted = false;
-    try {
-      const blob = typeof chatContent === 'string' ? JSON.parse(chatContent) : chatContent;
-      if (blob?.ciphertext && blob?.iv) {
-        if (roomKeyRef.current) {
+    
+    // Attempt decryption if room key is available
+    if (typeof chatContent === 'string' && roomKeyRef.current) {
+      try {
+        const blob = JSON.parse(chatContent);
+        if (blob?.ciphertext && blob?.iv) {
           chatContent = await decryptMessage(blob.ciphertext, blob.iv, roomKeyRef.current);
           isMsgEncrypted = true;
-        } else {
-          chatContent = JSON.stringify(blob);
         }
+      } catch (err) {
+        // Not a JSON string or decryption failed - content remains as is
       }
-    } catch {}
+    }
     
     setMessages((prev) => [...prev, {
       id: messageId,

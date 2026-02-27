@@ -2,6 +2,7 @@ import React from "react";
 import { type Message } from "../../../lib/types/chat";
 import { MessageBubble } from "./MessageBubble";
 import Avatar from "../../ui/avatar";
+import { type Reaction } from "./ReactionList";
 
 interface MessageRowProps {
   message: Message;
@@ -15,6 +16,7 @@ interface MessageRowProps {
   onDoubleClick?: () => void;
   bubbleRef?: React.RefObject<HTMLDivElement | null>;
   isPreview?: boolean;
+  onShowReactionDetails?: (reactions: Reaction[], messageId: string) => void;
 }
 
 export const MessageRow: React.FC<MessageRowProps> = ({
@@ -29,6 +31,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
   onDoubleClick,
   bubbleRef,
   isPreview = false,
+  onShowReactionDetails,
 }) => {
   const getBubbleTransform = () => {
     if (isPreview || showReactions) return "none";
@@ -98,6 +101,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
           isReplyToMe={isReplyToMe}
           scrollToRepliedMessage={scrollToRepliedMessage}
           isFocused={isFocused}
+          onShowReactionDetails={onShowReactionDetails}
         />
       </button>
     </div>

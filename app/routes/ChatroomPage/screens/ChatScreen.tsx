@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import EditChatroomModal from "../../../../components/editChatroomModal";
 import MessageInput from "../../../../components/messageInput";
@@ -12,6 +12,8 @@ import type { ReplyingTo, EditingMessage } from "../types";
 import { ChatHeader } from "./parts/ChatHeader";
 import { ChatMessageList } from "./parts/ChatMessageList";
 import { ChatSidebarArea } from "./parts/ChatSidebarArea";
+import { ReactionDetailsDrawer } from "../../../../components/messageDisplay/components/ReactionDetailsDrawer";
+import { type Reaction } from "../../../../components/messageDisplay/components/ReactionList";
 
 interface ChatScreenProps {
   isMobile: boolean;
@@ -88,6 +90,19 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
 }) => {
   const messagePortalRootRef = useRef<HTMLDivElement>(null);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [isReactionDrawerOpen, setIsReactionDrawerOpen] = useState(false);
+  const [reactionDrawerMessageId, setReactionDrawerMessageId] = useState<string | null>(null);
+
+  const handleShowReactionDetails = (reactions: Reaction[], messageId?: string) => {
+    setReactionDrawerMessageId(messageId || null);
+    setIsReactionDrawerOpen(true);
+  };
+
+  const currentReactions = useMemo(() => {
+    if (!reactionDrawerMessageId) return [];
+    const msg = messages.find(m => m.id === reactionDrawerMessageId);
+    return msg?.reactions || [];
+  }, [messages, reactionDrawerMessageId]);
 
   return (
     <div className="isolate flex h-dvh bg-transparent relative overflow-hidden transition-colors duration-300 w-full">
@@ -119,6 +134,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
           onSetEditingMessage={onSetEditingMessage}
           onDeleteMessage={onDeleteMessage}
           onSendReaction={onSendReaction}
+          onShowReactionDetails={handleShowReactionDetails}
           messagesContainerRef={messagesContainerRef}
           messagesEndRef={messagesEndRef}
           messagePortalRootRef={messagePortalRootRef}
@@ -173,6 +189,21 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
         initialRoomname={displayDetail?.roomname || ""}
         initialDescription={displayDetail?.description || ""}
         onSuccess={onEditSuccess}
+      />
+
+      <ReactionDetailsDrawer 
+        isOpen={isReactionDrawerOpen}
+        onClose={() => {
+          setIsReactionDrawerOpen(false);
+          setReactionDrawerMessageId(null);
+        }}
+        reactions={currentReactions}
+        currentUserId={currentUserId}
+        onUnreact={(emojiId) => {
+          if (reactionDrawerMessageId) {
+            onSendReaction(reactionDrawerMessageId, { id: emojiId });
+          }
+        }}
       />
     </div>
   );

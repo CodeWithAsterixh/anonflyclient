@@ -6,26 +6,33 @@ interface ReactionPickerProps {
   onReact: (emoji: Emoji) => void;
   onShowAll: () => void;
   showAllEmojis: boolean;
+  userReactions?: string[];
 }
 
 export const ReactionPicker: React.FC<ReactionPickerProps> = ({
   onReact,
   onShowAll,
   showAllEmojis,
+  userReactions = [],
 }) => (
   <div className="bg-background/95 backdrop-blur-md border border-border rounded-full px-2 py-1.5 shadow-2xl flex items-center gap-1">
-    {defaultEmojis.map((emoji) => (
-      <button
-        key={emoji.id}
-        onClick={(e) => {
-          e.stopPropagation();
-          onReact(emoji);
-        }}
-        className="w-10 h-10 flex items-center justify-center hover:bg-white/5 rounded-full text-xl transition-all hover:scale-125 active:scale-90"
-      >
-        {emoji.value}
-      </button>
-    ))}
+    {defaultEmojis.map((emoji) => {
+      const isSelected = userReactions.includes(emoji.id);
+      return (
+        <button
+          key={emoji.id}
+          onClick={(e) => {
+            e.stopPropagation();
+            onReact(emoji);
+          }}
+          className={`w-10 h-10 flex items-center justify-center rounded-full text-xl transition-all hover:scale-125 active:scale-90 ${
+            isSelected ? "bg-primary/20 ring-1 ring-primary" : "hover:bg-white/5"
+          }`}
+        >
+          {emoji.value}
+        </button>
+      );
+    })}
     <div className="w-px h-6 bg-border mx-1" />
     <button
       onClick={(e) => {

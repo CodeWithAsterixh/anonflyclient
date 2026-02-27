@@ -25,6 +25,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
   onReact,
   onEdit,
   onDelete,
+  onShowReactionDetails,
   portalRoot,
 }) => {
   const { user } = useAuth();
@@ -238,6 +239,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
           swipeOffset={swipeOffset}
           onDoubleClick={handleDoubleClick}
           bubbleRef={bubbleRef}
+          onShowReactionDetails={onShowReactionDetails}
         />
       </article>
       {showReactions &&
@@ -259,6 +261,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
             onEdit={handleEdit}
             onDelete={handleDelete}
             isEditable={isEditable}
+            userAid={user?.userId}
           />,
           portalRoot
         )}

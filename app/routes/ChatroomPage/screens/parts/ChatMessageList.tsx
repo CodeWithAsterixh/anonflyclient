@@ -8,6 +8,7 @@ import {
 } from "../../../../../components/typingIndicator";
 import type { Message } from "../../../../../lib/types/chat";
 import type { ReplyingTo, EditingMessage } from "../../types";
+import { type Emoji } from "../../../../../lib/assets/emojis";
 
 interface ChatMessageListProps {
   messages: Message[];
@@ -16,7 +17,7 @@ interface ChatMessageListProps {
   onSetReplyingTo: (reply: ReplyingTo | null) => void;
   onSetEditingMessage: (edit: EditingMessage | null) => void;
   onDeleteMessage: (id: string) => void;
-  onSendReaction: (id: string, emoji: any) => void;
+  onSendReaction: (id: string, emoji: Emoji) => void;
   onShowReactionDetails?: (reactions: Reaction[], messageId: string) => void;
   messagesContainerRef: React.RefObject<HTMLDivElement | null>;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;

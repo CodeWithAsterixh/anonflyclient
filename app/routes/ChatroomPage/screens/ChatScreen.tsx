@@ -14,6 +14,7 @@ import { ChatMessageList } from "./parts/ChatMessageList";
 import { ChatSidebarArea } from "./parts/ChatSidebarArea";
 import { ReactionDetailsDrawer } from "../../../../components/messageDisplay/components/ReactionDetailsDrawer";
 import { type Reaction } from "../../../../components/messageDisplay/components/ReactionList";
+import { type Emoji, allEmojis } from "../../../../lib/assets/emojis";
 
 interface ChatScreenProps {
   isMobile: boolean;
@@ -43,7 +44,7 @@ interface ChatScreenProps {
   onSetReplyingTo: (reply: ReplyingTo | null) => void;
   onSetEditingMessage: (edit: EditingMessage | null) => void;
   onDeleteMessage: (id: string) => void;
-  onSendReaction: (id: string, emoji: any) => void;
+  onSendReaction: (id: string, emoji: Emoji) => void;
   onEditSuccess: () => void;
   onTyping: (isTyping: boolean) => void;
   onRemoveParticipant: (userAid: string) => Promise<void>;
@@ -201,7 +202,10 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
         currentUserId={currentUserId}
         onUnreact={(emojiId) => {
           if (reactionDrawerMessageId) {
-            onSendReaction(reactionDrawerMessageId, { id: emojiId });
+            const emoji = allEmojis.find(e => e.id === emojiId);
+            if (emoji) {
+              onSendReaction(reactionDrawerMessageId, emoji);
+            }
           }
         }}
       />

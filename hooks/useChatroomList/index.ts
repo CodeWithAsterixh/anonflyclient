@@ -30,7 +30,7 @@ export const useChatroomList = (): UseChatroomListReturn => {
     }
 
     if (loadingAuth) return;
-    
+
     // If we are authenticated but have no token, we are in offline mode
     if (!token) {
       setError("Working in offline mode. Please check your connection to see chatrooms.");
@@ -48,7 +48,7 @@ export const useChatroomList = (): UseChatroomListReturn => {
     if (token) {
       url.searchParams.append('token', token);
     }
-    
+
     const region = getUserRegion();
     if (region) {
       url.searchParams.append('region', region);
@@ -58,16 +58,20 @@ export const useChatroomList = (): UseChatroomListReturn => {
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      setChatrooms(data);
-      setLoading(false);
-      setRetryCountdown(null);
+      if (Array.isArray(data)) {
+        setChatrooms(data);
+        setLoading(false);
+        setRetryCountdown(null);
+      } else {
+        console.warn("[useChatroomList] Received non-array data:", data);
+      }
     };
 
     eventSource.onerror = (err) => {
       setError("Failed to load chatrooms. Retrying...");
       setLoading(false);
       eventSource.close();
-      
+
       // Start 5-second countdown
       setRetryCountdown(5);
     };

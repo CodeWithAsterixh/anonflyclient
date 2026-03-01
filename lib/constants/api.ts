@@ -1,6 +1,6 @@
 import { selectBestServer } from '../helpers/serverSelector';
 
-let API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+let API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 /**
  * Resolve the chat WebSocket URL at runtime.
@@ -23,7 +23,7 @@ export function getChatWSURL(): string {
   if (API_BASE_URL.startsWith('http://')) return API_BASE_URL.replace(/^https?:\/\//i, 'ws://');
 
   // Fallback
-  return 'ws://localhost:3000';
+  return 'ws://localhost:5001';
 }
 
 /**
@@ -38,7 +38,7 @@ export async function initializeAPI(): Promise<void> {
       API_BASE_URL = await selectBestServer();
     } catch (error) {
       console.error('Failed to select server based on location, using default', error);
-      API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+      API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api/v1';
     }
   }
 }
@@ -58,5 +58,5 @@ export function getChatroomAPIURL(): string {
 }
 
 // For backward compatibility with existing code
-export const API_BASE_URL_STATIC = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+export const API_BASE_URL_STATIC = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api/v1';
 export const CHATROOM_API_BASE_URL = `${API_BASE_URL_STATIC}/chatrooms`;

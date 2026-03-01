@@ -47,7 +47,7 @@ export const MessageFullViewer: React.FC<MessageFullViewerProps> = ({
     if (!userAid || !message.reactions) return [];
     return message.reactions
       .filter((r) => r.userAid === userAid)
-      .map((r) => (r as any).emojiId);
+      .map((r) => r.emojiId);
   }, [message.reactions, userAid]);
 
   useEffect(() => {
@@ -66,9 +66,8 @@ export const MessageFullViewer: React.FC<MessageFullViewerProps> = ({
   return (
     <dialog
       open
-      className={`pointer-events-auto absolute top-0 inset-0 z-100 bg-black/40 backdrop-blur-2xl transition-all duration-300 flex items-center p-4 border-none m-0 max-w-none max-h-none w-full h-full outline-none ${
-        isCurrentUser ? "justify-end" : "justify-start"
-      }`}
+      className={`pointer-events-auto absolute top-0 inset-0 z-100 bg-black/40 backdrop-blur-2xl transition-all duration-300 flex items-center p-4 border-none m-0 max-w-none max-h-none w-full h-full outline-none ${isCurrentUser ? "justify-end" : "justify-start"
+        }`}
     >
       {/* Backdrop Button for closing */}
       <button
@@ -79,9 +78,8 @@ export const MessageFullViewer: React.FC<MessageFullViewerProps> = ({
       />
 
       <div
-        className={`relative z-10 flex flex-col items-center gap-2 animate-in zoom-in-90 fade-in-80 duration-300 ${
-          isCurrentUser ? "items-end" : "items-start"
-        }`}
+        className={`relative z-10 flex flex-col items-center gap-2 animate-in zoom-in-90 fade-in-80 duration-300 ${isCurrentUser ? "items-end" : "items-start"
+          }`}
       >
         <MessageRow
           message={message}

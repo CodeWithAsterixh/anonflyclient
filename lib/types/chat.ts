@@ -1,7 +1,6 @@
-import { type Emoji } from "../assets/emojis";
-
 export interface Message {
   id?: string;
+  messageId?: string; // Added for sync/duplicate checks
   senderAid: string;
   senderUsername: string;
   content: string;

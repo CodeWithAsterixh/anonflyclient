@@ -32,10 +32,15 @@ const parseColor = (color: string): [number, number, number] => {
 }
 
 const getRandomColor = (): string => {
-  const r = Math.floor(Math.random() * 256)
-  const g = Math.floor(Math.random() * 256)
-  const b = Math.floor(Math.random() * 256)
-  return `rgb(${r},${g},${b})`
+  const array = new Uint8Array(3)
+  if (globalThis.window?.crypto) {
+    globalThis.window.crypto.getRandomValues(array)
+  } else {
+    // Fallback for node environments if needed, though this is likely client-side
+    const crypto = require('node:crypto')
+    crypto.randomFillSync(array)
+  }
+  return `rgb(${array[0]},${array[1]},${array[2]})`
 }
 
 const getLuminance = (r: number, g: number, b: number): number => {
@@ -78,30 +83,30 @@ const generateRandomPair = (): ColorPairOutput => {
   while (true) {
     const rand = getRandomColor()
     const rParsed = parseColor(rand)
-    if (isReadable(BLACK, rParsed)) return {primary: rand, text: '#000000'}
-    if (isReadable(WHITE, rParsed)) return {primary: rand, text: '#FFFFFF'}
+    if (isReadable(BLACK, rParsed)) return { primary: rand, text: '#000000' }
+    if (isReadable(WHITE, rParsed)) return { primary: rand, text: '#FFFFFF' }
   }
 }
 
 /**
  * Generate a well-contrasted color pair (primary and text) meeting WCAG standards.
  */
-export function generateAccessibleColorPair({primary, text}: ColorPairInput = {}): ColorPairOutput {
+export function generateAccessibleColorPair({ primary, text }: ColorPairInput = {}): ColorPairOutput {
   // --- CASE: Both provided, ensure readability ---
   if (primary && text) {
-    if (isReadable(parseColor(text), parseColor(primary))) return {primary, text}
+    if (isReadable(parseColor(text), parseColor(primary))) return { primary, text }
     throw new Error('Provided primary and text colors do not meet WCAG contrast requirements.')
   }
 
   // --- CASE: Only primary provided ---
   if (primary) {
     const t = isReadable(BLACK, parseColor(primary)) ? '#000000' : '#FFFFFF'
-    return {primary, text: t}
+    return { primary, text: t }
   }
 
   // --- CASE: Only text provided ---
   if (text) {
-    return {primary: findAccessiblePrimary(parseColor(text)), text}
+    return { primary: findAccessiblePrimary(parseColor(text)), text }
   }
 
   // --- CASE: None provided ---

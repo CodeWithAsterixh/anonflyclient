@@ -1,12 +1,12 @@
 import type { MessageHandlerContext } from "../types";
 import { getIdentity, getRoomKey, saveRoomKey } from "../../../../../lib/helpers/identityManager";
-import { 
-  decryptMessage, 
-  deriveSharedSecret, 
-  encryptMessage, 
-  exportKey, 
-  generateRoomKey, 
-  importRoomKey 
+import {
+  decryptMessage,
+  deriveSharedSecret,
+  encryptMessage,
+  exportKey,
+  generateRoomKey,
+  importRoomKey
 } from "../../../../../lib/helpers/encryption";
 import type { Participant } from "../../../../../lib/types/chat";
 
@@ -34,7 +34,7 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
     joiningRef.current = null;
     setIsJoined(true);
     setCurrentChatroomId(message.chatroomId);
-    
+
     // Initialize messages from cachedMessages, ensuring they have an 'id' and correct 'type'
     const initialMessages = (message.cachedMessages || []).map((msg: any) => ({
       ...msg,
@@ -147,11 +147,11 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
   const handleChatMessage = async (message: any) => {
     const messageId = message.messageId || `msg-${message.timestamp || Date.now()}-${message.senderAid}`;
     // Use both id and messageId for checking duplicates
-    if (messagesRef.current.some((m) => (m.id || (m as any).messageId) === messageId)) return;
-    
+    if (messagesRef.current.some((m) => (m.id || m.messageId) === messageId)) return;
+
     let chatContent = message.content;
     let isMsgEncrypted = false;
-    
+
     // Attempt decryption if room key is available
     if (typeof chatContent === 'string' && roomKeyRef.current) {
       try {
@@ -160,11 +160,11 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
           chatContent = await decryptMessage(blob.ciphertext, blob.iv, roomKeyRef.current);
           isMsgEncrypted = true;
         }
-      } catch (err) {
+      } catch {
         // Not a JSON string or decryption failed - content remains as is
       }
     }
-    
+
     setMessages((prev) => [...prev, {
       id: messageId,
       senderAid: message.senderAid,
@@ -288,7 +288,7 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
   };
 
   const handleReactionUpdate = (message: any) => {
-    setMessages((prev) => prev.map((msg) => 
+    setMessages((prev) => prev.map((msg) =>
       msg.id === message.messageId ? { ...msg, reactions: message.reactions } : msg
     ));
   };
@@ -322,16 +322,16 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
           identityForShare.exchangeKeyPair.privateKey,
           host.exchangePublicKey
         );
-        
+
         try {
           const { ciphertext, iv } = message.encryptedKey;
           const decryptedKeyBase64 = await decryptMessage(ciphertext, iv, sharedSecret);
           const key = await importRoomKey(decryptedKeyBase64);
-          
+
           await saveRoomKey(message.chatroomId, decryptedKeyBase64);
           roomKeyRef.current = key;
           setHasRoomKey(true);
-          
+
           setMessages((prev) => [...prev, {
             id: `system-rotate-${Date.now()}`,
             senderAid: 'system',
@@ -366,7 +366,7 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
         case "joinSuccess":
           await handleJoinSuccess(message);
           break;
-          
+
         case "forceDisconnect":
           handleForceDisconnect(message);
           break;
@@ -423,7 +423,8 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
           globalThis.window.dispatchEvent(new CustomEvent('chatroom-typing', { detail: message }));
           break;
       }
-    } catch {
+    } catch (err) {
+      console.error("Failed to process message:", err);
       setError("Failed to process message");
     }
   };

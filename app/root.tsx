@@ -27,11 +27,11 @@ import "./app.css";
 export async function loader({ request }: { request: Request }): Promise<{ theme: string; colorScheme: string; }> {
   const cookieHeader = request.headers.get("Cookie");
   const theme = cookieHeader?.includes("themeState=light") ? "light" : "dark";
-  
+
   // Extract colorScheme from cookie if it exists
   const colorSchemeMatch = cookieHeader?.match(/colorScheme=([^;]+)/);
   const colorScheme = colorSchemeMatch ? colorSchemeMatch[1] : "purple";
-  
+
   return { theme, colorScheme };
 }
 
@@ -42,7 +42,7 @@ export const meta: Route.MetaFunction = () => [
   { name: "description", content: "Anonfly is the ultimate free, secure, and anonymous messaging platform. No registration, no tracking—just private chatrooms for everyone." },
   { name: "keywords", content: "anonymous chat, secure messaging, free chatrooms, private messaging, no registration chat, encrypted chat, anonfly" },
   { rel: "canonical", href: BASE_URL },
-  
+
   // Open Graph / Facebook
   { property: "og:type", content: "website" },
   { property: "og:url", content: BASE_URL },
@@ -57,7 +57,7 @@ export const meta: Route.MetaFunction = () => [
   { name: "twitter:title", content: "Anonfly | Secure, Anonymous & Free Messaging" },
   { name: "twitter:description", content: "Join anonymous chatrooms instantly. No tracking, no sign-ups. 100% secure and free." },
   { name: "twitter:image", content: `${BASE_URL}/logo.svg` },
-  
+
   // Theme Color for mobile browsers
   { name: "theme-color", content: "#2563eb" },
 ];
@@ -123,12 +123,12 @@ export function Layout({ children }: Readonly<{ children: React.ReactNode }>): J
         {/* Inline script to prevent theme flash */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `
+            __html: String.raw`
               (function() {
                 try {
                   var cookies = document.cookie.split('; ');
                   var theme = cookies.find(row => row.startsWith('themeState='))?.split('=')[1] || 
-                              localStorage.getItem('themeState') || 'dark';
+                               localStorage.getItem('themeState') || 'dark';
                   
                   var colorScheme = cookies.find(row => row.startsWith('colorScheme='))?.split('=')[1] || 
                                     localStorage.getItem('colorScheme') || 'purple';
@@ -151,7 +151,7 @@ export function Layout({ children }: Readonly<{ children: React.ReactNode }>): J
                   document.documentElement.style.setProperty('--primary-color', primaryColor);
                   
                   function hexToRgb(hex) {
-                    var result = /^#?([a-f\\d]{2})([a-f\\d]{2})([a-f\\d]{2})$/i.exec(hex);
+                    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
                     return result ? 
                       parseInt(result[1], 16) + ', ' + parseInt(result[2], 16) + ', ' + parseInt(result[3], 16) : 
                       '107, 78, 255';
@@ -206,10 +206,10 @@ export default function App(): JSX.Element {
       <AuthProvider>
         <Outlet />
         {showInstallPrompt && (
-          <PWAInstallPrompt 
-            onInstall={installApp} 
-            onRemindLater={remindLater} 
-            onCancel={cancelInstallation} 
+          <PWAInstallPrompt
+            onInstall={installApp}
+            onRemindLater={remindLater}
+            onCancel={cancelInstallation}
           />
         )}
       </AuthProvider>

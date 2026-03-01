@@ -24,12 +24,11 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            // Clearing old cache
-            return caches.delete(cache);
-          }
-        })
+        cacheNames
+          .filter((cache) => cache !== CACHE_NAME)
+          .map((cache) => caches.delete(cache).catch(() => {
+            console.warn(`Failed to delete old cache: ${cache}`);
+          }))
       );
     })
   );
@@ -58,7 +57,7 @@ self.addEventListener('fetch', (event) => {
           // We can try to fetch the destination if we have it, or just let the browser handle it
           // by not calling respondWith, but since we already did, we return it.
           // However, a better way is to fetch with follow.
-          return fetch(event.request.url); 
+          return fetch(event.request.url);
         }
         return response;
       }).catch(() => {

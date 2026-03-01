@@ -1,5 +1,7 @@
 import type { Participant, Message } from "../../../../lib/types/chat";
 
+export type RemovalReason = boolean | 'removed' | 'banned';
+
 export interface UseChatroomConnectionProps {
   token: string | null;
   user: any;
@@ -8,8 +10,8 @@ export interface UseChatroomConnectionProps {
   logout: () => void;
   currentChatroomId: string | null;
   setCurrentChatroomId: (id: string | null) => void;
-  isRemovedRef: React.RefObject<boolean | 'removed' | 'banned'>;
-  setIsRemoved: (val: boolean | 'removed' | 'banned') => void;
+  isRemovedRef: React.RefObject<RemovalReason>;
+  setIsRemoved: (val: RemovalReason) => void;
   chatroomDetailRef: React.RefObject<any>;
   participantsRef: React.RefObject<Map<string, Participant>>;
   messagesRef: React.RefObject<Message[]>;

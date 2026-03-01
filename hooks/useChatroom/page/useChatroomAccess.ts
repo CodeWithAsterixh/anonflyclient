@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getAPIBaseURL } from "../../../lib/constants/api";
+import { authorizedFetch } from "../../../lib/helpers/apiHelper";
 import { checkAccess } from "../../../lib/controllers/chatroomController";
 import { cryptSessionStorage } from "../../../lib/helpers/cryptSessionStorage";
 import type { ChatroomDetail } from "../../../lib/types/chat";
@@ -26,13 +26,8 @@ export const useChatroomAccess = (
     if (!chatroomId || !token || !user) return;
 
     try {
-      const response = await fetch(
-        `${getAPIBaseURL()}/chatroom/${encodeURIComponent(chatroomId)}/details`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await authorizedFetch(
+        `/chatroom/${encodeURIComponent(chatroomId)}/details`
       );
 
       if (response.status === 401) {
@@ -59,20 +54,20 @@ export const useChatroomAccess = (
     try {
       const joinAuthToken = cryptSessionStorage.getItem(`room_join_auth_${chatroomId}`, chatroomId) || undefined;
       const response = await checkAccess(chatroomId, joinAuthToken);
-      
+
       if (response.success && response.data?.accessGranted) {
         setAccessState({ status: 'granted' });
         fetchChatroomDetails();
       } else {
-        setAccessState({ 
-          status: 'denied', 
-          message: response.message || 'Access denied. You need a valid invite link to access this private room.' 
+        setAccessState({
+          status: 'denied',
+          message: response.message || 'Access denied. You need a valid invite link to access this private room.'
         });
       }
     } catch {
-      setAccessState({ 
-        status: 'denied', 
-        message: 'Failed to verify access. Please try again later.' 
+      setAccessState({
+        status: 'denied',
+        message: 'Failed to verify access. Please try again later.'
       });
     }
   }, [chatroomId, token, user, fetchChatroomDetails]);

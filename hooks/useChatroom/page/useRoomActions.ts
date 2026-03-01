@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { generateShareLink } from "../../../lib/controllers/chatroomController";
-import { getAPIBaseURL } from "../../../lib/constants/api";
+import { authorizedFetch } from "../../../lib/helpers/apiHelper";
 
 export const useRoomActions = (
   chatroomId: string | undefined,
@@ -35,13 +35,10 @@ export const useRoomActions = (
       "confirm",
       async () => {
         try {
-          const response = await fetch(
-            `${getAPIBaseURL()}/chatrooms/${chatroomId}`,
+          const response = await authorizedFetch(
+            `/chatrooms/${chatroomId}`,
             {
               method: "DELETE",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
             }
           );
 

@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-import { getAPIBaseURL } from "../../../lib/constants/api";
+import { useEffect, useRef, useState } from "react";
 import type { ChatroomDetail } from "../../../lib/types/chat";
 
 export const useChatroomSSE = (currentChatroomId: string | null, token: string | null) => {
@@ -20,14 +19,14 @@ export const useChatroomSSE = (currentChatroomId: string | null, token: string |
       return;
     }
 
-    const sseUrl = `${getAPIBaseURL()}/chatroom/${currentChatroomId}/details/sse?token=${token}`;
-    
+    const sseUrl = `/proxy/chatroom/${currentChatroomId}/details/sse?token=${token}`;
+
     if (activeSSERef.current === sseUrl) {
       return;
     }
-    
+
     activeSSERef.current = sseUrl;
-    
+
     const eventSource = new EventSource(sseUrl);
 
     eventSource.onopen = () => {

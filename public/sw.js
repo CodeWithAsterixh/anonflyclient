@@ -52,12 +52,14 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(event.request).then((response) => {
         // If it's a redirect, we need to handle it properly for navigation
-        if (response.type === 'opaqueredirect' || (response.status >= 300 && response.status < 400)) {
-          // Returning the redirect response directly might cause "redirect mode not follow"
-          // We can try to fetch the destination if we have it, or just let the browser handle it
-          // by not calling respondWith, but since we already did, we return it.
-          // However, a better way is to fetch with follow.
-          return fetch(event.request.url);
+        if (response.redirected) {
+          // A redirected response cannot be used for a request whose redirect mode is not "follow"
+          // We "clean" it by creating a new Response object from the same body/meta
+          return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers
+          });
         }
         return response;
       }).catch(() => {
@@ -81,6 +83,16 @@ self.addEventListener('fetch', (event) => {
             cache.put(event.request, responseToCache);
           });
         }
+
+        // Clean redirected responses for other requests too
+        if (response.redirected) {
+          return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers
+          });
+        }
+
         return response;
       });
     })

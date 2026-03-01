@@ -1,4 +1,3 @@
-import { getAPIBaseURL } from "../constants/api";
 import { getSessionUser } from '../helpers/authStorage';
 import { getUserRegion } from '../helpers/location';
 
@@ -13,11 +12,16 @@ const getAuthHeaders = () => {
   if (session?.token) {
     token = session.token;
   }
-  
-  return {
+
+  const headers: any = {
     'Content-Type': 'application/json',
-    'Authorization': token ? `Bearer ${token}` : '',
   };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  return headers;
 };
 
 /**
@@ -30,7 +34,7 @@ const getAuthHeaders = () => {
  */
 export const checkAccess = async (chatroomId: string, joinAuthToken?: string) => {
   try {
-    const response = await fetch(`${getAPIBaseURL()}/chatroom/${encodeURIComponent(chatroomId)}/check-access`, {
+    const response = await fetch(`/proxy/chatroom/${encodeURIComponent(chatroomId)}/check-access`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ joinAuthToken }),
@@ -69,8 +73,8 @@ export const checkAccess = async (chatroomId: string, joinAuthToken?: string) =>
  */
 export const createChatroom = async (roomname: string, description?: string, password?: string, isPrivate: boolean = false) => {
   const region = getUserRegion();
-  const body: any = { 
-    roomname: roomname.trim(), 
+  const body: any = {
+    roomname: roomname.trim(),
     region,
     isPrivate
   };
@@ -83,7 +87,7 @@ export const createChatroom = async (roomname: string, description?: string, pas
     body.password = password;
   }
 
-  const response = await fetch(`${getAPIBaseURL()}/chatrooms`, {
+  const response = await fetch(`/proxy/chatrooms`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(body),
@@ -107,7 +111,7 @@ export const createChatroom = async (roomname: string, description?: string, pas
  * @throws {Error} If fetching messages fails.
  */
 export const getChatroomMessages = async (chatroomId: string) => {
-  const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/messages`, {
+  const response = await fetch(`/proxy/chatrooms/${encodeURIComponent(chatroomId)}/messages`, {
     method: 'GET',
     headers: getAuthHeaders(),
   });
@@ -122,7 +126,7 @@ export const getChatroomMessages = async (chatroomId: string) => {
 };
 
 export const joinChatroom = async (chatroomId: string, password?: string, linkToken?: string, joinAuthToken?: string) => {
-  const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/join`, {
+  const response = await fetch(`/proxy/chatrooms/${encodeURIComponent(chatroomId)}/join`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({ password, linkToken, joinAuthToken }),
@@ -138,7 +142,7 @@ export const joinChatroom = async (chatroomId: string, password?: string, linkTo
 };
 
 export const removeParticipant = async (chatroomId: string, userAid: string): Promise<any> => {
-  const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/participants/${encodeURIComponent(userAid)}`, {
+  const response = await fetch(`/proxy/chatrooms/${encodeURIComponent(chatroomId)}/participants/${encodeURIComponent(userAid)}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });
@@ -153,7 +157,7 @@ export const removeParticipant = async (chatroomId: string, userAid: string): Pr
 };
 
 export const banParticipant = async (chatroomId: string, userAid: string, reason?: string): Promise<any> => {
-  const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/participants/${encodeURIComponent(userAid)}/ban`, {
+  const response = await fetch(`/proxy/chatrooms/${encodeURIComponent(chatroomId)}/participants/${encodeURIComponent(userAid)}/ban`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({ reason }),
@@ -169,7 +173,7 @@ export const banParticipant = async (chatroomId: string, userAid: string, reason
 };
 
 export const unbanParticipant = async (chatroomId: string, userAid: string): Promise<any> => {
-  const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/participants/${encodeURIComponent(userAid)}/unban`, {
+  const response = await fetch(`/proxy/chatrooms/${encodeURIComponent(chatroomId)}/participants/${encodeURIComponent(userAid)}/unban`, {
     method: 'POST',
     headers: getAuthHeaders(),
   });
@@ -184,7 +188,7 @@ export const unbanParticipant = async (chatroomId: string, userAid: string): Pro
 };
 
 export const generateShareLink = async (chatroomId: string): Promise<any> => {
-  const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/share-link`, {
+  const response = await fetch(`/proxy/chatrooms/${encodeURIComponent(chatroomId)}/share-link`, {
     method: 'POST',
     headers: getAuthHeaders(),
   });
@@ -199,7 +203,7 @@ export const generateShareLink = async (chatroomId: string): Promise<any> => {
 };
 
 export const validateShareLink = async (token: string): Promise<any> => {
-  const response = await fetch(`${getAPIBaseURL()}/chatrooms/validate-link`, {
+  const response = await fetch(`/proxy/chatrooms/validate-link`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({ token }),
@@ -215,7 +219,7 @@ export const validateShareLink = async (token: string): Promise<any> => {
 };
 
 export const leaveChatroom = async (chatroomId: string): Promise<any> => {
-  const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/leave`, {
+  const response = await fetch(`/proxy/chatrooms/${encodeURIComponent(chatroomId)}/leave`, {
     method: 'POST',
     headers: getAuthHeaders(),
   });
@@ -230,7 +234,7 @@ export const leaveChatroom = async (chatroomId: string): Promise<any> => {
 };
 
 export const deleteChatroom = async (chatroomId: string): Promise<any> => {
-  const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}`, {
+  const response = await fetch(`/proxy/chatrooms/${encodeURIComponent(chatroomId)}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });
@@ -245,12 +249,12 @@ export const deleteChatroom = async (chatroomId: string): Promise<any> => {
 };
 
 export const editChatroom = async (chatroomId: string, roomname: string, description?: string): Promise<any> => {
-  const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}`, {
+  const response = await fetch(`/proxy/chatrooms/${encodeURIComponent(chatroomId)}`, {
     method: 'PATCH',
     headers: getAuthHeaders(),
-    body: JSON.stringify({ 
-      roomname: roomname.trim(), 
-      description: description?.trim() 
+    body: JSON.stringify({
+      roomname: roomname.trim(),
+      description: description?.trim()
     }),
   });
 
@@ -264,7 +268,7 @@ export const editChatroom = async (chatroomId: string, roomname: string, descrip
 };
 
 export const deleteMessage = async (chatroomId: string, messageId: string): Promise<any> => {
-  const response = await fetch(`${getAPIBaseURL()}/chatrooms/${encodeURIComponent(chatroomId)}/messages/${encodeURIComponent(messageId)}`, {
+  const response = await fetch(`/proxy/chatrooms/${encodeURIComponent(chatroomId)}/messages/${encodeURIComponent(messageId)}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });
@@ -279,7 +283,7 @@ export const deleteMessage = async (chatroomId: string, messageId: string): Prom
 };
 
 export const getMyModerationToken = async (): Promise<any> => {
-  const response = await fetch(`${getAPIBaseURL()}/user/moderation-token`, {
+  const response = await fetch(`/proxy/user/moderation-token`, {
     method: 'GET',
     headers: getAuthHeaders(),
   });
@@ -301,7 +305,7 @@ export const getMyModerationToken = async (): Promise<any> => {
  * @returns {Function} A cleanup function to close the EventSource connection.
  */
 export const getChatroomListSSE = (onMessage: (data: any) => void, onError: (event: Event) => void): Function => {
-  const eventSource = new EventSource(`${getAPIBaseURL()}/chatrooms`);
+  const eventSource = new EventSource(`/proxy/chatrooms`);
 
   eventSource.onmessage = (event) => {
     onMessage(JSON.parse(event.data));

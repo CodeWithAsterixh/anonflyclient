@@ -1,20 +1,20 @@
 import React, { useMemo, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import EditChatroomModal from "../../../../components/editChatroomModal";
-import MessageInput from "../../../../components/messageInput";
+import EditChatroomModal from "~/features/messages/components/editChatroomModal";
+import MessageInput from "~/features/messages/components/messageInput";
 import type {
   ChatroomDetail,
   Message,
   Participant,
-} from "../../../../lib/types/chat";
-import type { TypingUser } from "../../../../components/typingIndicator";
+} from "~/shared/types/chat";
+import type { TypingUser } from "~/features/messages/components/typingIndicator";
 import type { ReplyingTo, EditingMessage } from "../types";
 import { ChatHeader } from "./parts/ChatHeader";
 import { ChatMessageList } from "./parts/ChatMessageList";
 import { ChatSidebarArea } from "./parts/ChatSidebarArea";
-import { ReactionDetailsDrawer } from "../../../../components/messageDisplay/components/ReactionDetailsDrawer";
-import { type Reaction } from "../../../../components/messageDisplay/components/ReactionList";
-import { type Emoji, allEmojis } from "../../../../lib/assets/emojis";
+import { ReactionDetailsDrawer } from "~/features/messages/components/messageDisplay/components/ReactionDetailsDrawer";
+import { type Reaction } from "~/features/messages/components/messageDisplay/components/ReactionList";
+import { type Emoji, allEmojis } from "~/shared/assets/emojis";
 
 interface ChatScreenProps {
   isMobile: boolean;
@@ -192,7 +192,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
         onSuccess={onEditSuccess}
       />
 
-      <ReactionDetailsDrawer 
+      <ReactionDetailsDrawer
         isOpen={isReactionDrawerOpen}
         onClose={() => {
           setIsReactionDrawerOpen(false);

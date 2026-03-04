@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Outlet, useParams, useLoaderData, useLocation } from "react-router";
 import ChatroomListPage from "../ChatroomListPage";
-import { requireAuth } from "../../middleware/auth";
-import { useAuth, useChatroomList } from "../../../hooks";
-import { ChatLayoutContext } from "../../contexts/ChatLayoutContext";
+import { requireAuth } from "~/middleware/auth";
+import { useAuth } from "~/features/auth/hooks";
+import { useChatroomList } from "~/features/conversations/hooks";
+import { ChatLayoutContext } from "~/shell/context/ChatLayoutContext";
 
 export async function loader({ request }: { request: Request }) {
   const { user, token } = await requireAuth(request);
@@ -123,10 +124,9 @@ const ChatLayout: React.FC = () => {
     <ChatLayoutContext.Provider value={contextValue}>
       <div className="flex h-screen bg-background overflow-hidden">
         {/* Sidebar - Hidden on mobile when chat is active */}
-        <div 
-          className={`${
-            showChatList ? 'flex' : 'hidden'
-          } md:flex w-full md:w-80 lg:w-96 border-r border-border flex-col shrink-0`}
+        <div
+          className={`${showChatList ? 'flex' : 'hidden'
+            } md:flex w-full md:w-80 lg:w-96 border-r border-border flex-col shrink-0`}
         >
           <ChatroomListPage onChatroomSelect={handleSelectChatroom} />
         </div>

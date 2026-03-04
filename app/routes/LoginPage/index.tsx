@@ -7,13 +7,13 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, type MetaFunction } from "react-router";
-import { useAuth } from "../../../hooks";
-import { validateUsername } from "../../../lib/helpers/validation";
+import { useAuth } from "~/features/auth/hooks";
+import { validateUsername } from "~/shared/utils/validation";
 import { Loader2, Users } from "lucide-react";
-import Logo from "../../../components/logo";
+import Logo from "~/shared/components/logo";
 import AccountSelectionModal from "./components/AccountSelectionModal";
-import Input from "../../../components/ui/input";
-import Loader from "../../../components/ui/loader";
+import Input from "~/shared/components/ui/input";
+import Loader from "~/shared/components/ui/loader";
 
 export const meta: MetaFunction = () => {
   return [
@@ -48,7 +48,7 @@ const LoginPage: React.FC = () => {
    * Validates the username and attempts to join anonymously.
    * Redirects to the specified path on successful join.
    */
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
 
     const usernameValidation = validateUsername(username);
@@ -85,7 +85,7 @@ const LoginPage: React.FC = () => {
             <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full border border-primary/20 uppercase tracking-wider">Anonymous</span>
           </div>
         </div>
-        
+
         <div className="space-y-1 mb-8 text-center">
           <h2 className="text-xl font-bold text-foreground">
             Join the Conversation
@@ -147,12 +147,12 @@ const LoginPage: React.FC = () => {
           </div>
         )}
 
-        <AccountSelectionModal 
-          isOpen={isAccountModalOpen} 
-          onClose={() => setIsAccountModalOpen(false)} 
-          identities={identities} 
-          onSelect={(aid) => switchAccount(aid, redirectPath)} 
-          isLoading={isLoading} 
+        <AccountSelectionModal
+          isOpen={isAccountModalOpen}
+          onClose={() => setIsAccountModalOpen(false)}
+          identities={identities}
+          onSelect={(aid) => switchAccount(aid, redirectPath)}
+          isLoading={isLoading}
         />
       </div>
     </div>

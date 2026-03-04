@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Check, Copy } from 'lucide-react';
-import CopyWrapper from '../../../../components/copyWrapper';
+import CopyWrapper from '~/shared/components/copyWrapper';
 
 interface HideableFieldProps {
   label?: string;
@@ -20,7 +20,7 @@ const HideableField: React.FC<HideableFieldProps> = ({
   showLabelOnHidden = true
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  
+
   const labelElement = label ? (
     <span className={`shrink-0 ${labelClassName}`}>
       {label}:
@@ -32,7 +32,7 @@ const HideableField: React.FC<HideableFieldProps> = ({
       <div className={`flex items-center gap-1.5 text-xs sm:text-sm text-muted ${mono ? 'font-mono' : ''} ${className}`}>
         {showLabelOnHidden && labelElement}
         <span className="truncate tracking-widest opacity-50">••••••••••••••••</span>
-        <button 
+        <button
           onClick={(e) => {
             e.stopPropagation();
             setIsVisible(true);
@@ -59,7 +59,7 @@ const HideableField: React.FC<HideableFieldProps> = ({
           </CopyWrapper.Content>
         </CopyWrapper.Trigger>
       </CopyWrapper>
-      <button 
+      <button
         onClick={(e) => {
           e.stopPropagation();
           setIsVisible(false);

@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@anonfly/react": "^1.0.2",
-    "@anonfly/sdk": "^1.0.1",
+    "@anonfly/sdk": "^1.0.3",
     "@headlessui/react": "^2.2.9",
     "@react-router/node": "7.12.0",
     "@react-router/serve": "7.12.0",

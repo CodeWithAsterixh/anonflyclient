@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Message } from '@anonfly/sdk';
+import { type Message } from '@anonfly/sdk';
 
 interface MessagesState {
     messages: Record<string, Message[]>; // roomId -> messages
@@ -24,7 +24,7 @@ export const useMessagesStore = create<MessagesState>((set) => ({
     addMessage: (roomId, message) => set((state) => {
         const roomMessages = state.messages[roomId] || [];
         // Prevent duplicates
-        if (roomMessages.find((m) => m.id === message.id)) return state;
+        if (roomMessages.some((m) => m.id === message.id)) return state;
         return {
             messages: {
                 ...state.messages,

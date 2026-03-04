@@ -1,4 +1,5 @@
-import { getAPIBaseURL } from '../../lib/constants/api';
+import { getAPIBaseURL } from '~/shared/constants/api';
+import { getChatWSURL } from '~/shared/constants/api';
 
 /**
  * Shared HTTP Client wrapper for consistent error handling and configuration.

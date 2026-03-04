@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, type MetaFunction } from 'react-router';
-import { validateShareLink } from '../../../lib/controllers/chatroomController';
-import { useAuth, useTheme } from '../../../hooks';
+import { validateShareLink } from '~/shared/utils/controllers/chatroomController';
+import { useAuth } from '~/features/auth/hooks';
+import { useTheme } from '~/shared/hooks';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { Background } from '../../../components/background';
-import { cryptSessionStorage } from '../../../lib/helpers/cryptSessionStorage';
+import { Background } from '~/shared/components/background';
+import { cryptSessionStorage } from '~/shared/utils/cryptSessionStorage';
 
 export const meta: MetaFunction = () => {
   return [
@@ -22,7 +23,7 @@ const JoinLinkPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, token: authToken, isLoading: authLoading } = useAuth();
   const { theme } = useTheme();
-  
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const hasValidated = useRef(false);
@@ -37,7 +38,7 @@ const JoinLinkPage: React.FC = () => {
     const validateToken = async () => {
       if (hasValidated.current) return;
       hasValidated.current = true;
-      
+
       if (!token) {
         setError('Invalid access link');
         setLoading(false);
@@ -46,23 +47,23 @@ const JoinLinkPage: React.FC = () => {
 
       try {
         const response = await validateShareLink(token);
-        
+
         if (response.success && response.data.accessGranted) {
           const { chatroomId, password, joinAuthToken } = response.data;
-          
+
           // Store the access token/password in sessionStorage so ChatroomPage can pick it up
           if (password) {
             cryptSessionStorage.setItem(`room_access_${chatroomId}`, password, chatroomId);
           }
-          
+
           // Store the join authorization token
           if (joinAuthToken) {
             cryptSessionStorage.setItem(`room_join_auth_${chatroomId}`, joinAuthToken, chatroomId);
           }
-          
+
           // Also store the token itself for private room validation
           cryptSessionStorage.setItem(`room_token_${chatroomId}`, token, chatroomId);
-          
+
           // Navigate to the chatroom
           navigate(`/${chatroomId}`);
         } else {

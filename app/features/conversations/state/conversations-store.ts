@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Room } from '@anonfly/sdk';
+import type { Room } from '@anonfly/sdk';
 
 interface ConversationsState {
     rooms: Room[];

@@ -10,10 +10,11 @@ import {
 import { useEffect, type JSX, useMemo } from "react";
 
 import type { Route } from "./+types/root";
-import { initializeAPI, getAPIBaseURL, getChatWSURL } from "../lib/constants/api";
-import { ThemeProvider, usePWA } from "../hooks";
+import { initializeAPI, getAPIBaseURL, getChatWSURL } from "~/shared/constants/api";
+import { ThemeProvider, usePWA } from "~/shared/hooks";
 import { AnonflyProvider } from "@anonfly/react";
-import PWAInstallPrompt from "../components/pwaInstallPrompt";
+import { AuthProvider } from "~/features/auth/context/AuthContext";
+import PWAInstallPrompt from "~/shared/components/pwaInstallPrompt";
 import "./app.css";
 
 /**
@@ -81,14 +82,16 @@ export default function App(): JSX.Element {
   return (
     <ThemeProvider initialTheme={theme as "light" | "dark"} initialColorScheme={colorScheme as any}>
       <AnonflyProvider config={anonflyConfig}>
-        <Outlet />
-        {showInstallPrompt && (
-          <PWAInstallPrompt
-            onInstall={installApp}
-            onRemindLater={remindLater}
-            onCancel={cancelInstallation}
-          />
-        )}
+        <AuthProvider>
+          <Outlet />
+          {showInstallPrompt && (
+            <PWAInstallPrompt
+              onInstall={installApp}
+              onRemindLater={remindLater}
+              onCancel={cancelInstallation}
+            />
+          )}
+        </AuthProvider>
       </AnonflyProvider>
     </ThemeProvider>
   );

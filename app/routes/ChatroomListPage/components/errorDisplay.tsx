@@ -1,7 +1,7 @@
 import React from "react";
 import { Users } from "lucide-react";
-import ChatroomCard from "../../../../components/chatroomCard";
-import type { Chatroom } from "../../../../hooks";
+import ChatroomCard from "~/features/conversations/components/chatroomCard";
+import type { Chatroom } from "~/features/conversations/hooks/types";
 
 type Props = {
   error: string | null;

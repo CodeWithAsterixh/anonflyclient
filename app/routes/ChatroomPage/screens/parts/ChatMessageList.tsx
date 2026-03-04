@@ -1,14 +1,14 @@
 import React, { useRef, useState, useMemo, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import MessageDisplay from "../../../../../components/messageDisplay";
-import { type Reaction } from "../../../../../components/messageDisplay/components/ReactionList";
+import { MessageDisplay } from "~/features/messages/components/messageDisplay";
+import { type Reaction } from "~/features/messages/components/messageDisplay/components/ReactionList";
 import {
   TypingIndicator,
   type TypingUser,
-} from "../../../../../components/typingIndicator";
-import type { Message } from "../../../../../lib/types/chat";
+} from "~/features/messages/components/typingIndicator";
+import type { Message } from "~/shared/types/chat";
 import type { ReplyingTo, EditingMessage } from "../../types";
-import { type Emoji } from "../../../../../lib/assets/emojis";
+import { allEmojis, type Emoji } from "~/shared/assets/emojis";
 
 interface ChatMessageListProps {
   messages: Message[];
@@ -41,23 +41,10 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const prevScrollHeightRef = useRef<number>(0);
 
-  // If a new message arrives that isn't from pagination (i.e. length increased by 1 at the end), 
-  // we should probably ensure it's visible. 
-  // However, the original code had:
-  // onSendMessage={(content) => { ... setVisibleCount((prev) => prev + 1); }}
-  // We can replicate this by watching messages length or just exposing a way to increment visible count?
-  // Actually, if we just rely on `messages.slice(-visibleCount)`, adding a message to the end 
-  // effectively pushes the oldest visible message out if we don't increment visibleCount.
-  // The original code incremented visibleCount on send.
-  // Let's use a ref to track previous length to detect new messages.
-  
   const prevMessagesLengthRef = useRef(messages.length);
 
   useEffect(() => {
     if (messages.length > prevMessagesLengthRef.current) {
-      // New message added (likely sent or received)
-      // We should increment visibleCount so the new message is shown without hiding the top one
-      // IF we are at the bottom. But simpler is just to increment it.
       setVisibleCount((prev) => prev + (messages.length - prevMessagesLengthRef.current));
     }
     prevMessagesLengthRef.current = messages.length;
@@ -91,7 +78,6 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
     }
   };
 
-  // Maintain scroll position after loading more messages
   useEffect(() => {
     if (messagesContainerRef.current && prevScrollHeightRef.current > 0) {
       const newScrollHeight = messagesContainerRef.current.scrollHeight;

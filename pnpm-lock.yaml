@@ -12,8 +12,8 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@anonfly/sdk':
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^1.0.3
+        version: 1.0.3
       '@headlessui/react':
         specifier: ^2.2.9
         version: 2.2.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -133,8 +133,8 @@ packages:
       react: '>=18'
       react-dom: '>=18'
 
-  '@anonfly/sdk@1.0.1':
-    resolution: {integrity: sha512-SpmP5XVj/ixI+6qVBE+Ua0wW4WIG5GIgMQGHYp0bW+Wk8ximHzMFpkXLSA5l7v8/oM2snaysZgcOC0jokRPMAg==}
+  '@anonfly/sdk@1.0.3':
+    resolution: {integrity: sha512-Mza0pmVPBntj/H6T0fMJnwh2PStDG+OBK2/GqqRGrYwyXWnR3ruPsHMZfVTZlk57jN6ur9K9yeszRiIdDe7QSg==}
 
   '@asamuzakjp/css-color@4.1.2':
     resolution: {integrity: sha512-NfBUvBaYgKIuq6E/RBLY1m0IohzNHAYyaJGuTK79Z23uNwmz2jl1mPsC5ZxCCxylinKhT1Amn5oNTlx1wN8cQg==}
@@ -465,8 +465,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@exodus/bytes@1.14.1':
-    resolution: {integrity: sha512-OhkBFWI6GcRMUroChZiopRiSp2iAMvEBK47NhJooDqz1RERO4QuZIZnjP63TXX8GAiLABkYmX+fuQsdJ1dd2QQ==}
+  '@exodus/bytes@1.15.0':
+    resolution: {integrity: sha512-UY0nlA+feH81UGSHv92sLEPLCeZFjXOuHhrIo0HQydScuQc8s0A7kL/UdgwgDq8g8ilksmuoF35YVTNphV2aBQ==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
     peerDependencies:
       '@noble/hashes': ^1.8.0 || ^2.0.0
@@ -2026,7 +2026,7 @@ snapshots:
 
   '@anonfly/react@1.0.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
-      '@anonfly/sdk': 1.0.1
+      '@anonfly/sdk': 1.0.3
       clsx: 2.1.1
       lucide-react: 0.473.0(react@19.2.4)
       react: 19.2.4
@@ -2037,7 +2037,7 @@ snapshots:
       - encoding
       - utf-8-validate
 
-  '@anonfly/sdk@1.0.1':
+  '@anonfly/sdk@1.0.3':
     dependencies:
       cross-fetch: 4.1.0
       events: 3.3.0
@@ -2353,7 +2353,7 @@ snapshots:
   '@esbuild/win32-x64@0.27.3':
     optional: true
 
-  '@exodus/bytes@1.14.1': {}
+  '@exodus/bytes@1.15.0': {}
 
   '@floating-ui/core@1.7.5':
     dependencies:
@@ -3181,7 +3181,7 @@ snapshots:
 
   html-encoding-sniffer@6.0.0:
     dependencies:
-      '@exodus/bytes': 1.14.1
+      '@exodus/bytes': 1.15.0
     transitivePeerDependencies:
       - '@noble/hashes'
 
@@ -3229,7 +3229,7 @@ snapshots:
     dependencies:
       '@acemir/cssom': 0.9.31
       '@asamuzakjp/dom-selector': 6.8.1
-      '@exodus/bytes': 1.14.1
+      '@exodus/bytes': 1.15.0
       cssstyle: 5.3.7
       data-urls: 6.0.1
       decimal.js: 10.6.0

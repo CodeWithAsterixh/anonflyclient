@@ -1,5 +1,4 @@
-import { Anonfly, AnonflyConfig } from '@anonfly/sdk';
-import { HttpClient } from '@anonfly/sdk';
+import { Anonfly, type AnonflyConfig } from '@anonfly/sdk';
 
 /**
  * Domain-specific adapter for the Anonfly SDK.
@@ -7,7 +6,7 @@ import { HttpClient } from '@anonfly/sdk';
  * It ensures that UI components never directly depend on the SDK.
  */
 export class AnonflyAdapter {
-    private sdk: Anonfly;
+    private readonly sdk: Anonfly;
 
     constructor(config: AnonflyConfig) {
         this.sdk = new Anonfly(config);

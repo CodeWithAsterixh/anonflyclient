@@ -1,6 +1,6 @@
 import React from 'react';
-import Modal from '../../../../components/modal';
-import type { Identity } from '../../../../lib/helpers/identityManager';
+import Modal from '~/shared/components/modal';
+import type { Identity } from '~/shared/utils/identityManager';
 import { User, ChevronRight } from 'lucide-react';
 
 interface AccountSelectionModalProps {
@@ -57,7 +57,7 @@ const AccountSelectionModal: React.FC<AccountSelectionModalProps> = ({
             </button>
           ))}
         </div>
-        
+
         {identities.length === 0 && (
           <div className="text-center py-8">
             <User size={48} className="mx-auto text-muted mb-4" />

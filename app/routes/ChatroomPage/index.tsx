@@ -1,10 +1,8 @@
-import NoChatSelectedFallback from "../../../components/noChatSelectedFallback";
+import NoChatSelectedFallback from "~/features/messages/components/noChatSelectedFallback";
 import React, { useEffect, useRef, useState, useContext } from "react";
 import { useNavigate, useParams, type MetaFunction } from "react-router";
 import {
   useChatroom,
-  useTheme,
-  useAlertDialog,
   useAutoJoin,
   useParticipantActions,
   useRoomActions,
@@ -12,11 +10,12 @@ import {
   useChatroomLifecycle,
   useChatroomMessaging,
   useTyping,
-} from "../../../hooks";
-import { Background } from "../../../components/background";
-import { cryptSessionStorage } from "../../../lib/helpers/cryptSessionStorage";
-import AlertDialog from "../../../components/alertDialog";
-import { ChatLayoutContext } from "../../contexts/ChatLayoutContext";
+} from "~/features/messages/hooks";
+import { useTheme, useAlertDialog } from "~/shared/hooks";
+import { Background } from "~/shared/components/background";
+import { cryptSessionStorage } from "~/shared/utils/cryptSessionStorage";
+import AlertDialog from "~/shared/components/alertDialog";
+import { ChatLayoutContext } from "~/shell/context/ChatLayoutContext";
 import {
   ChatScreen,
   ConnectingScreen,
@@ -303,7 +302,7 @@ const ChatroomPage: React.FC = () => {
           passwordError={
             passwordError ||
             (error?.toLowerCase().includes("password") ||
-            error?.toLowerCase().includes("locked")
+              error?.toLowerCase().includes("locked")
               ? error
               : null)
           }

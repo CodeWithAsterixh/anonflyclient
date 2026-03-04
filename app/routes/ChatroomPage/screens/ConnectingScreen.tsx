@@ -1,5 +1,5 @@
 import React from "react";
-import JoinRoomOverlay from "../../../../components/joinRoomOverlay";
+import JoinRoomOverlay from "~/features/messages/components/joinRoomOverlay";
 
 const ConnectingScreen: React.FC = () => {
   return <JoinRoomOverlay message="Connecting to chat service..." />;

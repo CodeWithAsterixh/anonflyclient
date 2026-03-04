@@ -7,36 +7,36 @@ import {
   Moon,
   Settings,
 } from "lucide-react";
-import React, { useState, useContext,Fragment } from "react";
+import React, { useState, useContext, Fragment } from "react";
 import { useNavigate } from "react-router";
-import ChatListSkeleton from "../../../components/chatListSkeleton";
-import CreateChatroomModal from "../../../components/createChatroomModal";
-import Logo from "../../../components/logo";
+import ChatListSkeleton from "~/features/messages/components/chatListSkeleton";
+import CreateChatroomModal from "~/features/conversations/components/createChatroomModal";
+import Logo from "~/shared/components/logo";
 import ErrorDisplay from "./components/errorDisplay";
-import { useTheme } from "../../../hooks";
+import { useTheme } from "~/shared/hooks";
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from "@headlessui/react";
 import type { ChatroomListPageProps } from "./types";
-import { ChatLayoutContext } from "../../contexts/ChatLayoutContext";
+import { ChatLayoutContext } from "~/shell/context/ChatLayoutContext";
 
 const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
   onChatroomSelect,
 }) => {
   const navigate = useNavigate();
   const context = useContext(ChatLayoutContext);
-  
+
   if (!context) {
     throw new Error("ChatroomListPage must be used within ChatLayoutContext");
   }
 
-  const { 
-    user, 
-    identities, 
-    chatrooms, 
-    loadingChatrooms: loading, 
-    chatroomError: error, 
+  const {
+    user,
+    identities,
+    chatrooms,
+    loadingChatrooms: loading,
+    chatroomError: error,
     retryCountdown,
-    switchAccount, 
-    logout 
+    switchAccount,
+    logout
   } = context;
   const { theme, toggleTheme } = useTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,7 +48,7 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
   const handleChatroomClick = (chatroomId: string) => {
     onChatroomSelect?.(chatroomId);
   };
-  
+
 
   return (
     <>
@@ -91,23 +91,20 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                         {({ focus }) => (
                           <button
                             onClick={() => switchAccount(identity.aid)}
-                            className={`flex w-full items-center justify-between px-3 py-2.5 rounded-lg transition-all ${
-                              focus
+                            className={`flex w-full items-center justify-between px-3 py-2.5 rounded-lg transition-all ${focus
                                 ? "bg-primary/10 text-primary"
                                 : "text-foreground"
-                            } ${
-                              user?.userId === identity.aid
+                              } ${user?.userId === identity.aid
                                 ? "bg-white/5"
                                 : ""
-                            }`}
+                              }`}
                           >
                             <div className="flex items-center gap-3">
                               <div
-                                className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
-                                  user?.userId === identity.aid
+                                className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${user?.userId === identity.aid
                                     ? "bg-primary text-white"
                                     : "bg-white/10 text-muted"
-                                }`}
+                                  }`}
                               >
                                 {identity.username[0].toUpperCase()}
                               </div>
@@ -132,11 +129,10 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                       {({ focus }) => (
                         <button
                           onClick={() => setIsModalOpen(true)}
-                          className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                            focus
+                          className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${focus
                               ? "bg-primary/10 text-primary"
                               : "text-foreground"
-                          }`}
+                            }`}
                         >
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                             <Plus size={18} />
@@ -149,11 +145,10 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                       {({ focus }) => (
                         <button
                           onClick={toggleTheme}
-                          className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                            focus
+                          className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${focus
                               ? "bg-primary/10 text-primary"
                               : "text-foreground"
-                          }`}
+                            }`}
                         >
                           <div
                             className={`w-8 h-8 rounded-full flex items-center justify-center bg-primary/10 text-primary`}
@@ -174,11 +169,10 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                       {({ focus }) => (
                         <button
                           onClick={() => navigate("/settings")}
-                          className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                            focus
+                          className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${focus
                               ? "bg-primary/10 text-primary"
                               : "text-foreground"
-                          }`}
+                            }`}
                         >
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                             <Settings size={18} />
@@ -191,11 +185,10 @@ const ChatroomListPage: React.FC<ChatroomListPageProps> = ({
                       {({ focus }) => (
                         <button
                           onClick={logout}
-                          className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                            focus
+                          className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${focus
                               ? "bg-destructive/10 text-destructive"
                               : "text-foreground"
-                          }`}
+                            }`}
                         >
                           <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center text-destructive">
                             <LogOut size={18} />

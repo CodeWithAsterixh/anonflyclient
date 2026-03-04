@@ -1,8 +1,8 @@
 import { ArrowLeft, FileText, Scale, AlertTriangle, CheckCircle, Clock, Globe } from 'lucide-react';
 import React, { useContext } from 'react';
 import { useNavigate, type MetaFunction } from 'react-router';
-import Logo from '../../../components/logo';
-import { ChatLayoutContext } from '../../contexts/ChatLayoutContext';
+import Logo from '~/shared/components/logo';
+import { ChatLayoutContext } from '~/shell/context/ChatLayoutContext';
 
 export const meta: MetaFunction = () => {
   return [
@@ -54,7 +54,7 @@ const TermsPage: React.FC = () => {
       <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => {
                 if (onBack) {
                   onBack();
@@ -78,15 +78,15 @@ const TermsPage: React.FC = () => {
           </div>
           <h2 className="text-3xl font-black text-foreground">Terms and Conditions</h2>
           <p className="text-muted leading-relaxed max-w-2xl mx-auto">
-            Please read these terms carefully before using Anonfly. By using the platform, 
+            Please read these terms carefully before using Anonfly. By using the platform,
             you acknowledge that you have read, understood, and agreed to these terms.
           </p>
         </section>
 
         <div className="grid gap-6">
           {sections.map((section, index) => (
-            <div 
-              key={index+1}
+            <div
+              key={index + 1}
               className="bg-background rounded-3xl p-6 border border-border shadow-sm hover:border-primary/30 transition-colors group"
             >
               <div className="flex items-start gap-4">

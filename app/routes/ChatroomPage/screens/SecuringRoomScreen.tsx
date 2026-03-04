@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ChevronDown, Lock, RefreshCw } from "lucide-react";
-import Logo from "../../../../components/logo";
-import type { ChatroomDetail } from "../../../../lib/types/chat";
+import Logo from "~/shared/components/logo";
+import type { ChatroomDetail } from "~/shared/types/chat";
 
 interface SecuringRoomScreenProps {
   isMobile: boolean;
@@ -66,13 +66,13 @@ const SecuringRoomScreen: React.FC<SecuringRoomScreenProps> = ({
           Establishing Secure Connection
         </h2>
         <p className="text-muted max-w-xs mb-6" aria-live="polite">
-          {timeoutReached 
-            ? "Connection is taking longer than expected." 
+          {timeoutReached
+            ? "Connection is taking longer than expected."
             : "Waiting for other participants to securely share the room key. This ensures your messages remain private."}
         </p>
-        
+
         {timeoutReached && (
-          <button 
+          <button
             onClick={handleRetry}
             className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors"
             aria-label="Retry connection"

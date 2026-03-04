@@ -1,4 +1,4 @@
-import { getChatWSURL } from '../../lib/constants/api';
+import { getChatWSURL } from "~/shared/constants/api";
 
 /**
  * Shared WebSocket client wrapper for real-time features.

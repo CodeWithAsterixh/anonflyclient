@@ -1,7 +1,7 @@
 import React from "react";
-import ChatroomSidebar from "../../../../../components/chatroomSidebar";
-import Drawer from "../../../../../components/ui/drawer/Drawer";
-import type { ChatroomDetail, Participant } from "../../../../../lib/types/chat";
+import ChatroomSidebar from "~/features/messages/components/chatroomSidebar";
+import Drawer from "~/shared/components/ui/drawer/Drawer";
+import type { ChatroomDetail, Participant } from "~/shared/types/chat";
 
 interface ChatSidebarAreaProps {
   isMobile: boolean;
@@ -43,12 +43,11 @@ export const ChatSidebarArea: React.FC<ChatSidebarAreaProps> = ({
       {!isMobile && (
         <>
           {/* Backdrop for screens between 768px and 1024px */}
-          <input 
+          <input
             type="button"
             tabIndex={0}
-            className={`fixed inset-0 bg-black/20 backdrop-blur-[1px] z-40 lg:hidden transition-opacity duration-300 ${
-              isOptionsOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-            }`}
+            className={`fixed inset-0 bg-black/20 backdrop-blur-[1px] z-40 lg:hidden transition-opacity duration-300 ${isOptionsOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+              }`}
             onClick={() => setIsOptionsOpen(false)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
@@ -58,12 +57,11 @@ export const ChatSidebarArea: React.FC<ChatSidebarAreaProps> = ({
             }}
             aria-label="Close room options overlay"
           />
-          <div 
-            className={`z-50 lg:z-auto transition-all duration-300 ease-in-out absolute right-0 top-0 h-full lg:relative lg:h-auto overflow-hidden ${
-              isOptionsOpen 
-                ? "translate-x-0 w-80 opacity-100 shadow-2xl lg:shadow-none" 
+          <div
+            className={`z-50 lg:z-auto transition-all duration-300 ease-in-out absolute right-0 top-0 h-full lg:relative lg:h-auto overflow-hidden ${isOptionsOpen
+                ? "translate-x-0 w-80 opacity-100 shadow-2xl lg:shadow-none"
                 : "translate-x-full lg:translate-x-0 w-0 lg:w-0 opacity-0"
-            }`}
+              }`}
           >
             <div className="w-80 h-full">
               <ChatroomSidebar

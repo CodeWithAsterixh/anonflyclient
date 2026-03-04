@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { ChevronDown, Lock, Settings } from "lucide-react";
-import ChatroomSidebar from "../../../../components/chatroomSidebar";
-import Drawer from "../../../../components/ui/drawer/Drawer";
-import Logo from "../../../../components/logo";
-import Input from "../../../../components/ui/input";
-import type { ChatroomDetail } from "../../../../lib/types/chat";
+import ChatroomSidebar from "~/features/messages/components/chatroomSidebar";
+import Drawer from "~/shared/components/ui/drawer/Drawer";
+import Logo from "~/shared/components/logo";
+import Input from "~/shared/components/ui/input";
+import type { ChatroomDetail } from "~/shared/types/chat";
+import type { User } from "~/shared/types/User";
+import { authorizedFetch } from "~/shared/utils/apiHelper";
+import { checkAccess, removeParticipant, banParticipant, unbanParticipant } from "~/shared/utils/controllers/chatroomController";
+import { cryptSessionStorage } from "~/shared/utils/cryptSessionStorage";
+import type { ReplyingTo } from "~/routes/ChatroomPage/types";
 
 interface JoinRoomScreenProps {
   isMobile: boolean;
@@ -91,11 +96,10 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
 
             <button
               onClick={() => setIsOptionsOpen(!isOptionsOpen)}
-              className={`p-2 rounded-full transition-all ${
-                isOptionsOpen
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted hover:bg-white/5"
-              }`}
+              className={`p-2 rounded-full transition-all ${isOptionsOpen
+                ? "bg-primary/10 text-primary"
+                : "text-muted hover:bg-white/5"
+                }`}
               title="Room Options"
             >
               <Settings size={20} />
@@ -118,8 +122,8 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
 
               {((isLocked && !isCreator && !isAlreadyParticipant && !hasStoredCredentials)) ||
                 (passwordError &&
-                (passwordError.toLowerCase().includes("password") ||
-                  passwordError.toLowerCase().includes("locked"))) ? (
+                  (passwordError.toLowerCase().includes("password") ||
+                    passwordError.toLowerCase().includes("locked"))) ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-center gap-2 text-amber-500 mb-2">
                     <Lock size={18} />
@@ -131,22 +135,21 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
                     <Input
                       type="password"
                       value={joinPassword}
-                      onChange={(e) => onSetJoinPassword(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSetJoinPassword(e.target.value)}
                       placeholder="Enter room password"
                       disabled={isConnecting}
                       error={passwordError || undefined}
-                      onKeyDown={(e) => e.key === "Enter" && onJoinChatroom()}
+                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && onJoinChatroom()}
                     />
                   </div>
                   <div className="flex flex-col gap-3 mt-6">
                     <button
                       onClick={onJoinChatroom}
                       disabled={isConnecting}
-                      className={`w-full py-3 rounded-xl font-bold text-white transition-all shadow-lg ${
-                        isConnecting
-                          ? "bg-primary/50 cursor-not-allowed"
-                          : "bg-primary hover:opacity-90 shadow-primary/20"
-                      }`}
+                      className={`w-full py-3 rounded-xl font-bold text-white transition-all shadow-lg ${isConnecting
+                        ? "bg-primary/50 cursor-not-allowed"
+                        : "bg-primary hover:opacity-90 shadow-primary/20"
+                        }`}
                     >
                       {isConnecting ? (
                         <div className="flex items-center justify-center gap-2">
@@ -191,19 +194,17 @@ const JoinRoomScreen: React.FC<JoinRoomScreenProps> = ({
           <button
             type="button"
             aria-label="Close options"
-            className={`fixed inset-0 bg-black/20 backdrop-blur-[1px] z-40 lg:hidden transition-opacity duration-300 border-none outline-none ${
-              isOptionsOpen
-                ? "opacity-100 pointer-events-auto"
-                : "opacity-0 pointer-events-none"
-            }`}
+            className={`fixed inset-0 bg-black/20 backdrop-blur-[1px] z-40 lg:hidden transition-opacity duration-300 border-none outline-none ${isOptionsOpen
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none"
+              }`}
             onClick={() => setIsOptionsOpen(false)}
           />
           <div
-            className={`z-50 lg:z-auto transition-all duration-300 ease-in-out absolute right-0 top-0 h-full lg:relative lg:h-auto overflow-hidden ${
-              isOptionsOpen
-                ? "translate-x-0 w-80 opacity-100 shadow-2xl lg:shadow-none"
-                : "translate-x-full lg:translate-x-0 w-0 lg:w-0 opacity-0"
-            }`}
+            className={`z-50 lg:z-auto transition-all duration-300 ease-in-out absolute right-0 top-0 h-full lg:relative lg:h-auto overflow-hidden ${isOptionsOpen
+              ? "translate-x-0 w-80 opacity-100 shadow-2xl lg:shadow-none"
+              : "translate-x-full lg:translate-x-0 w-0 lg:w-0 opacity-0"
+              }`}
           >
             <div className="w-80 h-full">
               <ChatroomSidebar

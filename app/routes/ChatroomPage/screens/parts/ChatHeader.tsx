@@ -1,7 +1,7 @@
 import React from "react";
 import { ChevronDown, Settings, LogOutIcon } from "lucide-react";
-import Logo from "../../../../../components/logo";
-import type { ChatroomDetail, Participant } from "../../../../../lib/types/chat";
+import Logo from "~/shared/components/logo";
+import type { ChatroomDetail, Participant } from "~/shared/types/chat";
 
 interface ChatHeaderProps {
   isMobile: boolean;
@@ -79,11 +79,10 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
         <div className="w-fit flex gap-2 items-center justify-end">
           <button
             onClick={() => setIsOptionsOpen(!isOptionsOpen)}
-            className={`p-2 rounded-full transition-all ${
-              isOptionsOpen
-                ? "bg-primary/10 text-primary"
-                : "text-muted hover:bg-white/5"
-            }`}
+            className={`p-2 rounded-full transition-all ${isOptionsOpen
+              ? "bg-primary/10 text-primary"
+              : "text-muted hover:bg-white/5"
+              }`}
             title="Room Options"
             aria-label="Room options"
           >

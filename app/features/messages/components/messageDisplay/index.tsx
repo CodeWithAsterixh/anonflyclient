@@ -2,16 +2,16 @@ import { Reply } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useAuth } from "~/features/auth/hooks";
+import { type Emoji } from "~/shared/assets/emojis";
+import AlertDialog from "~/shared/components/alertDialog";
 import { useIsMobile, useSwipe } from "~/shared/hooks";
-import { type Emoji, allEmojis } from "~/shared/assets/emojis";
 import {
   getUserAvatar
 } from "~/shared/utils/controllers/colorsProcessors/userAvatar";
-import AlertDialog from "~/shared/components/alertDialog";
 import { MessageFullViewer } from "./components/MessageFullViewer";
-import { MessageRow } from "./components/MessageRow";
 import SystemMessage from "./components/SystemMessage";
 import type { MessageDisplayProps } from "./types";
+import { MessageRow } from "./components/MessageRow";
 
 /**
  * MessageDisplay component is a presentational component for displaying a single chat message.
@@ -31,7 +31,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
 }) => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
-  const isCurrentUser = user && user.userId === message.senderAid;
+  const isCurrentUser = user?.userId === message.senderAid;
   const isSystemMessage = message.type === "system";
 
   const [highlight, setHighlight] = useState(false);

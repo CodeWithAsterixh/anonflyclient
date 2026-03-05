@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@anonfly/react':
-        specifier: ^1.0.2
-        version: 1.0.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@anonfly/sdk':
         specifier: ^1.0.3
-        version: 1.0.3
+        version: 1.0.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@anonfly/sdk':
+        specifier: ^1.0.4
+        version: 1.0.4
       '@headlessui/react':
         specifier: ^2.2.9
         version: 2.2.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -127,14 +127,14 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@anonfly/react@1.0.2':
-    resolution: {integrity: sha512-SAF3iwnE7K+eFq7mIr9zhz60sMHCAeAGLpjb0PjX9uiBIoEJs4QbNr5/d65mui+/3PpDWeCkf1coNshGwW8xXA==}
+  '@anonfly/react@1.0.3':
+    resolution: {integrity: sha512-Sj/GK/Jcae5k1BXrmf9biF3UksKunBqxvq8zwizVa39M1d93efv0MLStaRs66qi5Q4TUqSumMEV8YymYl4LuWA==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@anonfly/sdk@1.0.3':
-    resolution: {integrity: sha512-Mza0pmVPBntj/H6T0fMJnwh2PStDG+OBK2/GqqRGrYwyXWnR3ruPsHMZfVTZlk57jN6ur9K9yeszRiIdDe7QSg==}
+  '@anonfly/sdk@1.0.4':
+    resolution: {integrity: sha512-r/mPGNUMrbT4VTNDrMglG+QfimUrwqjfzN1FYfEo2lItcmNEdLzxQbKLAqjmFEi6uT6xhwv0qhwjVKJN4OyUAg==}
 
   '@asamuzakjp/css-color@4.1.2':
     resolution: {integrity: sha512-NfBUvBaYgKIuq6E/RBLY1m0IohzNHAYyaJGuTK79Z23uNwmz2jl1mPsC5ZxCCxylinKhT1Amn5oNTlx1wN8cQg==}
@@ -2024,9 +2024,9 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@anonfly/react@1.0.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@anonfly/react@1.0.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
-      '@anonfly/sdk': 1.0.3
+      '@anonfly/sdk': 1.0.4
       clsx: 2.1.1
       lucide-react: 0.473.0(react@19.2.4)
       react: 19.2.4
@@ -2037,7 +2037,7 @@ snapshots:
       - encoding
       - utf-8-validate
 
-  '@anonfly/sdk@1.0.3':
+  '@anonfly/sdk@1.0.4':
     dependencies:
       cross-fetch: 4.1.0
       events: 3.3.0

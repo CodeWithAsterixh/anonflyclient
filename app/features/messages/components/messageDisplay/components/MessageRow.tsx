@@ -1,8 +1,6 @@
-import { Reply } from "lucide-react";
-import React, { useMemo } from "react";
-import type { Message } from "~/shared/types/chat";
+import React from "react";
 import Avatar from "~/shared/components/ui/avatar";
-import { getUserAvatar } from "~/shared/utils/controllers/colorsProcessors/userAvatar";
+import type { Message } from "~/shared/types/chat";
 import { MessageBubble } from "./MessageBubble";
 import { type Reaction } from "./ReactionList";
 

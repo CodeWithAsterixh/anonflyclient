@@ -94,6 +94,7 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
       ws.current?.send(JSON.stringify({
         type: "roomKeyRequest",
         chatroomId: message.chatroomId,
+        senderAid: user.userId
       }));
     }
   };
@@ -113,6 +114,7 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
           ws.current?.send(JSON.stringify({
             type: "roomKeyShare",
             chatroomId: message.chatroomId,
+            senderAid: user.userId,
             targetAid: message.senderAid,
             encryptedKey: encryptedKey.ciphertext,
             iv: encryptedKey.iv,

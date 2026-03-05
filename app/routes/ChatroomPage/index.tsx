@@ -215,6 +215,7 @@ const ChatroomPage: React.FC = () => {
     try {
       if (displayDetail?.isLocked && !isConnected) {
         reconnect();
+        setIsSubmitting(false); // Reset so auto-join or user can try again once connected
       } else {
         await joinChatroom(chatroomId, joinPassword);
       }

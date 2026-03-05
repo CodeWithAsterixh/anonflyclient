@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useEffect } from 'react';
 import { type ChatroomDetail } from '~/shared/types/chat';
 
 export interface AutoJoinOptions {
@@ -43,6 +43,10 @@ export const useAutoJoin = ({
     // 4. We haven't just joined this room
     // 5. We haven't been removed from this room
     // 6. We have the necessary conditions (public room or stored credentials)
+    if (!isJoined && lastJoinedRoomRef.current === chatroomId) {
+      lastJoinedRoomRef.current = null;
+    }
+
     if (
       !chatroomId ||
       isJoined ||
@@ -59,7 +63,7 @@ export const useAutoJoin = ({
       isAlreadyParticipant ||
       hasStoredCredentials;
 
-    if (canAutoJoin && !isSubmitting) {
+    if (canAutoJoin && isConnected && !isSubmitting) {
       const performAutoJoin = async () => {
         isJoiningRef.current = true;
         try {

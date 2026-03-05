@@ -54,17 +54,21 @@ export const useChatroomAccess = (
     try {
       const joinAuthToken = cryptSessionStorage.getItem(`room_join_auth_${chatroomId}`, chatroomId) || undefined;
       const response = await checkAccess(chatroomId, joinAuthToken);
+      console.log('[useChatroomAccess] checkAccess response:', response);
 
       if (response.success && response.data?.accessGranted) {
+        console.log('[useChatroomAccess] Access granted, fetching details...');
         setAccessState({ status: 'granted' });
         fetchChatroomDetails();
       } else {
+        console.error('[useChatroomAccess] Access denied:', response);
         setAccessState({
           status: 'denied',
           message: response.message || 'Access denied. You need a valid invite link to access this private room.'
         });
       }
-    } catch {
+    } catch (err) {
+      console.error('[useChatroomAccess] Error verifying access:', err);
       setAccessState({
         status: 'denied',
         message: 'Failed to verify access. Please try again later.'

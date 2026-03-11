@@ -42,6 +42,15 @@ self.addEventListener('fetch', (event) => {
   // Skip cross-origin requests
   if (url.origin !== self.location.origin) return;
 
+  // Skip SSE streams
+  const accept = event.request.headers.get('accept') || '';
+  if (accept.includes('text/event-stream')) return;
+
+  // Skip proxy traffic
+  if (url.pathname.startsWith('/proxy/')) {
+    return;
+  }
+
   // Skip API requests and WebSocket
   if (url.pathname.includes('/api/') || url.pathname.includes('socket')) {
     return;

@@ -83,9 +83,7 @@ const ChatroomPage: React.FC = () => {
 
   const shouldDeferConnection =
     accessState.status !== "granted" ||
-    (!hasStoredCredentials &&
-      (!chatroomDetail ||
-        (chatroomDetail.isLocked && !isCreator && !isAlreadyParticipant)));
+    (accessState.joinRequired === true && !hasStoredCredentials);
 
   const {
     messages,

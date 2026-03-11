@@ -8,6 +8,7 @@ import type { User } from '~/shared/types/User';
 export interface AccessState {
   status: 'checking' | 'granted' | 'denied';
   message?: string;
+  joinRequired?: boolean;
 }
 
 export const useChatroomAccess = (
@@ -54,11 +55,10 @@ export const useChatroomAccess = (
     try {
       const joinAuthToken = cryptSessionStorage.getItem(`room_join_auth_${chatroomId}`, chatroomId) || undefined;
       const response = await checkAccess(chatroomId, joinAuthToken);
-      console.log('[useChatroomAccess] checkAccess response:', response);
 
       if (response.success && response.data?.accessGranted) {
         console.log('[useChatroomAccess] Access granted, fetching details...');
-        setAccessState({ status: 'granted' });
+        setAccessState({ status: 'granted', joinRequired: !!response.data?.joinRequired });
         fetchChatroomDetails();
       } else {
         console.error('[useChatroomAccess] Access denied:', response);

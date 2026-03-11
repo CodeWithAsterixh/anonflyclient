@@ -76,12 +76,28 @@ self.addEventListener('fetch', (event) => {
       }
 
       return fetch(event.request).then((response) => {
-        // Cache new static assets
-        if (event.request.method === 'GET' && response.status === 200) {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+        // Cache new static assets (only safe, cacheable responses)
+        const isGet = event.request.method === 'GET';
+        const isBasic = response && response.type === 'basic'; // same-origin
+        const ok = response && response.ok; // 2xx
+        const noRange = !event.request.headers.get('range');
+        const notOnlyIfCached = event.request.cache !== 'only-if-cached';
+        const notRedirected = !response.redirected;
+        const cacheable = isGet && ok && isBasic && noRange && notOnlyIfCached && notRedirected;
+
+        if (cacheable) {
+          try {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache).catch((err) => {
+                console.warn('[SW] Cache.put failed:', err);
+              });
+            }).catch((err) => {
+              console.warn('[SW] caches.open failed:', err);
+            });
+          } catch (err) {
+            console.warn('[SW] Failed to cache response:', err);
+          }
         }
 
         // Clean redirected responses for other requests too

@@ -68,11 +68,9 @@ export const useChatroomMessages = (currentChatroomId: string | null, user: any)
           const identity = await getIdentity();
           if (!identity) throw new Error("Identity not found");
 
-          let finalContent = content;
-          if (roomKey) {
-            const encrypted = await encryptMessage(content, roomKey);
-            finalContent = JSON.stringify(encrypted);
-          }
+          if (!roomKey) throw new Error("Room is not secured yet");
+          const encrypted = await encryptMessage(content, roomKey);
+          const finalContent = JSON.stringify(encrypted);
 
           const signature = await signBlob(
             btoa(finalContent),
@@ -107,11 +105,9 @@ export const useChatroomMessages = (currentChatroomId: string | null, user: any)
     async (ws: WebSocket | null, messageId: string, newContent: string, roomKey: CryptoKey | null) => {
       if (ws?.readyState === WebSocket.OPEN && currentChatroomId && user) {
         try {
-          let finalContent = newContent;
-          if (roomKey) {
-            const encrypted = await encryptMessage(newContent, roomKey);
-            finalContent = JSON.stringify(encrypted);
-          }
+          if (!roomKey) throw new Error("Room is not secured yet");
+          const encrypted = await encryptMessage(newContent, roomKey);
+          const finalContent = JSON.stringify(encrypted);
 
           ws.send(
             JSON.stringify({

@@ -12,6 +12,7 @@ import { MessageFullViewer } from "./components/MessageFullViewer";
 import SystemMessage from "./components/SystemMessage";
 import type { MessageDisplayProps } from "./types";
 import { MessageRow } from "./components/MessageRow";
+import MessageContextMenu from "./components/MessageContextMenu";
 
 /**
  * MessageDisplay component is a presentational component for displaying a single chat message.
@@ -38,6 +39,8 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
   const [showReactions, setShowReactions] = useState(false);
   const [showAllEmojis, setShowAllEmojis] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [contextMenuOpen, setContextMenuOpen] = useState(false);
+  const [contextMenuPos, setContextMenuPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
   const bubbleRef = useRef<HTMLDivElement>(null);
   const reactionsRef = useRef<HTMLDivElement>(null);
@@ -48,12 +51,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
   };
 
   // Check if message is editable (within 10 minutes)
-  const isEditable = useMemo(() => {
-    if (!isCurrentUser || message.type === "system") return false;
-    const messageTime = new Date(message.timestamp).getTime();
-    const currentTime = Date.now();
-    return currentTime - messageTime < 10 * 60 * 1000;
-  }, [message.timestamp, isCurrentUser, message.type]);
+
 
   // Prevent scrolling when preview is active
   useEffect(() => {
@@ -209,6 +207,22 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
     );
   }
 
+  const isEditable = useMemo(() => {
+    if (!isCurrentUser || message.type === "system") return false;
+    const messageTime = new Date(message.timestamp).getTime();
+    const currentTime = Date.now();
+    return currentTime - messageTime < 10 * 60 * 1000;
+  }, [message.timestamp, isCurrentUser, message.type]);
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenuPos({ top: e.clientY, left: e.clientX });
+    setContextMenuOpen(true);
+  };
+
+  const closeContextMenu = () => setContextMenuOpen(false);
+
   return (
     <>
       <article
@@ -238,8 +252,20 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
           onDoubleClick={handleDoubleClick}
           bubbleRef={bubbleRef}
           onShowReactionDetails={onShowReactionDetails}
+          onContextMenu={(e) => handleContextMenu(e)}
         />
       </article>
+      <MessageContextMenu
+        open={contextMenuOpen}
+        position={contextMenuPos}
+        onClose={closeContextMenu}
+        message={message}
+        isEditable={isEditable}
+        bubbleRef={bubbleRef as any}
+        onReply={handleReply}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
       {showReactions &&
         portalRoot &&
         createPortal(

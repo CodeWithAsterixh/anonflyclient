@@ -17,6 +17,7 @@ interface MessageRowProps {
   bubbleRef?: React.RefObject<HTMLDivElement | null>;
   isPreview?: boolean;
   onShowReactionDetails?: (reactions: Reaction[], messageId: string) => void;
+  onContextMenu?: (e: React.MouseEvent, message: Message) => void;
 }
 
 export const MessageRow: React.FC<MessageRowProps> = ({
@@ -32,6 +33,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
   bubbleRef,
   isPreview = false,
   onShowReactionDetails,
+  onContextMenu,
 }) => {
   const getBubbleTransform = () => {
     if (isPreview || showReactions) return "none";
@@ -100,6 +102,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
           scrollToRepliedMessage={scrollToRepliedMessage}
           isFocused={isFocused}
           onShowReactionDetails={onShowReactionDetails}
+          onContextMenu={onContextMenu}
         />
       </button>
     </div>

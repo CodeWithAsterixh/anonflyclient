@@ -11,6 +11,7 @@ interface MessageBubbleProps {
   scrollToRepliedMessage: (id: string) => void;
   isFocused?: boolean;
   onShowReactionDetails?: (reactions: Reaction[], messageId: string) => void;
+  onContextMenu?: (e: React.MouseEvent, message: Message) => void;
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
@@ -20,9 +21,18 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   scrollToRepliedMessage,
   isFocused,
   onShowReactionDetails,
+  onContextMenu,
 }) => {
+  const handleContextMenu = (e: React.MouseEvent) => {
+    if (onContextMenu) {
+      e.preventDefault();
+      e.stopPropagation();
+      onContextMenu(e, message);
+    }
+  };
+
   return (
-    <>
+    <div onContextMenu={handleContextMenu}>
       {/* Reply Preview in Bubble */}
       {message.replyTo && (
         <button
@@ -72,6 +82,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         onShowDetails={onShowReactionDetails}
         messageId={message.id || ""}
       />
-    </>
+    </div>
   );
 };

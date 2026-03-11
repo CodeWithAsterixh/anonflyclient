@@ -10,8 +10,8 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@anonfly/react": "^1.0.3",
-    "@anonfly/sdk": "^1.0.4",
+    "@anonfly/react": "link:..\\anonfly-package\\packages\\react",
+    "@anonfly/sdk": "link:..\\anonfly-package\\packages\\core",
     "@headlessui/react": "^2.2.9",
     "@react-router/node": "7.12.0",
     "@react-router/serve": "7.12.0",
@@ -48,5 +48,11 @@
     "vite": "^7.1.7",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^4.0.18"
+  },
+  "pnpm": {
+    "overrides": {
+      "@anonfly/sdk": "link:../anonfly-package/packages/core",
+      "@anonfly/react": "link:../anonfly-package/packages/react"
+    }
   }
 }

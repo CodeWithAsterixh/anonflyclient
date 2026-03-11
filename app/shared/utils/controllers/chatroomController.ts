@@ -1,5 +1,6 @@
 import { getSessionUser } from '../authStorage';
 import { getUserRegion } from '../location';
+import { getAPIBaseURL } from '../../constants/api';
 
 /**
  * Generates authorization headers for API requests using the current session token.
@@ -52,11 +53,30 @@ export const checkAccess = async (chatroomId: string, joinAuthToken?: string) =>
 
     return data;
   } catch (error: any) {
-    return {
-      success: false,
-      message: error.message || 'Failed to verify access',
-      statusCode: 500
-    };
+    // Fallback: attempt direct API call when proxy is unavailable (public endpoint)
+    try {
+      const base = getAPIBaseURL();
+      const directResp = await fetch(`${base}/chatroom/${encodeURIComponent(chatroomId)}/check-access`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ joinAuthToken }),
+      });
+      const directData = await directResp.json();
+      if (!directResp.ok) {
+        return {
+          success: false,
+          message: directData.message || 'Access denied',
+          statusCode: directResp.status
+        };
+      }
+      return directData;
+    } catch (directError: any) {
+      return {
+        success: false,
+        message: directError.message || 'Failed to verify access',
+        statusCode: 500
+      };
+    }
   }
 };
 

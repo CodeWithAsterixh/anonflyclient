@@ -9,6 +9,7 @@ import { getIdentity, getAllIdentities, switchIdentity as switchLocalIdentity, g
 import type { User } from '~/shared/types/User';
 import { getSessionUser, setSessionUser, clearSessionUser } from '~/shared/utils/authStorage';
 import type { AuthState } from './types';
+import { webSocketController } from '~/shared/utils/controllers/websocketController';
 
 export const useAuthInternal = () => {
   const [authState, setAuthState] = useState<AuthState>({
@@ -271,6 +272,21 @@ export const useAuthInternal = () => {
       checkPremiumStatus();
     }
   }, [authState.isAuthenticated, authState.token, authState.allowedFeatures, authState.loading, checkPremiumStatus]);
+
+  // WebSocket Real-time Premium Updates
+  useEffect(() => {
+    if (!authState.isAuthenticated || !authState.token) return;
+
+    const handlePremiumUpdate = (data: any) => {
+      console.log("[useAuthInternal] Premium status updated via WebSocket:", data);
+      checkPremiumStatus();
+    };
+
+    webSocketController.on('premiumUpdated', handlePremiumUpdate);
+    return () => {
+      webSocketController.off('premiumUpdated', handlePremiumUpdate);
+    };
+  }, [authState.isAuthenticated, authState.token, checkPremiumStatus]);
 
   useEffect(() => {
     if (authState.retryCountdown === null) return;

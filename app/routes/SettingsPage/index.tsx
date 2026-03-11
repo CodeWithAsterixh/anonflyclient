@@ -33,6 +33,7 @@ import { useSettings } from '~/features/settings/hooks';
 import { ChatLayoutContext } from '~/shell/context/ChatLayoutContext';
 import { requireAuth } from '~/middleware/auth';
 import HideableField from './components/HideableField';
+import PremiumUpgradeModal from './components/PremiumUpgradeModal';
 import { getAllIdentities } from '~/shared/utils/identityManager';
 
 export const meta: MetaFunction = () => {
@@ -60,6 +61,7 @@ const SettingsPage: React.FC = () => {
 
   const {
     user,
+    token,
     identities,
     authLoading,
     chatrooms,
@@ -107,9 +109,10 @@ const SettingsPage: React.FC = () => {
     });
   };
 
-  const isPremium = user?.allowedFeatures?.includes('CREATE_PRIVATE_ROOM');
+  const isPremium = user?.allowedFeatures?.includes('create_private_hidden_room') || user?.allowedFeatures?.includes('CREATE_PRIVATE_ROOM');
 
   const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
 
   const handleRefresh = async () => {
     if (isRefreshing) return;
@@ -211,6 +214,15 @@ const SettingsPage: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap gap-2 mb-6">
+            {!isPremium && (
+              <button
+                onClick={() => setShowUpgradeModal(true)}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-linear-to-r from-amber-500 to-orange-600 hover:opacity-90 rounded-xl transition-all shadow-md shadow-orange-500/20"
+              >
+                <Crown size={16} fill="currentColor" />
+                <span>Upgrade to Premium</span>
+              </button>
+            )}
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
@@ -630,6 +642,14 @@ const SettingsPage: React.FC = () => {
       >
         {alertDialog.children}
       </AlertDialog>
+
+      {showUpgradeModal && token && (
+        <PremiumUpgradeModal 
+          token={token} 
+          onClose={() => setShowUpgradeModal(false)}
+          onSuccess={handleRefresh}
+        />
+      )}
     </div>
   );
 };

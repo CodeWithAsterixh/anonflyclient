@@ -108,13 +108,29 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
     roomKeyRef
   );
 
+  // Reset state when user changes
+  useEffect(() => {
+    if (user?.userId) {
+      setError(null);
+      setIsRemoved(false);
+      isRemovedRef.current = false;
+      joiningRef.current = null;
+      // We don't necessarily want to leave the room if we just switched account
+      // but we should probably clear messages if the new identity isn't part of it
+      // For now, let's just ensure we reconnect with the new token
+    }
+  }, [user?.userId, setIsRemoved, isRemovedRef, joiningRef]);
+
   useEffect(() => {
     if (!deferConnection) {
       connect();
     }
     return () => {
       if (ws.current) {
-        ws.current.close();
+        // Only close if it's not already closed or closing
+        if (ws.current.readyState === WebSocket.OPEN || ws.current.readyState === WebSocket.CONNECTING) {
+          ws.current.close();
+        }
       }
     };
   }, [connect, deferConnection, ws]);

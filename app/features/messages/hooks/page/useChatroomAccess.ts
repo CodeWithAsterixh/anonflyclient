@@ -49,7 +49,10 @@ export const useChatroomAccess = (
   }, [chatroomId, token, user, logout]);
 
   const verifyAccess = useCallback(async () => {
-    if (!chatroomId || !token || !user) return;
+    if (!chatroomId || !token || !user) {
+      setAccessState({ status: 'checking' });
+      return;
+    }
 
     setAccessState({ status: 'checking' });
     try {

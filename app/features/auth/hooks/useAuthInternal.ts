@@ -77,7 +77,14 @@ export const useAuthInternal = () => {
   }, []);
 
   const switchAccount = useCallback(async (aid: string, redirectTo: string = '/') => {
-    setAuthState(prev => ({ ...prev, loading: true, retryCountdown: null }));
+    setAuthState(prev => ({ 
+      ...prev, 
+      loading: true, 
+      user: null, 
+      token: null, 
+      isAuthenticated: false,
+      retryCountdown: null 
+    }));
     try {
       const identity = await switchLocalIdentity(aid);
       if (identity) {

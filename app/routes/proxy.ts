@@ -37,8 +37,14 @@ async function proxyHandler({ request, params }: LoaderFunctionArgs | ActionFunc
             redirect: "manual", // Let the client handle redirects
         });
 
-        // Clean up headers from the target response if needed
+        // Clean up headers from the target response
         const responseHeaders = new Headers(response.headers);
+        
+        // Remove compression headers if the fetch body is already decompressed
+        // fetch in most modern runtimes (Node 18+, CF Workers) automatically decompresses
+        responseHeaders.delete("content-encoding");
+        // Remove content-length as the body stream length might have changed due to decompression
+        responseHeaders.delete("content-length");
 
         return new Response(response.body, {
             status: response.status,

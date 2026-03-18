@@ -120,6 +120,8 @@ const ChatroomPage: React.FC = () => {
     showAlertDialog,
   });
 
+  const { typingUsers, sendTypingStatus } = useTyping(chatroomId, ws);
+
   const {
     messagesContainerRef,
     messagesEndRef,
@@ -132,9 +134,12 @@ const ChatroomPage: React.FC = () => {
     scrollToBottom,
     handleSendMessage,
     handleEditMessage,
-  } = useChatroomMessaging(messages, sendMessage, editMessage);
-
-  const { typingUsers, sendTypingStatus } = useTyping(chatroomId, ws);
+  } = useChatroomMessaging(
+    messages,
+    sendMessage,
+    editMessage,
+    sendTypingStatus
+  );
   const { theme } = useTheme();
 
   const displayDetail = sseChatroomDetail || chatroomDetail;

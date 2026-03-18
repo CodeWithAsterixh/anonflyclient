@@ -6,7 +6,7 @@ export interface UseChatroomReturn {
   messages: Message[];
   participants: Map<string, Participant>;
   chatroomDetail: ChatroomDetail | null;
-  sendMessage: (content: string, replyTo?: { messageId: string; senderUsername: string; content: string; senderAid: string }) => Promise<void>;
+  sendMessage: (content: string, replyToId?: string) => Promise<void>;
   editMessage: (messageId: string, newContent: string) => Promise<void>;
   deleteMessage: (messageId: string) => Promise<void>;
   sendReaction: (messageId: string, emoji: Emoji) => void;

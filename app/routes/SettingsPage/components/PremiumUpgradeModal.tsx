@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Crown, Shield, Zap, Coins, X, CheckCircle2, AlertCircle, Copy, ExternalLink } from 'lucide-react';
+import { Crown, Shield, Zap, X, CheckCircle2, AlertCircle, Copy } from 'lucide-react';
 import Card from '~/shared/components/ui/card';
 import Badge from '~/shared/components/ui/badge';
 import Input from '~/shared/components/ui/input';
-import { createPaymentIntent, redeemVoucher } from '~/shared/utils/controllers/paymentController';
+import { submitManualProof, redeemVoucher } from '~/shared/utils/controllers/paymentController';
 import { useClipboard } from '~/shared/hooks';
 
 interface PremiumUpgradeModalProps {
@@ -16,17 +16,21 @@ const PremiumUpgradeModal: React.FC<PremiumUpgradeModalProps> = ({ token, onClos
   const [step, setStep] = useState<'select' | 'pay' | 'redeem'>('select');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paymentData, setPaymentData] = useState<any>(null);
+  const [paymentProof, setPaymentProof] = useState('');
   const [voucherCode, setVoucherCode] = useState('');
   const { copy, hasCopied } = useClipboard();
 
-  const handleSelectProvider = async (provider: 'monero' | 'lightning' | 'stripe') => {
+  const handleManualPayment = () => {
+    setStep('pay');
+  };
+
+  const handleSubmitProof = async () => {
+    if (!paymentProof.trim()) return;
     setLoading(true);
     setError(null);
     try {
-      const intent = await createPaymentIntent(token, provider, 5.00); // Fixed price for now
-      setPaymentData(intent);
-      setStep('pay');
+      await submitManualProof(token, 5, 'USD', paymentProof.trim());
+      setStep('redeem'); // We reuse 'redeem' step but with a different message or just show success
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -90,49 +94,20 @@ const PremiumUpgradeModal: React.FC<PremiumUpgradeModalProps> = ({ token, onClos
             <div className="space-y-6">
               <div className="grid grid-cols-1 gap-3">
                 <Card 
-                  onClick={() => handleSelectProvider('monero')}
-                  className="p-4 flex items-center gap-4 group hover:border-primary/50 transition-all"
+                  onClick={handleManualPayment}
+                  className="p-4 flex items-center gap-4 group hover:border-primary/50 transition-all cursor-pointer"
                 >
-                  <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 group-hover:scale-110 transition-transform">
-                    <Coins size={24} />
-                  </div>
-                  <div className="flex-1 min-w-0 text-left">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-foreground">Monero (XMR)</h3>
-                      <Badge variant="green" className="py-0.5 px-1.5">Recommended</Badge>
-                    </div>
-                    <p className="text-xs text-muted">Maximum Anonymity. No KYC.</p>
-                  </div>
-                  <Zap size={18} className="text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                </Card>
-
-                <Card 
-                  onClick={() => handleSelectProvider('lightning')}
-                  className="p-4 flex items-center gap-4 group hover:border-primary/50 transition-all"
-                >
-                  <div className="w-12 h-12 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-yellow-500 group-hover:scale-110 transition-transform">
-                    <Zap size={24} />
-                  </div>
-                  <div className="flex-1 min-w-0 text-left">
-                    <h3 className="font-bold text-foreground">Bitcoin Lightning</h3>
-                    <p className="text-xs text-muted">Instant & Low Fees.</p>
-                  </div>
-                </Card>
-
-                <Card 
-                  onClick={() => handleSelectProvider('stripe')}
-                  className="p-4 flex items-center gap-4 group hover:border-primary/50 transition-all"
-                >
-                  <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                     <Shield size={24} />
                   </div>
                   <div className="flex-1 min-w-0 text-left">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-foreground">Credit Card / Apple Pay</h3>
-                      <Badge variant="red" className="py-0.5 px-1.5">Not Anonymous</Badge>
+                      <h3 className="font-bold text-foreground">Manual Transaction</h3>
+                      <Badge variant="blue" className="py-0.5 px-1.5">Direct Transfer</Badge>
                     </div>
-                    <p className="text-xs text-muted">Convenient but links your identity.</p>
+                    <p className="text-xs text-muted">Bank transfer or Crypto. Reviewed in 2 days.</p>
                   </div>
+                  <Zap size={18} className="text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Card>
               </div>
 
@@ -157,52 +132,51 @@ const PremiumUpgradeModal: React.FC<PremiumUpgradeModalProps> = ({ token, onClos
             </div>
           )}
 
-          {step === 'pay' && paymentData && (
-            <div className="space-y-6 text-center animate-in zoom-in-95 duration-200">
-              <div className="p-6 bg-muted-bg rounded-3xl border border-border space-y-4">
-                <p className="text-sm text-muted">Send exactly <span className="font-bold text-foreground">{paymentData.amount} USD</span> equivalent to:</p>
-                
-                {paymentData.provider === 'monero' && (
-                  <div className="space-y-4">
-                    <div className="p-3 bg-background border border-border rounded-2xl font-mono text-[10px] break-all select-all">
-                      {paymentData.address}
+          {step === 'pay' && (
+            <div className="space-y-6 animate-in zoom-in-95 duration-200">
+              <div className="p-6 bg-muted-bg rounded-3xl border border-border space-y-6">
+                <div>
+                  <h4 className="text-sm font-bold text-foreground mb-3">Transfer Details</h4>
+                  <div className="space-y-3">
+                    <div className="p-4 bg-background border border-border rounded-2xl text-left">
+                      <p className="text-[10px] text-muted uppercase font-bold mb-1">Monero (XMR) Address</p>
+                      <div className="flex items-center justify-between gap-3">
+                        <code className="text-xs font-mono break-all text-primary">4...PLACEHOLDER_XMR_ADDRESS_FROM_USER...</code>
+                        <button onClick={() => copy('4...PLACEHOLDER_XMR_ADDRESS_FROM_USER...')} className="text-muted hover:text-primary shrink-0">
+                          {hasCopied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
+                        </button>
+                      </div>
                     </div>
-                    <button 
-                      onClick={() => copy(paymentData.address)}
-                      className="flex items-center gap-2 mx-auto px-4 py-2 bg-primary/10 text-primary text-sm font-bold rounded-xl hover:bg-primary/20 transition-all"
-                    >
-                      {hasCopied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
-                      <span>{hasCopied ? 'Copied!' : 'Copy Address'}</span>
-                    </button>
-                  </div>
-                )}
-
-                {paymentData.provider === 'lightning' && (
-                  <div className="space-y-4 text-center">
-                    <div className="aspect-square w-48 mx-auto bg-white p-2 rounded-2xl">
-                      {/* QR Code Placeholder */}
-                      <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground italic text-xs">QR Code</div>
+                    <div className="p-4 bg-background border border-border rounded-2xl text-left">
+                      <p className="text-[10px] text-muted uppercase font-bold mb-1">Amount</p>
+                      <p className="text-sm font-bold text-foreground">5.00 USD (equiv. in XMR)</p>
                     </div>
-                    <p className="text-[10px] font-mono text-muted break-all">{paymentData.invoice}</p>
                   </div>
-                )}
+                </div>
 
-                {paymentData.provider === 'stripe' && (
-                  <a 
-                    href={paymentData.checkoutUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="w-full py-4 bg-primary text-white font-bold rounded-2xl hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+                <div className="space-y-3 pt-4 border-t border-border">
+                  <h4 className="text-sm font-bold text-foreground text-left">Submit Proof</h4>
+                  <p className="text-xs text-muted text-left">Please provide the transaction hash or any reference ID for our review.</p>
+                  <Input 
+                    placeholder="Enter transaction hash/ID..." 
+                    value={paymentProof}
+                    onChange={(e) => setPaymentProof(e.target.value)}
+                    className="w-full"
+                  />
+                  <button 
+                    onClick={handleSubmitProof}
+                    disabled={loading || !paymentProof.trim()}
+                    className="w-full py-4 bg-primary text-white font-bold rounded-2xl hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 disabled:opacity-50"
                   >
-                    Go to Secure Checkout
-                    <ExternalLink size={18} />
-                  </a>
-                )}
+                    Submit for Review
+                    <CheckCircle2 size={18} />
+                  </button>
+                </div>
               </div>
 
               <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl flex items-start gap-3 text-amber-500 text-xs text-left">
-                <Shield size={16} className="shrink-0 mt-0.5" />
-                <p>After payment, you will receive a <strong>Voucher Code</strong>. Keep this window open or save the code to redeem your features.</p>
+                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                <p>After submission, our team will review the transaction. Features will be activated within <strong>2 business days</strong>.</p>
               </div>
 
               <button 
@@ -219,8 +193,8 @@ const PremiumUpgradeModal: React.FC<PremiumUpgradeModalProps> = ({ token, onClos
               <div className="w-20 h-20 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 size={48} />
               </div>
-              <h3 className="text-2xl font-bold text-foreground">Upgrade Successful!</h3>
-              <p className="text-muted max-w-xs mx-auto">Your premium features have been unlocked and synced to your account.</p>
+              <h3 className="text-2xl font-bold text-foreground">Submission Received!</h3>
+              <p className="text-muted max-w-xs mx-auto">Your proof has been submitted for review. You will receive premium access within 2 business days once verified.</p>
             </div>
           )}
         </div>

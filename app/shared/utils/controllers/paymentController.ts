@@ -57,3 +57,27 @@ export const redeemVoucher = async (
 
   return data.data;
 };
+
+/**
+ * Submits a manual payment proof for review.
+ */
+export const submitManualProof = async (
+  token: string,
+  amount: number,
+  currency: string,
+  proof: string
+): Promise<{ success: boolean; message: string; data: any }> => {
+  const response = await fetch(`${getAPIBaseURL()}/payments/submit-manual-proof`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ amount, currency, proof })
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || 'Failed to submit proof');
+
+  return data;
+};

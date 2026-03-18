@@ -39,7 +39,7 @@ interface ChatScreenProps {
   onCloseEditModal: () => void;
   onScroll: () => void;
   onScrollToBottom: () => void;
-  onSendMessage: (content: string) => void;
+  onSendMessage: (content: string, replyToId?: string) => void;
   onEditMessage: (content: string) => void;
   onSetReplyingTo: (reply: ReplyingTo | null) => void;
   onSetEditingMessage: (edit: EditingMessage | null) => void;

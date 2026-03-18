@@ -1,5 +1,5 @@
 export interface MessageInputProps {
-  onSendMessage: (content: string) => void;
+  onSendMessage: (content: string, replyToId?: string) => void;
   onEditMessage?: (content: string) => void;
   isDisabled: boolean;
   replyingTo?: {

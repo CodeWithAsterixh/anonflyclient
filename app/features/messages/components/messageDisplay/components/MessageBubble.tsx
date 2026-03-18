@@ -31,6 +31,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     }
   };
 
+  console.log(message?.replyTo)
   return (
     <div onContextMenu={handleContextMenu}>
       {/* Reply Preview in Bubble */}
@@ -42,8 +43,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
             scrollToRepliedMessage(message.replyTo!.messageId);
           }}
           className={`w-full text-left mb-2 p-2 rounded-lg border-l-4 text-xs cursor-pointer transition-colors border-y-0 border-r-0 ${isCurrentUser
-              ? "bg-white/20 border-white/40 hover:bg-white/30"
-              : "bg-white/5 border-border hover:bg-white/10"
+            ? "bg-white/20 border-white/40 hover:bg-white/30"
+            : "bg-white/5 border-border hover:bg-white/10"
             }`}
         >
           <p className="font-bold opacity-70 truncate">

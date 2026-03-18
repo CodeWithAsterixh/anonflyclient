@@ -183,9 +183,9 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
   );
 
   const sendMessage = useCallback(
-    async (content: string, replyTo?: any) => {
+    async (content: string, replyToId?: string) => {
       try {
-        await sendMessageAction(ws.current, content, roomKeyRef.current, replyTo);
+        await sendMessageAction(ws.current, content, roomKeyRef.current, replyToId);
       } catch {
         setError("Failed to secure message");
       }

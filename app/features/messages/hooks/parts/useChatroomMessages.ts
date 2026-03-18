@@ -31,7 +31,7 @@ export const useChatroomMessages = (currentChatroomId: string | null, user: any)
         if (msg.id === messageId) {
           return { ...msg, content: "[This message was deleted]", type: "system" as const, isDeleted: true };
         }
-        if (msg.replyTo && msg.replyTo.messageId === messageId) {
+        if (msg.replyTo?.messageId === messageId) {
           return { ...msg, replyTo: { ...msg.replyTo, content: "[This message was deleted]" } };
         }
         return msg;
@@ -45,7 +45,7 @@ export const useChatroomMessages = (currentChatroomId: string | null, user: any)
         if (msg.id === messageId) {
           return { ...msg, content: newContent, isEdited: true };
         }
-        if (msg.replyTo && msg.replyTo.messageId === messageId) {
+        if (msg.replyTo?.messageId === messageId) {
           return { ...msg, replyTo: { ...msg.replyTo, content: newContent } };
         }
         return msg;
@@ -62,7 +62,7 @@ export const useChatroomMessages = (currentChatroomId: string | null, user: any)
   }, []);
 
   const sendMessage = useCallback(
-    async (ws: WebSocket | null, content: string, roomKey: CryptoKey | null, replyTo?: any) => {
+    async (ws: WebSocket | null, content: string, roomKey: CryptoKey | null, replyToId?: string) => {
       if (ws?.readyState === WebSocket.OPEN && currentChatroomId && user) {
         try {
           const identity = await getIdentity();
@@ -84,12 +84,7 @@ export const useChatroomMessages = (currentChatroomId: string | null, user: any)
               content: finalContent,
               signature,
               userAid: identity.aid,
-              replyTo: replyTo ? {
-                messageId: replyTo.messageId,
-                username: replyTo.senderUsername,
-                content: replyTo.content,
-                userAid: replyTo.senderAid
-              } : undefined,
+              replyToId: replyToId,
             })
           );
         } catch (err: any) {

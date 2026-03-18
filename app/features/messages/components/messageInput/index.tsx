@@ -68,7 +68,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
       if (editingMessage) {
         onEditMessage?.(messageInput);
       } else {
-        onSendMessage(messageInput);
+        onSendMessage(messageInput, replyingTo?.messageId);
       }
       setMessageInput('');
 

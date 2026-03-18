@@ -3,8 +3,9 @@ import type { ReplyingTo } from '~/routes/ChatroomPage/types';
 
 export const useChatroomMessaging = (
   messages: any[],
-  sendMessage: (content: string, replyingTo?: ReplyingTo) => void,
-  editMessage: (messageId: string, newContent: string) => void
+  sendMessage: (content: string, replyToId?: string) => void,
+  editMessage: (messageId: string, newContent: string) => void,
+  onTyping: (isTyping: boolean) => void
 ) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -33,10 +34,10 @@ export const useChatroomMessaging = (
     }
   }, []);
 
-  const handleSendMessage = useCallback((content: string) => {
-    sendMessage(content, replyingTo || undefined);
+  const handleSendMessage = useCallback((content: string, replyToId?: string) => {
+    sendMessage(content, replyToId);
     setReplyingTo(null);
-  }, [sendMessage, replyingTo]);
+  }, [sendMessage]);
 
   const handleEditMessage = useCallback((newContent: string) => {
     if (editingMessage) {

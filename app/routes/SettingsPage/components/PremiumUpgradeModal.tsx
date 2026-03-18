@@ -19,6 +19,8 @@ const PremiumUpgradeModal: React.FC<PremiumUpgradeModalProps> = ({ token, onClos
   const [paymentProof, setPaymentProof] = useState('');
   const [voucherCode, setVoucherCode] = useState('');
   const { copy, hasCopied } = useClipboard();
+  const [selectedToken, setSelectedToken] = useState<'USDT' | 'USDC' | 'USDM'>('USDT');
+  const walletAddress = import.meta.env.VITE_WALLET_ADDRESS || "0x789...PLEASE_SET_VITE_WALLET_ADDRESS_IN_ENV...";
 
   const handleManualPayment = () => {
     setStep('pay');
@@ -29,8 +31,8 @@ const PremiumUpgradeModal: React.FC<PremiumUpgradeModalProps> = ({ token, onClos
     setLoading(true);
     setError(null);
     try {
-      await submitManualProof(token, 5, 'USD', paymentProof.trim());
-      setStep('redeem'); // We reuse 'redeem' step but with a different message or just show success
+      await submitManualProof(token, 5, selectedToken, paymentProof.trim());
+      setStep('redeem');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -82,7 +84,7 @@ const PremiumUpgradeModal: React.FC<PremiumUpgradeModalProps> = ({ token, onClos
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto max-h-[70vh]">
           {error && (
             <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-2xl flex items-start gap-3 text-destructive text-sm animate-in slide-in-from-top-2">
               <AlertCircle size={18} className="shrink-0 mt-0.5" />
@@ -98,16 +100,16 @@ const PremiumUpgradeModal: React.FC<PremiumUpgradeModalProps> = ({ token, onClos
                   className="p-4 flex items-center gap-4 group hover:border-primary/50 transition-all cursor-pointer"
                 >
                   <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                    <Shield size={24} />
+                    <Zap size={24} />
                   </div>
                   <div className="flex-1 min-w-0 text-left">
                     <div className="flex items-center gap-2">
                       <h3 className="font-bold text-foreground">Manual Transaction</h3>
-                      <Badge variant="blue" className="py-0.5 px-1.5">Direct Transfer</Badge>
+                      <Badge variant="blue" className="py-0.5 px-1.5 text-[10px]">Direct Transfer</Badge>
                     </div>
-                    <p className="text-xs text-muted">Bank transfer or Crypto. Reviewed in 2 days.</p>
+                    <p className="text-xs text-muted">Celo Network (USDT, USDC, USDM). Reviewed in 2 days.</p>
                   </div>
-                  <Zap size={18} className="text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <CheckCircle2 size={18} className="text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Card>
               </div>
 
@@ -134,54 +136,84 @@ const PremiumUpgradeModal: React.FC<PremiumUpgradeModalProps> = ({ token, onClos
 
           {step === 'pay' && (
             <div className="space-y-6 animate-in zoom-in-95 duration-200">
-              <div className="p-6 bg-muted-bg rounded-3xl border border-border space-y-6">
-                <div>
-                  <h4 className="text-sm font-bold text-foreground mb-3">Transfer Details</h4>
-                  <div className="space-y-3">
-                    <div className="p-4 bg-background border border-border rounded-2xl text-left">
-                      <p className="text-[10px] text-muted uppercase font-bold mb-1">Monero (XMR) Address</p>
-                      <div className="flex items-center justify-between gap-3">
-                        <code className="text-xs font-mono break-all text-primary">4...PLACEHOLDER_XMR_ADDRESS_FROM_USER...</code>
-                        <button onClick={() => copy('4...PLACEHOLDER_XMR_ADDRESS_FROM_USER...')} className="text-muted hover:text-primary shrink-0">
-                          {hasCopied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
-                        </button>
-                      </div>
+              <div className="p-5 bg-muted-bg rounded-3xl border border-border space-y-5">
+                <div className="text-center">
+                  <h4 className="text-[10px] font-bold text-muted uppercase tracking-widest mb-4">Manual Payment Process</h4>
+                  
+                  <div className="flex flex-col items-center gap-4 py-2">
+                    <div className="p-2 bg-white rounded-2xl shadow-sm">
+                      <img 
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(walletAddress)}&bgcolor=ffffff&color=000000&margin=1`} 
+                        alt="Wallet QR Code" 
+                        className="w-32 h-32"
+                      />
                     </div>
-                    <div className="p-4 bg-background border border-border rounded-2xl text-left">
-                      <p className="text-[10px] text-muted uppercase font-bold mb-1">Amount</p>
-                      <p className="text-sm font-bold text-foreground">5.00 USD (equiv. in XMR)</p>
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted uppercase font-bold">Network</p>
+                      <Badge variant="blue">Celo</Badge>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-3 pt-4 border-t border-border">
-                  <h4 className="text-sm font-bold text-foreground text-left">Submit Proof</h4>
-                  <p className="text-xs text-muted text-left">Please provide the transaction hash or any reference ID for our review.</p>
-                  <Input 
-                    placeholder="Enter transaction hash/ID..." 
-                    value={paymentProof}
-                    onChange={(e) => setPaymentProof(e.target.value)}
-                    className="w-full"
-                  />
-                  <button 
-                    onClick={handleSubmitProof}
-                    disabled={loading || !paymentProof.trim()}
-                    className="w-full py-4 bg-primary text-white font-bold rounded-2xl hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 disabled:opacity-50"
-                  >
-                    Submit for Review
-                    <CheckCircle2 size={18} />
-                  </button>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[10px] text-muted uppercase font-bold mb-2">1. Select Token</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['USDT', 'USDC', 'USDM'] as const).map((t) => (
+                        <button
+                          key={t}
+                          onClick={() => setSelectedToken(t)}
+                          className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
+                            selectedToken === t 
+                              ? 'bg-primary/10 border-primary text-primary shadow-sm' 
+                              : 'bg-background border-border text-muted hover:border-muted hover:text-foreground'
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-background border border-border rounded-2xl text-left">
+                    <p className="text-[10px] text-muted uppercase font-bold mb-1">2. Transfer to Address</p>
+                    <div className="flex items-center justify-between gap-3">
+                      <code className="text-xs font-mono break-all text-primary">{walletAddress}</code>
+                      <button onClick={() => copy(walletAddress)} className="text-muted hover:text-primary shrink-0 transition-colors">
+                        {hasCopied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 pt-4 border-t border-border">
+                    <p className="text-[10px] text-muted uppercase font-bold text-left">3. Submit Proof</p>
+                    <p className="text-[10px] text-muted italic text-left leading-relaxed">Please provide the transaction hash or ID for review.</p>
+                    <Input 
+                      placeholder="Enter transaction hash..." 
+                      value={paymentProof}
+                      onChange={(e) => setPaymentProof(e.target.value)}
+                      className="w-full text-xs"
+                    />
+                    <button 
+                      onClick={handleSubmitProof}
+                      disabled={loading || !paymentProof.trim()}
+                      className="w-full py-4 bg-primary text-white font-bold rounded-2xl hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 disabled:opacity-50"
+                    >
+                      Submit Proof
+                      <Zap size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl flex items-start gap-3 text-amber-500 text-xs text-left">
-                <AlertCircle size={16} className="shrink-0 mt-0.5" />
-                <p>After submission, our team will review the transaction. Features will be activated within <strong>2 business days</strong>.</p>
+              <div className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-2xl flex items-start gap-3 text-amber-500 text-[10px] text-left">
+                <AlertCircle size={14} className="shrink-0 mt-0.5" />
+                <p>Transfer will be verified and premium features activated within <strong>2 business days</strong>.</p>
               </div>
 
               <button 
                 onClick={() => setStep('select')}
-                className="text-sm font-bold text-muted hover:text-foreground transition-colors"
+                className="text-[10px] font-bold text-muted hover:text-foreground transition-colors uppercase tracking-widest"
               >
                 Go Back
               </button>

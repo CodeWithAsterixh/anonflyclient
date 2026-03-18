@@ -112,7 +112,7 @@ const SettingsPage: React.FC = () => {
     });
   };
 
-  const isPremium = user?.allowedFeatures?.includes('create_private_hidden_room') || user?.allowedFeatures?.includes('CREATE_PRIVATE_ROOM');
+  const isPremium = user?.isPremium;
 
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);

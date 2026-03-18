@@ -13,7 +13,12 @@ export function useAuth() {
     const login = useCallback(async (params: { aid: string; username: string; challenge: string; signature: string; publicKey: string; exchangePublicKey: string }) => {
         try {
             const session = await sdkLogin(params.aid, params.username, params.challenge, params.signature, params.publicKey, params.exchangePublicKey);
-            setAuth({ userId: session.identityAid, username: session.username }, session.token);
+            setAuth({ 
+                userId: session.identityAid, 
+                username: session.username,
+                isPremium: (session as any).isPremium,
+                allowedFeatures: (session as any).allowedFeatures
+            }, session.token);
         } catch (err: any) {
             console.error('Login failed:', err);
         }

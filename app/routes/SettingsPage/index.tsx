@@ -1,6 +1,7 @@
 import {
   Activity,
   ArrowLeft,
+  Bell,
   Calendar,
   CheckCircle2,
   Crown,
@@ -34,6 +35,8 @@ import { ChatLayoutContext } from '~/shell/context/ChatLayoutContext';
 import { requireAuth } from '~/middleware/auth';
 import HideableField from './components/HideableField';
 import PremiumUpgradeModal from './components/PremiumUpgradeModal';
+import NotificationList from '~/features/notifications/components/NotificationList';
+import { useNotifications } from '~/features/notifications/hooks/useNotifications';
 import { getAllIdentities } from '~/shared/utils/identityManager';
 
 export const meta: MetaFunction = () => {
@@ -113,6 +116,8 @@ const SettingsPage: React.FC = () => {
 
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
+  const [showNotifications, setShowNotifications] = React.useState(false);
+  const { unreadCount } = useNotifications();
 
   const handleRefresh = async () => {
     if (isRefreshing) return;
@@ -175,7 +180,21 @@ const SettingsPage: React.FC = () => {
             </button>
             <h1 className="text-xl font-bold text-foreground">Settings</h1>
           </div>
-          <Logo size={32} />
+          
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowNotifications(true)}
+              className="relative p-2.5 hover:bg-muted-bg rounded-2xl transition-all text-muted hover:text-primary group"
+            >
+              <Bell size={20} className="group-hover:scale-110 transition-transform" />
+              {unreadCount > 0 && (
+                <span className="absolute top-2 right-2 w-4 h-4 bg-primary text-white text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-background animate-in zoom-in-50 duration-200">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+            <Logo size={32} />
+          </div>
         </div>
       </header>
 
@@ -650,6 +669,11 @@ const SettingsPage: React.FC = () => {
           onSuccess={handleRefresh}
         />
       )}
+
+      <NotificationList 
+        isOpen={showNotifications} 
+        onClose={() => setShowNotifications(false)} 
+      />
     </div>
   );
 };

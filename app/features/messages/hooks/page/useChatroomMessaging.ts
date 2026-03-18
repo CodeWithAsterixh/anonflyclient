@@ -5,6 +5,7 @@ export const useChatroomMessaging = (
   messages: any[],
   sendMessage: (content: string, replyToId?: string) => void,
   editMessage: (messageId: string, newContent: string) => void,
+  deleteMessage: (messageId: string, mode?: 'everyone' | 'me') => void,
   onTyping: (isTyping: boolean) => void
 ) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -46,6 +47,10 @@ export const useChatroomMessaging = (
     }
   }, [editMessage, editingMessage]);
 
+  const handleDeleteMessage = useCallback((messageId: string, mode: 'everyone' | 'me' = 'everyone') => {
+    deleteMessage(messageId, mode);
+  }, [deleteMessage]);
+
   return {
     messagesEndRef,
     messagesContainerRef,
@@ -57,6 +62,7 @@ export const useChatroomMessaging = (
     handleScroll,
     scrollToBottom,
     handleSendMessage,
-    handleEditMessage
+    handleEditMessage,
+    handleDeleteMessage
   };
 };

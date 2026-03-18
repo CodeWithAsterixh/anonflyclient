@@ -10,36 +10,60 @@ export const useChatroomEncryption = () => {
   const [hasRoomKey, setHasRoomKey] = useState<boolean>(false);
   const roomKeyRef = useRef<CryptoKey | null>(null);
 
-  const decryptStoredMessages = useCallback(async (key: CryptoKey, messages: Message[]) => {
-    const updatedMessages = await Promise.all(
-      messages.map(async (msg) => {
-        // Handle both 'message' and 'chatMessage' types, and allow for missing type (default to message)
-        const isMsg = !msg.type || msg.type === 'message';
-        if (isMsg && !msg.isEncrypted) {
+  const decryptSingleMessage = useCallback(async (key: CryptoKey, msg: Message) => {
+    let updatedMsg = { ...msg };
+
+    // Handle both 'message' and 'chatMessage' types, and allow for missing type (default to message)
+    const isMsg = !updatedMsg.type || updatedMsg.type === 'message';
+    if (isMsg && !updatedMsg.isEncrypted) {
+      try {
+        const content = updatedMsg.content;
+        if (typeof content === 'string') {
+          let blob;
           try {
-            const content = msg.content;
-            if (typeof content !== 'string') return msg;
+            blob = JSON.parse(content);
+          } catch {
+            // Not a JSON string
+          }
 
-            let blob;
-            try {
-              blob = JSON.parse(content);
-            } catch {
-              return msg; // Not a JSON string
-            }
-
-            if (blob?.ciphertext && blob.iv) {
-              const decrypted = await decryptMessage(blob.ciphertext, blob.iv, key);
-              return { ...msg, content: decrypted, isEncrypted: true };
-            }
-          } catch (e) {
-            console.debug("Failed to decrypt stored message:", e);
+          if (blob?.ciphertext && blob.iv) {
+            const decrypted = await decryptMessage(blob.ciphertext, blob.iv, key);
+            updatedMsg = { ...updatedMsg, content: decrypted, isEncrypted: true };
           }
         }
-        return msg;
-      })
-    );
-    return updatedMessages;
+      } catch (e) {
+        console.debug("Failed to decrypt stored message:", e);
+      }
+    }
+
+    // Decrypt replyTo content if it exists
+    if (updatedMsg.replyTo?.content) {
+      try {
+        const replyContent = updatedMsg.replyTo.content;
+        if (typeof replyContent === 'string') {
+          let replyBlob;
+          try {
+            replyBlob = JSON.parse(replyContent);
+          } catch {
+            // Not a JSON string
+          }
+
+          if (replyBlob?.ciphertext && replyBlob.iv) {
+            const decryptedReply = await decryptMessage(replyBlob.ciphertext, replyBlob.iv, key);
+            updatedMsg.replyTo = { ...updatedMsg.replyTo, content: decryptedReply };
+          }
+        }
+      } catch (e) {
+        console.debug("Failed to decrypt stored reply content:", e);
+      }
+    }
+
+    return updatedMsg;
   }, []);
+
+  const decryptStoredMessages = useCallback(async (key: CryptoKey, messages: Message[]) => {
+    return await Promise.all(messages.map(msg => decryptSingleMessage(key, msg)));
+  }, [decryptSingleMessage]);
 
   const updateRoomKey = useCallback(async (chatroomId: string, encryptedKey: string, expiration?: number) => {
     const key = await importRoomKey(encryptedKey);

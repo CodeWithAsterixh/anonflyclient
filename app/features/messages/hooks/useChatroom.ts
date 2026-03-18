@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
-import { allEmojis, type Emoji } from '~/shared/assets/emojis';
+import { useAuth } from '~/features/auth/hooks';
+import { type Emoji } from '~/shared/assets/emojis';
 import { cryptSessionStorage } from '~/shared/utils/cryptSessionStorage';
 import { getIdentity } from '~/shared/utils/identityManager';
-import { useAuth } from '~/features/auth/hooks';
 import { useChatroomConnection } from "./parts/useChatroomConnection/index";
 import { useChatroomEncryption } from "./parts/useChatroomEncryption";
 import { useChatroomMessages } from "./parts/useChatroomMessages";
 import { useChatroomParticipants } from "./parts/useChatroomParticipants";
-import { useChatroomSSE } from "./parts/useChatroomSSE";
 import { useChatroomRotation } from "./parts/useChatroomRotation";
+import { useChatroomSSE } from "./parts/useChatroomSSE";
 import type { UseChatroomReturn } from "./types";
 
 /**
@@ -205,9 +205,9 @@ export const useChatroom = (initialChatroomId?: string | null, deferConnection: 
   );
 
   const deleteMessage = useCallback(
-    async (messageId: string) => {
+    async (messageId: string, mode: 'everyone' | 'me' = 'everyone') => {
       try {
-        await deleteMessageAction(ws.current, messageId);
+        await deleteMessageAction(ws.current, messageId, mode);
       } catch {
         setError("Failed to delete message");
       }

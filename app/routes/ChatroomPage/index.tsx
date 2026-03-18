@@ -134,10 +134,12 @@ const ChatroomPage: React.FC = () => {
     scrollToBottom,
     handleSendMessage,
     handleEditMessage,
+    handleDeleteMessage,
   } = useChatroomMessaging(
     messages,
     sendMessage,
     editMessage,
+    deleteMessage,
     sendTypingStatus
   );
   const { theme } = useTheme();
@@ -353,7 +355,7 @@ const ChatroomPage: React.FC = () => {
         onEditMessage={handleEditMessage}
         onSetReplyingTo={setReplyingTo}
         onSetEditingMessage={setEditingMessage}
-        onDeleteMessage={deleteMessage}
+        onDeleteMessage={handleDeleteMessage}
         onSendReaction={sendReaction}
         onEditSuccess={fetchChatroomDetails}
         onTyping={sendTypingStatus}

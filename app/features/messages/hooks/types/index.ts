@@ -8,7 +8,7 @@ export interface UseChatroomReturn {
   chatroomDetail: ChatroomDetail | null;
   sendMessage: (content: string, replyToId?: string) => Promise<void>;
   editMessage: (messageId: string, newContent: string) => Promise<void>;
-  deleteMessage: (messageId: string) => Promise<void>;
+  deleteMessage: (messageId: string, mode?: 'everyone' | 'me') => Promise<void>;
   sendReaction: (messageId: string, emoji: Emoji) => void;
   joinChatroom: (chatroomId: string, password?: string, linkToken?: string) => Promise<void>;
   leaveChatroom: () => Promise<void>;

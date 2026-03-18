@@ -171,8 +171,11 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
     }
   };
 
-  const handleDelete = () => {
+  const [deleteMode, setDeleteMode] = useState<"everyone" | "me">("everyone");
+
+  const handleDelete = (mode: "everyone" | "me") => {
     if (onDelete && message.id) {
+      setDeleteMode(mode);
       setShowDeleteConfirm(true);
       closeMenus();
     }
@@ -180,7 +183,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
 
   const confirmDelete = () => {
     if (onDelete && message.id) {
-      onDelete(message.id);
+      onDelete(message.id, deleteMode);
     }
     setShowDeleteConfirm(false);
   };
@@ -197,6 +200,13 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
     [message.senderUsername, message.senderAid]
   );
 
+  const isEditable = useMemo(() => {
+    if (!isCurrentUser || message.type === "system") return false;
+    const messageTime = new Date(message.timestamp).getTime();
+    const currentTime = Date.now();
+    return currentTime - messageTime < 10 * 60 * 1000;
+  }, [message.timestamp, isCurrentUser, message.type]);
+
   if (isSystemMessage) {
     return (
       <SystemMessage
@@ -206,13 +216,6 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
       />
     );
   }
-
-  const isEditable = useMemo(() => {
-    if (!isCurrentUser || message.type === "system") return false;
-    const messageTime = new Date(message.timestamp).getTime();
-    const currentTime = Date.now();
-    return currentTime - messageTime < 10 * 60 * 1000;
-  }, [message.timestamp, isCurrentUser, message.type]);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -265,6 +268,7 @@ export const MessageDisplay: React.FC<MessageDisplayProps> = ({
         onReply={handleReply}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        isCurrentUser={isCurrentUser || false}
       />
       {showReactions &&
         portalRoot &&

@@ -167,6 +167,18 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
       }
     }
 
+    let replyContent = message.replyTo?.content;
+    if (replyContent && roomKeyRef.current) {
+      try {
+        const blob = typeof replyContent === 'string' ? JSON.parse(replyContent) : replyContent;
+        if (blob?.ciphertext && blob?.iv) {
+          replyContent = await decryptMessage(blob.ciphertext, blob.iv, roomKeyRef.current);
+        }
+      } catch {
+        // Not encrypted or decryption failed
+      }
+    }
+
     setMessages((prev) => [...prev, {
       id: messageId,
       senderAid: message.senderAid,
@@ -182,7 +194,7 @@ export const createOnMessageHandler = (ctx: MessageHandlerContext) => {
       replyTo: message.replyTo ? {
         messageId: message.replyTo.messageId,
         senderUsername: message.replyTo.senderUsername || message.replyTo.username,
-        content: message.replyTo.content,
+        content: replyContent,
         userAid: message.replyTo.userAid
       } : undefined,
     }]);

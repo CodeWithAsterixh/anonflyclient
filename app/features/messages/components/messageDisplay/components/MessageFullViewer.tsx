@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
+import { type Emoji } from "~/shared/assets/emojis";
+import type { Message } from "~/shared/types/chat";
+import { ActionMenu } from "./ActionMenu";
+import { EmojiGrid } from "./EmojiGrid";
 import { MessageRow } from "./MessageRow";
 import { ReactionPicker } from "./ReactionPicker";
-import { EmojiGrid } from "./EmojiGrid";
-import { ActionMenu } from "./ActionMenu";
-import type { Message } from "~/shared/types/chat";
-import { type Emoji } from "~/shared/assets/emojis";
 
 interface MessageFullViewerProps {
   message: Message;
@@ -20,7 +20,7 @@ interface MessageFullViewerProps {
   showAllEmojis: boolean;
   onReply: () => void;
   onEdit: () => void;
-  onDelete: () => void;
+  onDelete: (mode: "everyone" | "me") => void;
   isEditable: boolean;
   userAid?: string | null;
 }
@@ -110,6 +110,7 @@ export const MessageFullViewer: React.FC<MessageFullViewerProps> = ({
             onEdit={onEdit}
             onDelete={onDelete}
             isEditable={isEditable}
+            isCurrentUser={isCurrentUser || false}
           />
         </div>
       </div>

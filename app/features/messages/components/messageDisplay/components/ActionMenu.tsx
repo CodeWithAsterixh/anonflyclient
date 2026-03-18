@@ -4,8 +4,9 @@ import { Reply, Edit2, Trash2 } from "lucide-react";
 interface ActionMenuProps {
   onReply: () => void;
   onEdit?: () => void;
-  onDelete?: () => void;
+  onDelete?: (mode: "everyone" | "me") => void;
   isEditable: boolean;
+  isCurrentUser: boolean;
 }
 
 export const ActionMenu: React.FC<ActionMenuProps> = ({
@@ -13,6 +14,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
   onEdit,
   onDelete,
   isEditable,
+  isCurrentUser,
 }) => (
   <div className="bg-background/95 backdrop-blur-md border border-border rounded-2xl p-1 shadow-2xl min-w-[200px] animate-in slide-in-from-top-2 duration-300">
     <button
@@ -39,16 +41,33 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
           <Edit2 className="w-4 h-4" />
           <span className="text-sm font-medium">Edit Message</span>
         </button>
+      </>
+    )}
+
+    <div className="h-px bg-border mx-2" />
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onDelete?.("me");
+      }}
+      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors text-destructive rounded-xl"
+    >
+      <Trash2 className="w-4 h-4" />
+      <span className="text-sm font-medium">Delete for Me</span>
+    </button>
+
+    {isCurrentUser && (
+      <>
         <div className="h-px bg-border mx-2" />
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onDelete?.();
+            onDelete?.("everyone");
           }}
           className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors text-destructive rounded-xl"
         >
           <Trash2 className="w-4 h-4" />
-          <span className="text-sm font-medium">Delete</span>
+          <span className="text-sm font-medium">Delete for Everyone</span>
         </button>
       </>
     )}

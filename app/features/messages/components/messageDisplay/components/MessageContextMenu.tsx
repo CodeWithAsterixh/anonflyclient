@@ -12,7 +12,8 @@ interface MessageContextMenuProps {
   bubbleRef?: React.RefObject<HTMLElement | null>;
   onReply?: () => void;
   onEdit?: () => void;
-  onDelete?: () => void;
+  onDelete?: (mode: "everyone" | "me") => void;
+  isCurrentUser: boolean;
 }
 
 const clampToViewport = (top: number, left: number, width: number, height: number) => {
@@ -33,7 +34,8 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = ({
   bubbleRef,
   onReply,
   onEdit,
-  onDelete
+  onDelete,
+  isCurrentUser
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -147,7 +149,7 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = ({
           className="w-full flex items-center gap-3 px-4 py-2 hover:bg-white/5 transition-colors text-left disabled:opacity-50"
         >
           <Search className="w-4 h-4" />
-          <span className="text-sm">Search “{selection ? (selection.length > 24 ? selection.slice(0, 24) + "…" : selection) : ""}”</span>
+          <span className="text-sm">Search “{selection && (selection.length > 24 ? selection.slice(0, 24) + "…" : selection)}”</span>
         </button>
         <button
           onClick={copyLink}
@@ -164,23 +166,35 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = ({
           <Reply className="w-4 h-4" />
           <span className="text-sm">Reply</span>
         </button>
+
         {isEditable && (
-          <>
-            <button
-              onClick={() => { onEdit?.(); }}
-              className="w-full flex items-center gap-3 px-4 py-2 hover:bg-white/5 transition-colors text-left"
-            >
-              <Edit2 className="w-4 h-4" />
-              <span className="text-sm">Edit</span>
-            </button>
-            <button
-              onClick={() => { onDelete?.(); }}
-              className="w-full flex items-center gap-3 px-4 py-2 hover:bg-white/5 transition-colors text-left text-destructive"
-            >
-              <Trash2 className="w-4 h-4" />
-              <span className="text-sm">Delete</span>
-            </button>
-          </>
+          <button
+            onClick={() => { onEdit?.(); }}
+            className="w-full flex items-center gap-3 px-4 py-2 hover:bg-white/5 transition-colors text-left"
+          >
+            <Edit2 className="w-4 h-4" />
+            <span className="text-sm">Edit</span>
+          </button>
+        )}
+
+        {/* Delete For Me is available for everyone */}
+        <button
+          onClick={() => { onDelete?.("me"); }}
+          className="w-full flex items-center gap-3 px-4 py-2 hover:bg-white/5 transition-colors text-left text-destructive"
+        >
+          <Trash2 className="w-4 h-4" />
+          <span className="text-sm">Delete for me</span>
+        </button>
+
+        {/* Delete For Everyone is available only for sender */}
+        {isCurrentUser && (
+          <button
+            onClick={() => { onDelete?.("everyone"); }}
+            className="w-full flex items-center gap-3 px-4 py-2 hover:bg-white/5 transition-colors text-left text-destructive"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span className="text-sm">Delete for everyone</span>
+          </button>
         )}
       </div>
     </div>,

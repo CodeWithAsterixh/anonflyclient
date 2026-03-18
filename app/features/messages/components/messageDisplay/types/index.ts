@@ -12,7 +12,7 @@ export interface MessageDisplayProps {
   }) => void;
   onReact?: (messageId: string, emoji: Emoji) => void;
   onEdit?: (messageId: string, content: string) => void;
-  onDelete?: (messageId: string) => void;
+  onDelete?: (messageId: string, mode?: "everyone" | "me") => void;
   onShowReactionDetails?: (reactions: Reaction[], messageId: string) => void;
   portalRoot?: HTMLElement | null;
 }

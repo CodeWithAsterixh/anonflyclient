@@ -124,19 +124,25 @@ export const useChatroomMessages = (currentChatroomId: string | null, user: any)
   );
 
   const deleteMessage = useCallback(
-    async (ws: WebSocket | null, messageId: string) => {
+    async (ws: WebSocket | null, messageId: string, mode: 'everyone' | 'me' = 'everyone') => {
       if (ws?.readyState === WebSocket.OPEN && currentChatroomId) {
-        deleteMessageLocally(messageId);
+        if (mode === 'everyone') {
+          deleteMessageLocally(messageId);
+        } else {
+          setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+        }
+
         ws.send(
           JSON.stringify({
             type: "deleteMessage",
             chatroomId: currentChatroomId,
             messageId,
+            mode,
           })
         );
       }
     },
-    [currentChatroomId, deleteMessageLocally]
+    [currentChatroomId, deleteMessageLocally, setMessages]
   );
 
   const sendReaction = useCallback(

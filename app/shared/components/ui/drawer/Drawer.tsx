@@ -47,7 +47,7 @@ const DrawerRoot: React.FC<DrawerProps> = ({
   if (!shouldRender && !isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 z-100 flex items-center justify-center transition-all duration-300 ${isActive ? "visible" : "invisible delay-300"}`}>
+    <div className={`fixed inset-0 z-[100] flex items-center justify-center transition-all duration-300 ${isActive ? "visible" : "invisible delay-300"}`}>
       {/* Backdrop */}
       <button
         type="button"

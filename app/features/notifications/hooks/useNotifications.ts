@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useAuthStore } from '~/features/auth/state/auth-store';
 import { getNotifications, markNotificationAsRead, type Notification } from '~/shared/utils/controllers/notificationController';
 
-export const useNotifications = () => {
-    const { token } = useAuthStore();
+export const useNotifications = (token: string | null) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -30,7 +28,7 @@ export const useNotifications = () => {
                 n.id === id ? { ...n, isRead: true, readAt: new Date().toISOString() } : n
             ));
         } catch (err: any) {
-            console.error('Failed to mark notification as read:', err);
+            // Error handling could be added here if needed (e.g., toast)
         }
     }, [token]);
 

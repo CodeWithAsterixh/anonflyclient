@@ -117,7 +117,7 @@ const SettingsPage: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
   const [showNotifications, setShowNotifications] = React.useState(false);
-  const { unreadCount } = useNotifications();
+  const { unreadCount } = useNotifications(token);
 
   const handleRefresh = async () => {
     if (isRefreshing) return;
@@ -673,6 +673,7 @@ const SettingsPage: React.FC = () => {
       <NotificationList 
         isOpen={showNotifications} 
         onClose={() => setShowNotifications(false)} 
+        token={token}
       />
     </div>
   );

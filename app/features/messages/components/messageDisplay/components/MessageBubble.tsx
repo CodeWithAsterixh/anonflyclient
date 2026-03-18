@@ -31,7 +31,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     }
   };
 
-  console.log(message?.replyTo)
   return (
     <div onContextMenu={handleContextMenu}>
       {/* Reply Preview in Bubble */}

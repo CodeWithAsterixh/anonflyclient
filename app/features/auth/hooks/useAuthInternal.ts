@@ -78,13 +78,13 @@ export const useAuthInternal = () => {
   }, []);
 
   const switchAccount = useCallback(async (aid: string, redirectTo: string = '/') => {
-    setAuthState(prev => ({ 
-      ...prev, 
-      loading: true, 
-      user: null, 
-      token: null, 
+    setAuthState(prev => ({
+      ...prev,
+      loading: true,
+      user: null,
+      token: null,
       isAuthenticated: false,
-      retryCountdown: null 
+      retryCountdown: null
     }));
     try {
       const identity = await switchLocalIdentity(aid);
@@ -278,7 +278,6 @@ export const useAuthInternal = () => {
     if (!authState.isAuthenticated || !authState.token) return;
 
     const handlePremiumUpdate = (data: any) => {
-      console.log("[useAuthInternal] Premium status updated via WebSocket:", data);
       checkPremiumStatus();
     };
 

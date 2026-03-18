@@ -60,7 +60,6 @@ export const useChatroomAccess = (
       const response = await checkAccess(chatroomId, joinAuthToken);
 
       if (response.success && response.data?.accessGranted) {
-        console.log('[useChatroomAccess] Access granted, fetching details...');
         setAccessState({ status: 'granted', joinRequired: !!response.data?.joinRequired });
         fetchChatroomDetails();
       } else {
